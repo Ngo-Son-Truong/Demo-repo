@@ -1,0 +1,238 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #f5ebdd;
+  --ink: #252525;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--cream);
+  color: var(--ink);
+  font-feature-settings: "ss01" on, "cv01" on;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  body {
+    overflow: auto;
+  }
+}
+
+::selection {
+  background: #ffbd59;
+  color: #252525;
+}
+
+/* Slim, warm scrollbars inside the app */
+.chill-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(118, 84, 59, 0.35) transparent;
+}
+.chill-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.chill-scroll::-webkit-scrollbar-thumb {
+  background: rgba(118, 84, 59, 0.3);
+  border-radius: 999px;
+}
+.chill-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Soft paper grain used across panels */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: radial-gradient(
+      rgba(118, 84, 59, 0.16) 0.5px,
+      transparent 0.5px
+    ),
+    radial-gradient(rgba(255, 255, 255, 0.5) 0.5px, transparent 0.5px);
+  background-size: 5px 5px, 7px 7px;
+  background-position: 0 0, 2px 3px;
+  mix-blend-mode: multiply;
+}
+
+.panel {
+  background: rgba(251, 245, 234, 0.94);
+  border: 1px solid rgba(118, 84, 59, 0.18);
+  backdrop-filter: blur(14px);
+}
+
+.hairline {
+  border-color: rgba(118, 84, 59, 0.16);
+}
+
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid #0799ad;
+  outline-offset: 2px;
+}
+
+input,
+textarea,
+button,
+select {
+  font: inherit;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-parchment transition-all duration-200 hover:-translate-y-0.5 hover:bg-cocoaDark active:translate-y-0;
+  box-shadow: 0 10px 24px -14px rgba(37, 37, 37, 0.9);
+}
+.btn-ghost {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-cocoa/20 bg-white/50 px-4 py-2.5 text-sm font-medium text-cocoa transition-colors hover:border-cocoa/35 hover:bg-white/80;
+}
+.chip {
+  @apply inline-flex items-center gap-1.5 rounded-full border border-cocoa/15 bg-white/60 px-2.5 py-1 text-[11px] font-medium text-cocoa;
+}
+
+.noise-bg {
+  background-image: radial-gradient(
+      circle at 18% 12%,
+      rgba(255, 189, 89, 0.22),
+      transparent 42%
+    ),
+    radial-gradient(circle at 82% 0%, rgba(7, 153, 173, 0.16), transparent 46%),
+    linear-gradient(160deg, #f8f0e4 0%, #f3e7d6 55%, #efe0cc 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Ambient player volume slider */
+.chill-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #ffbd59;
+  border: 2px solid #252525;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+.chill-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #ffbd59;
+  border: 2px solid #252525;
+  cursor: pointer;
+}
+.chill-range::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Baked scene artwork — ambient overlays                                     */
+/* -------------------------------------------------------------------------- */
+
+.scene-rain {
+  background-image: repeating-linear-gradient(
+    100deg,
+    rgba(206, 232, 247, 0.32) 0px 1px,
+    transparent 1px 26px
+  );
+  background-size: 120px 180px;
+  animation: rain-fall 1.1s linear infinite;
+  will-change: background-position;
+}
+
+.scene-rain-slow {
+  background-image: repeating-linear-gradient(
+    94deg,
+    rgba(206, 232, 247, 0.22) 0px 1px,
+    transparent 1px 42px
+  );
+  background-size: 240px 300px;
+  animation-duration: 1.9s;
+}
+
+@keyframes rain-fall {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -36px 200px;
+  }
+}
+
+.scene-haze {
+  background:
+    radial-gradient(60% 48% at 26% 62%, rgba(206, 226, 214, 0.16), transparent 72%),
+    radial-gradient(52% 40% at 78% 40%, rgba(214, 226, 236, 0.12), transparent 70%);
+  animation: haze-drift 28s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes haze-drift {
+  from {
+    transform: translate3d(-1.5%, 0, 0) scale(1.02);
+  }
+  to {
+    transform: translate3d(1.5%, -1.2%, 0) scale(1.06);
+  }
+}
+
+.scene-stars {
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 18%, rgba(247, 236, 220, 0.9), transparent 60%),
+    radial-gradient(1.4px 1.4px at 32% 8%, rgba(247, 236, 220, 0.75), transparent 60%),
+    radial-gradient(1.8px 1.8px at 47% 26%, rgba(247, 236, 220, 0.85), transparent 60%),
+    radial-gradient(1.3px 1.3px at 63% 12%, rgba(247, 236, 220, 0.7), transparent 60%),
+    radial-gradient(1.7px 1.7px at 78% 22%, rgba(247, 236, 220, 0.8), transparent 60%),
+    radial-gradient(1.2px 1.2px at 88% 9%, rgba(247, 236, 220, 0.65), transparent 60%);
+  background-size: 520px 320px;
+  animation: star-twinkle 6.5s ease-in-out infinite;
+  will-change: opacity;
+}
+
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-rain,
+  .scene-rain-slow,
+  .scene-haze,
+  .scene-stars {
+    animation: none;
+  }
+}
