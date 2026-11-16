@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SePay Demo · Thanh toán chuyển khoản</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b815c'/%3E%3Cpath d='M9 20c2 1.6 4.2 2.2 6.4 1.6 2.6-.7 3.4-2.6 1.8-3.8-1.6-1.2-5-1.2-6.6-2.6C8.6 13.4 9.8 10.6 13 9.6c2.4-.8 4.8-.2 6.6 1.4' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">S</span>
+        <div>
+          <h1>SePay Checkout Demo</h1>
+          <p class="sub">VA theo đơn hàng · Webhook HMAC-SHA256 · Test mode pipeline</p>
+        </div>
+      </div>
+      <div class="mode-chips" id="modeChips">
+        <span class="chip loading">đang tải cấu hình…</span>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- ───────────────── Cột trái: giỏ hàng ───────────────── -->
+      <section class="card" id="shop">
+        <h2><span class="num">1</span> Chọn hàng</h2>
+        <p class="hint">Số tiền do server tính từ catalog — client chỉ gửi <code>{id, qty}</code>.</p>
+        <ul class="items" id="items"></ul>
+
+        <div class="field">
+          <label for="buyerName">Người mua</label>
+          <input id="buyerName" value="NGUYEN VAN A" maxlength="80" />
+        </div>
+
+        <div class="totals" id="totals"></div>
+
+        <button class="primary" id="btnCheckout">Tạo đơn &amp; lấy chỉ dẫn thanh toán</button>
+        <p class="hint" id="checkoutNote">
+          Gọi <code>POST /v2/bank-accounts/{ba_xid}/orders</code> → nhận <code>va_number</code> + <code>qr_code_url</code>.
+        </p>
+      </section>
+
+      <!-- ───────────────── Cột giữa: chỉ dẫn ───────────────── -->
+      <section class="card" id="pay">
+        <div class="card-head">
+          <h2><span class="num">2</span> Chuyển khoản</h2>
+          <span class="pill" id="orderStatus">chưa có đơn</span>
+        </div>
+
+        <div class="empty" id="payEmpty">Chọn hàng bên trái rồi bấm tạo đơn.</div>
+
+        <div id="payPanel" hidden>
+          <div class="row-meta">
+            <div>
+              <span class="k">Mã đơn</span>
+              <span class="v mono" id="oCode">—</span>
+            </div>
+            <div>
+              <span class="k">Hết hạn sau</span>
+              <span class="v mono" id="oCountdown">—</span>
+            </div>
+          </div>
+
+          <div class="qr-wrap">
+            <img id="oQr" alt="VietQR" />
+            <div class="qr-caption">VietQR <code>template=compact</code> · ảnh render từ vietqr.app</div>
+          </div>
+
+          <div class="copy-list" id="copyList"></div>
+
+          <div class="btn-row">
+            <button class="ghost" id="btnReconcile">Đối soát bằng API</button>
+            <button class="ghost danger" id="btnCancel">Hủy đơn</button>
+          </div>
+          <p class="hint" id="reconcileNote">
+            <code>GET /v2/.../orders/{order_xid}</code> + <code>GET /v2/transactions?q=…</code> — dùng khi webhook trễ hoặc mất.
+          </p>
+        </div>
+      </section>
+
+      <!-- ───────────────── Cột phải: mô phỏng ───────────────── -->
+      <section class="card" id="sim">
+        <div class="card-head">
+          <h2><span class="num">3</span> Mô phỏng giao dịch</h2>
+          <span class="badge" id="simMode">mock</span>
+        </div>
+        <p class="hint">
+          Bản sao form <em>Test mode → Giao dịch → Mô phỏng</em> trên dashboard SePay, chạy đủ 4 bước pipeline rồi POST payload đã ký
+          vào webhook của chính demo này.
+        </p>
+
+        <div class="quota">
+          <span id="quotaText">Đã dùng: 0/500</span>
+          <div class="bar"><i id="quotaBar"></i></div>
+        </div>
+
+        <div class="field">
+          <label for="simVa">Tài khoản ảo (VA)</label>
+          <select id="simVa"><option value="">— không dùng VA —</option></select>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="simType">Loại giao dịch</label>
+            <select id="simType"><option value="in">Tiền vào</option><option value="out">Tiền ra</option></select>
+          </div>
+          <div class="field">
+            <label for="simAmount">Số tiền (VND)</label>
+            <input id="simAmount" type="number" step="1000" min="1000" max="499000000" value="100000" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="simContent">Nội dung chuyển khoản <small id="simContentLeft">tối đa 200 ký tự</small></label>
+          <input id="simContent" placeholder="DH1001 thanh toan don hang" maxlength="200" />
+          <small class="chipify" id="simDetect">—</small>
+        </div>
+
+        <label class="check"><input type="checkbox" id="simFail" /> Endpoint trả 500 (xem SePay retry theo Fibonacci)</label>
+
+        <button class="primary" id="btnSim">Mô phỏng giao dịch</button>
+
+        <div id="pipeline" class="pipeline" hidden></div>
+      </section>
+
+      <!-- ───────────────── Log webhook ───────────────── -->
+      <section class="card wide" id="log">
+        <div class="card-head">
+          <h2>Lịch sử webhook <small id="logCount" class="muted"></small></h2>
+          <div class="btn-row">
+            <button class="tiny ghost" id="btnRefreshLog">Làm mới</button>
+            <button class="tiny ghost danger" id="btnReset">Reset demo</button>
+          </div>
+        </div>
+        <div class="log-scroll">
+          <table class="log">
+            <thead>
+              <tr><th>Thời gian</th><th>Hướng</th><th>Loại</th><th>Đơn</th><th>HTTP</th><th>#</th><th>Ghi chú</th></tr>
+            </thead>
+            <tbody id="logBody"><tr class="muted"><td colspan="7">Chưa có event nào.</td></tr></tbody>
+          </table>
+        </div>
+        <details class="raw">
+          <summary>Xem payload mẫu SePay gửi tới <code id="hookUrl">/webhooks/sepay</code></summary>
+          <pre id="samplePayload"></pre>
+        </details>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span>Demo tích hợp theo <a href="https://developer.sepay.vn/vi/tien-ich-khac/test-mode" target="_blank" rel="noreferrer">SePay Developer Docs</a></span>
+      <span class="muted">Token/secret chỉ nằm ở server — frontend không bao giờ thấy <code>Authorization: Bearer …</code></span>
+    </footer>
+
+    <div class="toast" id="toast" hidden></div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

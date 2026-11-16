@@ -1,0 +1,19 @@
+{
+  "name": "sepay-payment-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Demo luồng thanh toán chuyển khoản qua SePay (Webhook + API v2, Test mode)",
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "check": "node --check src/server.js",
+    "test": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "express": "^4.22.3"
+  }
+}
