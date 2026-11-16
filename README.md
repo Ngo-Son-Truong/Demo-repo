@@ -1,4 +1,4 @@
-# SePay Payment Demo
+# SePay Payment Demo · Node.js + TypeScript
 
 Demo luồng **thanh toán chuyển khoản ngân hàng qua SePay** dựng theo tài liệu chính thức
 [developer.sepay.vn](https://developer.sepay.vn/vi/tien-ich-khac/test-mode) — gồm **Webhook** (HMAC-SHA256)
@@ -10,12 +10,28 @@ chuyển sang sandbox thật.
 
 ```bash
 npm install
-npm run dev            # http://localhost:3000
+npm run dev            # http://localhost:3000  (build app.js cho browser trước, rồi chạy tsx watch)
 ```
 
 ```bash
-npm test               # 29 kiểm tra end-to-end (webhook, chữ ký, chống trùng, đối soát…)
+npm test               # 28 kiểm tra end-to-end (webhook, chữ ký, chống trùng, đối soát…)
+npm run typecheck      # tsc --noEmit cho cả server project lẫn web project
 ```
+
+## Stack
+
+| Lớp | Công nghệ |
+| --- | --- |
+| Ngôn ngữ | **TypeScript 7** (`strict`, `noUncheckedIndexedAccess`, `verbatimModuleSyntax`, `erasableSyntaxOnly`) |
+| Runtime | Node.js ≥ 18.17 qua **tsx** (Node 22.18+ còn chạy thẳng `node src/server.ts` nhờ type stripping) |
+| HTTP | Express 4 — dependency runtime **duy nhất**; `@types/express` chỉ là devDependency |
+| Crypto / fs / fetch | `node:crypto`, `node:fs`, `fetch` built-in — không lib ngoài |
+| Frontend | `web/app.ts` → `tsc` biên dịch ra `public/app.js` (ES module thuần, không bundler) |
+| Store | `node:fs` ghi `data/state.json` |
+| Kiểu dữ liệu | `src/types.ts` — shape payload webhook + API v2 chép theo doc |
+
+Không có build step cho server: `tsx` strip type lúc chạy. `public/app.js` là output của
+`npm run build:web` và đã nằm trong `.gitignore`.
 
 ---
 
@@ -66,7 +82,7 @@ cp .env.example .env
 #      Bảo mật  = HMAC-SHA256, Secret Key = SEPAY_WEBHOOK_SECRET trong .env
 # 4. Test mode → Tài khoản ngân hàng → tạo mới (tài khoản "sao chép từ Live" chỉ đọc)
 #    Test mode → Giao dịch → Mô phỏng → xem webhook chạy thật
-SEPAY_MODE=sandbox node --env-file=.env src/server.js
+SEPAY_MODE=sandbox npx tsx --env-file=.env src/server.ts
 ```
 
 Đổi `SEPAY_WEBHOOK_AUTH=apikey` nếu bạn chọn API Key trên dashboard (header `Authorization: Apikey <KEY>`),
@@ -75,22 +91,25 @@ hoặc `none` khi test nhanh — endpoint lúc đó ai cũng gọi được, đ�
 ## Cấu trúc
 
 ```
+tsconfig.json            server project (NodeNext, noEmit — tsx lo phần chạy)
+tsconfig.web.json        web project (DOM, outDir = public/)
 src/
-  config.js              env → mode mock|sandbox|live, hạn mức, bộ lọc
-  catalog.js             sản phẩm mẫu · định giá ở SERVER (client chỉ gửi {id, qty})
-  store.js               đơn hàng + log webhook, UNIQUE theo id giao dịch (doc: chống trùng)
-  sepay/client.js        REST v2: tạo/hủy/chi tiết đơn, transactions (+ nhánh mock)
-  sepay/signature.js     HMAC-SHA256 "{timestamp}.{raw_body}", so sánh constant-time, ±5 phút
-  sepay/matching.js      khớp đơn subAccount → code → nội dung · bộ lọc · kiểm tra số tiền
-  sepay/mock.js          giả lập sandbox + sổ cái "ngân hàng" độc lập (để test đối soát)
-  sepay/sender.js        [mock] phía SePay gửi webhook + retry Fibonacci 1,1,2,3,5,8,13
-  routes/webhook.js      ★ endpoint bạn cần cho production
-  routes/checkout.js     /api/checkout · /api/orders/:code · /cancel · /reconcile
-  routes/simulator.js    form "Mô phỏng giao dịch" + pipeline 4 bước
-public/                  UI checkout 3 cột + log webhook
-scripts/
-  smoke.mjs              test end-to-end
-  send-webhook.mjs       tự ký + POST một payload SePay tới endpoint của bạn
+  types.ts               ★ shape SePay: 12 trường payload, envelope, order/transaction…
+  config.ts              env → mode mock|sandbox|live, hạn mức, bộ lọc
+  catalog.ts             sản phẩm mẫu · định giá ở SERVER (client chỉ gửi {id, qty})
+  store.ts               đơn hàng + log webhook, ghi chú UNIQUE theo id giao dịch
+  sepay/payload.ts       normalizeWebhookPayload(): unknown → SePayWebhookPayload (type guard)
+  sepay/signature.ts     HMAC-SHA256 "{timestamp}.{raw_body}", constant-time, ±5 phút
+  sepay/matching.ts      khớp đơn subAccount → code → nội dung · bộ lọc · check số tiền
+  sepay/client.ts        REST v2: tạo/hủy/chi tiết đơn, transactions (+ nhánh mock)
+  sepay/mock.ts          giả lập sandbox + sổ cái "ngân hàng" độc lập (để test đối soát)
+  sepay/sender.ts        [mock] phía SePay gửi webhook + retry Fibonacci 1,1,2,3,5,8,13
+  routes/webhook.ts      ★ endpoint bạn cần cho production
+  routes/checkout.ts     /api/checkout · /api/orders/:code · /cancel · /reconcile
+  routes/simulator.ts    form "Mô phỏng giao dịch" + pipeline 4 bước
+  server.ts              install middleware đúng thứ tự (raw trước json)
+web/app.ts               UI (TS) → build ra public/app.js
+scripts/smoke.ts         test end-to-end · scripts/send-webhook.ts  tự ký payload
 docs/SEPAY.md            ánh chiếu demo ↔ từng trang doc, checklist production, bảng lỗi
 ```
 
@@ -102,6 +121,8 @@ docs/SEPAY.md            ánh chiếu demo ↔ từng trang doc, checklist produ
   là thất bại → SePay retry tới 8 lần trong ~33 phút.
 - **Raw body để verify chữ ký.** Route webhook đăng ký `express.raw()` **trước** `express.json()`;
   parse rồi `JSON.stringify` lại sẽ làm lệch chữ ký (escape unicode, thứ tự key, khoảng trắng).
+- **Body webhook là `unknown`, không phải `SePayWebhookPayload`.** `src/sepay/payload.ts` là chỗ
+  duy nhất đọc field thô và validate; cast `as SePayWebhookPayload` ngay ở route là tự lừa mình.
 - **Idempotent.** Cùng một `id` giao dịch có thể đến nhiều lần (retry, admin bấm *Phát lại*,
   nhiều webhook cùng trỏ một URL). Đặt UNIQUE + `INSERT IGNORE`, không thì cộng tiền hai lần.
 - **Số tiền từ server.** SePay gửi tiền theo *nội dung chuyển khoản*, nên mã đơn là khóa khớp;

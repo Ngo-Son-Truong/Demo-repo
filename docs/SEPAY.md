@@ -5,14 +5,34 @@ Mỗi quyết định trong demo đều có nguồn. Bảng dưới tra nhanh t�
 | Trong demo | Doc gốc | Điểm cần nhớ |
 | --- | --- | --- |
 | `SEPAY_MODE=mock/sandbox/live`, hạn mức, `config.sim` | [Tổng quan Test mode](https://developer.sepay.vn/vi/tien-ich-khac/test-mode) | Test mode cách ly hoàn toàn: tài khoản, VA, webhook, API Access, giao dịch mô phỏng. Không có webhook Live nào nhận payload từ Test mode |
-| `src/sepay/mock.js` sinh VA `SBSEPAY`+12 ký tự | [Tạo VA Test mode](https://developer.sepay.vn/vi/tien-ich-khac/test-mode/tao-va) | VA chính thức hỗ trợ ACB, BIDV, MBBank, VPBank (cá nhân/HKD), VietinBank (DN), OCB, MSB, Sacombank (cá nhân/HKD), KienLongBank. VCB/TPBank/VietinBank cá nhân dùng **TKP** (3 ký tự, khớp qua nội dung `TKP{mã}`) → `subAccount` sẽ mang mã định dạng đó |
+| `src/sepay/mock.ts` sinh VA `SBSEPAY`+12 ký tự | [Tạo VA Test mode](https://developer.sepay.vn/vi/tien-ich-khac/test-mode/tao-va) | VA chính thức hỗ trợ ACB, BIDV, MBBank, VPBank (cá nhân/HKD), VietinBank (DN), OCB, MSB, Sacombank (cá nhân/HKD), KienLongBank. VCB/TPBank/VietinBank cá nhân dùng **TKP** (3 ký tự, khớp qua nội dung `TKP{mã}`) → `subAccount` sẽ mang mã định dạng đó |
 | `SEPAY_API_TOKEN`, `config.sepay.apiBase` | [API Access Test mode](https://developer.sepay.vn/vi/tien-ich-khac/test-mode/api-access) | Token Test mode **chỉ** xác thực trên `userapi-sandbox.sepay.vn`; token Live không dùng ngược lại được. Tối đa 50 token, chỉ hiện đầy đủ 1 lần |
-| `routes/simulator.js` (4 bước pipeline, lý do bỏ qua, quota 500/ngày, `referenceCode` mở đầu `SB`) | [Mô phỏng giao dịch](https://developer.sepay.vn/vi/tien-ich-khac/test-mode/mo-phong-giao-dich) | Tiền vào: `accumulated += amount`; tiền ra: `max(0, accumulated − amount)`. Số tiền 1.000 → 499.000.000. Bỏ trống nội dung → tự sinh `Giao dich sandbox` |
-| `config.webhook.filters`, 3 chuỗi "lý do bỏ qua" | [Tạo webhook Test mode](https://developer.sepay.vn/vi/tien-ich-khac/test-mode/tao-webhook) | 3 bước (Cơ bản / Tài khoản / Bảo mật). Test mode **tắt xác thực SSL** → endpoint HTTP hoặc self-signed vẫn dùng được khi dev |
-| `verifySignature()` + header `X-SePay-Signature` / `X-SePay-Timestamp` | [Xác thực webhook](https://developer.sepay.vn/vi/sepay-webhooks/xac-thuc) | Chuỗi ký = `{timestamp}.{raw_body}`, HMAC-SHA256, hex. API Key: `Authorization: Apikey <KEY>`. Có cả OAuth 2.0 (client credentials) |
-| `routes/webhook.js`: `{"success": true}`, raw body, dedupe theo `id` | [Tích hợp webhook](https://developer.sepay.vn/vi/sepay-webhooks/tich-hop-webhook) | Thành công = 200/201 **và** body `{"success": true}` **và** <30s. `code = null` khác `""` — dùng `=== null` nếu cần phân biệt |
-| `sender.js` retry, `?forceFail` trong UI | [Xử lý lỗi](https://developer.sepay.vn/vi/sepay-webhooks/xu-ly-loi) | 1 lần đầu + 7 retry, chờ 1,1,2,3,5,8,13 phút (~33 phút), rồi mới đánh dấu Failed. Log mỗi lần gửi có `error_code` cURL (6 DNS, 7 refused, 28 timeout, 51/60 SSL) |
-| `client.js` — các path `/v2/...` | [Bắt đầu nhanh API v2](https://developer.sepay.vn/vi/sepay-api/v2/bat-dau-nhanh), [Tạo đơn hàng](https://developer.sepay.vn/vi/sepay-api/v2/don-hang/tao-don-hang), [Chi tiết](https://developer.sepay.vn/vi/sepay-api/v2/don-hang/chi-tiet), [Hủy](https://developer.sepay.vn/vi/sepay-api/v2/don-hang/huy-don-hang), [Giao dịch](https://developer.sepay.vn/vi/sepay-api/v2/giao-dich/danh-sach) | Envelope `{status, data, meta}`; `Authorization: Bearer <token>` |
+| `routes/simulator.ts` (4 bước pipeline, lý do bỏ qua, quota 500/ngày, `referenceCode` mở đầu `SB`) | [Mô phỏng giao dịch](https://developer.sepay.vn/vi/tien-ich-khac/test-mode/mo-phong-giao-dich) | Tiền vào: `accumulated += amount`; tiền ra: `max(0, accumulated − amount)`. Số tiền 1.000 → 499.000.000. Bỏ trống nội dung → tự sinh `Giao dich sandbox` |
+| `config.webhook.filters` + `evaluateWebhookFilters()`, 3 chuỗi "lý do bỏ qua" | [Tạo webhook Test mode](https://developer.sepay.vn/vi/tien-ich-khac/test-mode/tao-webhook) | 3 bước (Cơ bản / Tài khoản / Bảo mật). Test mode **tắt xác thực SSL** → endpoint HTTP hoặc self-signed vẫn dùng được khi dev |
+| `verifySignature()` (src/sepay/signature.ts) + header `X-SePay-Signature` / `X-SePay-Timestamp` | [Xác thực webhook](https://developer.sepay.vn/vi/sepay-webhooks/xac-thuc) | Chuỗi ký = `{timestamp}.{raw_body}`, HMAC-SHA256, hex. API Key: `Authorization: Apikey <KEY>`. Có cả OAuth 2.0 (client credentials) |
+| `routes/webhook.ts`: `{"success": true}`, raw body, dedupe theo `id` | [Tích hợp webhook](https://developer.sepay.vn/vi/sepay-webhooks/tich-hop-webhook) | Thành công = 200/201 **và** body `{"success": true}` **và** <30s. `code = null` khác `""` — dùng `=== null` nếu cần phân biệt |
+| `sepay/sender.ts` retry, `?forceFail` trong UI | [Xử lý lỗi](https://developer.sepay.vn/vi/sepay-webhooks/xu-ly-loi) | 1 lần đầu + 7 retry, chờ 1,1,2,3,5,8,13 phút (~33 phút), rồi mới đánh dấu Failed. Log mỗi lần gửi có `error_code` cURL (6 DNS, 7 refused, 28 timeout, 51/60 SSL) |
+| `client.ts` — các path `/v2/...` | [Bắt đầu nhanh API v2](https://developer.sepay.vn/vi/sepay-api/v2/bat-dau-nhanh), [Tạo đơn hàng](https://developer.sepay.vn/vi/sepay-api/v2/don-hang/tao-don-hang), [Chi tiết](https://developer.sepay.vn/vi/sepay-api/v2/don-hang/chi-tiet), [Hủy](https://developer.sepay.vn/vi/sepay-api/v2/don-hang/huy-don-hang), [Giao dịch](https://developer.sepay.vn/vi/sepay-api/v2/giao-dich/danh-sach) | Envelope `{status, data, meta}`; `Authorization: Bearer <token>` |
+
+## Lớp type (`src/types.ts`)
+
+Toàn bộ shape dữ liệu chép lại từ doc để editor báo lỗi ngay khi dùng sai field:
+
+| Type | Nguồn trong doc | Ghi chú nghiệp vụ |
+| --- | --- | --- |
+| `SePayWebhookPayload` | tich-hop-webhook#payload | `subAccount: string` (rỗng chứ không null) vs `code: string \| null` — doc tách nghĩa 2 cái này |
+| `SePayTransferType` | ″ | `'in' \| 'out'` — là literal union, không phải `string` |
+| `SePayOrderStatus` | don-hang/tao-don-hang | `'Pending' \| 'Paid' \| 'Partially' \| 'Cancelled'` |
+| `SePayCreatedOrder` | don-hang/tao-don-hang | `va_number` phẳng + `qr_code_url` |
+| `SePayOrderDetail` | don-hang/chi-tiet | `va` là **mảng** (khác POST) |
+| `SePayTransactionRow` | giao-dich/danh-sach | `webhook_success: 0 \| 1 \| null` |
+| `SePayEnvelope<T>` | bat-dau-nhanh | `{status, message?, data, meta.pagination}` |
+| `SePayErrorCode` | bảng lỗi các trang | union các mã đã biết + `(string & {})` để không vỡ khi SePay thêm mã |
+| `SePayTransactionQuery` | giao-dich/danh-sach | `since_id`, `timestamp_format`, `per_page`… |
+| `AmountVerdict`, `FilterVerdict`, `VerifyResult` | ″ | discriminated union cho nhánh lỗi, không `boolean` rời rạc |
+
+Không dùng `enum` (bật `erasableSyntaxOnly` để code chạy được cả với `node src/server.ts`
+không qua tsx) — mọi tập giá trị là union of literal + `as const`.
 
 ## Endpoint đã dùng
 
@@ -69,7 +89,7 @@ GET    /v2/transactions?q=&since_id=&transfer_type=in  # đối soát / polling
 
 - [ ] Endpoint HTTPS chứng chỉ hợp lệ (Live **bắt buộc**, Test mode mới được tắt SSL)
 - [ ] `SEPAY_WEBHOOK_AUTH=hmac`, Secret Key tạo ngẫu nhiên, chỉ nằm trong env; `SEPAY_MODE=live`
-- [ ] Collider UNIQUE trên `sepay_transaction_id` (`INSERT IGNORE`) — xem `src/store.js`
+- [ ] Collider UNIQUE trên `sepay_transaction_id` (`INSERT IGNORE`) — xem `src/store.ts`
 - [ ] Trả `200 {"success": true}` <30s, đẩy việc nặng sang queue
 - [ ] Whitelist [IP SePay](https://developer.sepay.vn/vi/dia-chi-ip) ở firewall/WAF (nếu 403)
 - [ ] Job đối soát `GET /v2/transactions?since_id=…&transaction_date_sort=asc` chạy đều
