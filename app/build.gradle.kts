@@ -52,14 +52,15 @@ android {
 
     packaging {
         resources {
-            excludes += setOf(
-                "META-INF/DEPENDENCIES",
-                "META-INF/LICENSE",
-                "META-INF/LICENSE.txt",
-                "META-INF/NOTICE",
-                "META-INF/NOTICE.txt",
-                "META-INF/ASL2.0",
-            )
+            excludes +=
+                setOf(
+                    "META-INF/DEPENDENCIES",
+                    "META-INF/LICENSE",
+                    "META-INF/LICENSE.txt",
+                    "META-INF/NOTICE",
+                    "META-INF/NOTICE.txt",
+                    "META-INF/ASL2.0",
+                )
         }
     }
 
@@ -81,7 +82,7 @@ ksp {
 }
 
 ktlint {
-    version.set(libs.versions.ktlint.core.get())
+    // version: dùng mặc định của plugin (12.2.0 → ktlint 1.5.x) — tránh khai báo trùng
     android.set(false)
     outputToConsole.set(true)
     ignoreFailures.set(false)
