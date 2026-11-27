@@ -106,6 +106,16 @@ class BotApiGateway(
         )
     }
 
+    override suspend fun getChatByUsername(username: String): ChatInfo {
+        val chat = call { api.getChatByUsername(token(), username) }
+        return ChatInfo(
+            chatId = chat.id,
+            title = chat.title,
+            username = chat.username,
+            pinnedMessageText = chat.pinnedMessage?.text,
+        )
+    }
+
     override suspend fun getBotRights(chatId: Long): BotRights {
         val me = call { api.getMe(token()) }
         val member = call { api.getChatMember(token(), chatId, me.id) }

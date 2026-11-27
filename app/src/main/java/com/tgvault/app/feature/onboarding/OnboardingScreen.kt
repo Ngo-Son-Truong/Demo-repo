@@ -45,8 +45,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,7 +61,7 @@ import com.tgvault.app.core.designsystem.components.TgTextField
 /**
  * Onboarding theo SPEC §15.3 màn 2: Welcome → CreateBot → EnterToken →
  * ConnectChannel → VerifyRights → Done (mã hoá nối ở M7 — FR-ONB-4).
- * Animation chuyển bước: slide + fade nhẹ theo MotionConfig (§15.4).
+ * Chuyển bước: slide + fade theo MotionConfig.DURATION_NAV (§15.4).
  */
 @Composable
 fun OnboardingScreen(
@@ -70,10 +70,9 @@ fun OnboardingScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize().padding(Spacing.x6)) {
-        // Thanh tiến trình bước (§15.3)
-        val stepIndex = state.step.ordinal
+        // Thanh tiến trình bước (§15.3 màn 2)
         LinearProgressIndicator(
-            progress = { stepIndex / (OnboardingStep.entries.size - 1).toFloat() },
+            progress = { state.step.ordinal / (OnboardingStep.entries.size - 1).toFloat() },
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.height(Spacing.x4))
@@ -81,15 +80,16 @@ fun OnboardingScreen(
         AnimatedContent(
             targetState = state.step,
             transitionSpec = {
+                val forward = targetState.ordinal > initialState.ordinal
                 (
                     slideInHorizontally(
                         animationSpec = tween(MotionConfig.DURATION_NAV),
-                        initialOffsetX = { if (targetState.ordinal > initialState.ordinal) it / 3 else -it / 3 },
+                        initialOffsetX = { if (forward) it / 3 else -it / 3 },
                     ) + fadeIn(tween(MotionConfig.DURATION_NAV))
                 ).togetherWith(
                     slideOutHorizontally(
                         animationSpec = tween(MotionConfig.DURATION_NAV),
-                        targetOffsetX = { if (targetState.ordinal > initialState.ordinal) -it / 3 else it / 3 },
+                        targetOffsetX = { if (forward) -it / 3 else it / 3 },
                     ) + fadeOut(tween(MotionConfig.DURATION_NAV))
                 )
             },
@@ -115,7 +115,9 @@ private fun StepScaffold(
     onBack: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (onBack != null) {
                 TextButton(onClick = onBack) { Text(stringResource(R.string.action_back)) }
@@ -225,9 +227,7 @@ private fun EnterTokenStep(
         Spacer(Modifier.height(Spacing.x3))
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.x2)) {
             TgSecondaryButton(
-                onClick = {
-                    clipboard.getText()?.text?.let(viewModel::onTokenChange)
-                },
+                onClick = { clipboard.getText()?.text?.let(viewModel::onTokenChange) },
             ) {
                 Icon(Icons.Rounded.ContentPaste, contentDescription = null)
                 Spacer(Modifier.size(Spacing.x1))

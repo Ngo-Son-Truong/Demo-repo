@@ -22,7 +22,7 @@ import javax.inject.Inject
 enum class OnboardingStep { WELCOME, CREATE_BOT, ENTER_TOKEN, CONNECT_CHANNEL, VERIFY_RIGHTS, DONE }
 
 /** Lỗi onboarding thân thiện (M4-6) — UI map sang chuỗi + hành động gợi ý. */
-enum class OnboardingError { INVALID_TOKEN, NETWORK, CHANNEL_NOT_FOUND, MISSING_RIGHTS, UNKNOWN }
+enum class OnboardingError { INVALID_TOKEN, NETWORK, CHANNEL_NOT_FOUND, UNKNOWN }
 
 data class OnboardingUiState(
     val step: OnboardingStep = OnboardingStep.WELCOME,
@@ -50,6 +50,9 @@ class OnboardingViewModel
         val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
 
         private var watchJob: Job? = null
+
+        /** chatId đang kiểm tra — giữ để nút "Kiểm tra lại" dùng (đặt ở đầu checkRights). */
+        private var lastChatId: Long? = null
 
         // --- điều hướng bước ---
 
@@ -200,12 +203,8 @@ class OnboardingViewModel
         }
 
         fun recheckRights() {
-            val chatId = lastChatId ?: return
-            checkRights(chatId)
+            lastChatId?.let { checkRights(it) }
         }
-
-        /** chatId đang kiểm tra — giữ để nút "Kiểm tra lại" dùng (đặt ở đầu checkRights). */
-        private var lastChatId: Long? = null
 
         private suspend fun finish(chatId: Long) {
             val state = _uiState.value
