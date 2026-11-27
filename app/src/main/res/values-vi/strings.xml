@@ -67,4 +67,20 @@
     <string name="onb_rights_recheck">Kiểm tra lại</string>
     <string name="onb_done_title">Xong rồi!</string>
     <string name="onb_done_message">Ổ Telegram của bạn đã kết nối. Bắt đầu tải tệp đầu tiên lên nào.</string>
+
+    <!-- Files (M5) -->
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Huỷ</string>
+    <string name="files_root">Gốc</string>
+    <string name="files_folder">Thư mục</string>
+    <string name="files_uploading">Đang tải lên…</string>
+    <string name="files_upload">Tải lên</string>
+    <string name="files_new_folder">Thư mục mới</string>
+    <string name="files_rename">Đổi tên</string>
+    <string name="files_trash">Chuyển vào thùng rác</string>
+    <string name="files_name_label">Tên</string>
+    <string name="files_search_hint">Tìm tệp</string>
+    <string name="files_sort_name">Tên</string>
+    <string name="files_sort_date">Ngày</string>
+    <string name="files_sort_size">Kích thước</string>
 </resources>

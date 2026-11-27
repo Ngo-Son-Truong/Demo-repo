@@ -67,4 +67,20 @@
     <string name="onb_rights_recheck">Check again</string>
     <string name="onb_done_title">All set!</string>
     <string name="onb_done_message">Your Telegram vault is connected. Start uploading your first file.</string>
+
+    <!-- Files (M5) -->
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="files_root">Root</string>
+    <string name="files_folder">Folder</string>
+    <string name="files_uploading">Uploading…</string>
+    <string name="files_upload">Upload</string>
+    <string name="files_new_folder">New folder</string>
+    <string name="files_rename">Rename</string>
+    <string name="files_trash">Move to Trash</string>
+    <string name="files_name_label">Name</string>
+    <string name="files_search_hint">Search files</string>
+    <string name="files_sort_name">Name</string>
+    <string name="files_sort_date">Date</string>
+    <string name="files_sort_size">Size</string>
 </resources>
