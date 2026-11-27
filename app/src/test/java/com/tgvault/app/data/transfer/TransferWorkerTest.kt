@@ -216,6 +216,11 @@ class TransferWorkerTest {
 
         override suspend fun queuedIds(): List<String> = emptyList()
 
+        override suspend fun createDownload(
+            nodeId: String,
+            bytesTotal: Long,
+        ): Transfer = error("không dùng trong test này")
+
         override suspend fun requeue(id: String) {
             items.value[id]?.let { items.value = items.value + (id to it.copy(state = TransferState.QUEUED)) }
         }

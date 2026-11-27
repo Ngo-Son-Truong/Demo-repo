@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.testing.WorkManagerTestInitHelper
 import com.tgvault.app.domain.model.DriveConfig
 import com.tgvault.app.domain.model.Transfer
 import com.tgvault.app.domain.model.TransferDirection
@@ -33,7 +32,7 @@ class TransferSchedulerTest {
 
     @Before
     fun setUp() {
-        WorkManagerTestInitHelper.initTestWorkManager(context)
+        androidx.work.testing.WorkManagerTestInitHelper.initTestWorkManager(context)
         workManager = WorkManager.getInstance(context)
         transfers = FakeTransferRepository()
         scheduler = TransferScheduler(context, transfers, FakeConfigRepository())
@@ -153,6 +152,11 @@ class TransferSchedulerTest {
 
         override suspend fun queuedIds(): List<String> =
             items.value.values.filter { it.state == TransferState.QUEUED }.map { it.id }
+
+        override suspend fun createDownload(
+            nodeId: String,
+            bytesTotal: Long,
+        ): Transfer = error("không dùng trong test này")
 
         override suspend fun requeue(id: String) {
             items.value[id]?.let { items.value = items.value + (id to it.copy(state = TransferState.QUEUED)) }
