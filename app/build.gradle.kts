@@ -167,6 +167,7 @@ dependencies {
 
     // DI
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
 
     // Dữ liệu

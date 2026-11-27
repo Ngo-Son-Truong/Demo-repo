@@ -3,6 +3,7 @@ package com.tgvault.app
 import android.app.Application
 import android.util.Log
 import com.tgvault.app.core.common.TokenRedactor
+import com.tgvault.app.data.remote.ConnectionManager
 import com.tgvault.app.data.transfer.TransferNotifier
 import com.tgvault.app.data.transfer.TransferScheduler
 import dagger.hilt.EntryPoint
@@ -24,7 +25,10 @@ class TgVaultApp : Application() {
         fun transferScheduler(): TransferScheduler
 
         fun transferNotifier(): TransferNotifier
+    
+        fun connectionManager(): ConnectionManager
     }
+
 
     /** Scope sống cùng process — cho notifier và tác vụ nền nhỏ lúc khởi động. */
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -43,6 +47,9 @@ class TgVaultApp : Application() {
         entryPoint.transferNotifier().start(appScope)
         // M3-5: phục hồi transfer RUNNING mồ côi + enqueue lại hàng đợi
         appScope.launch {
+            // M4-3: khôi phục gateway từ token đã mã hoá (nếu đã onboarding)
+            runCatching { entryPoint.connectionManager().restore() }
+                .onFailure { Timber.w(it, "restore gateway thất bại") }
             entryPoint.transferScheduler().recoverOrphaned()
         }
     }

@@ -56,6 +56,9 @@ interface TelegramGateway {
     /** getChat — gồm pinnedMessageText. */
     suspend fun getChat(chatId: Long): ChatInfo
 
+    /** getChat theo @username (lối nhập tay ở onboarding — FR-ONB-2). */
+    suspend fun getChatByUsername(username: String): ChatInfo
+
     /** getChatMember của chính bot → quyền Post/Delete/Pin. */
     suspend fun getBotRights(chatId: Long): BotRights
 

@@ -28,4 +28,43 @@
     <string name="notif_upload_done_title">Upload complete</string>
     <string name="notif_download_done_title">Download complete</string>
     <string name="notif_error_title">Transfer failed</string>
+
+    <!-- Onboarding (M4) -->
+    <string name="action_back">Back</string>
+    <string name="onb_welcome_message">Store your files in a private Telegram channel — split safely, synced automatically.</string>
+    <string name="onb_welcome_privacy">Your files live in YOUR channel. Using Telegram as storage is outside its intended purpose — keep a backup of important data.</string>
+    <string name="onb_start">Get started</string>
+    <string name="onb_create_bot_title">Create your bot</string>
+    <string name="onb_create_bot_intro">A bot is your app’s key to Telegram. Create one in a minute:</string>
+    <string name="onb_create_bot_step1">Open @BotFather in Telegram</string>
+    <string name="onb_create_bot_step2">Send /newbot and pick a name</string>
+    <string name="onb_create_bot_step3">Copy the token it gives you</string>
+    <string name="onb_open_botfather">Open @BotFather</string>
+    <string name="onb_have_token">I have a token</string>
+    <string name="onb_enter_token_title">Enter bot token</string>
+    <string name="onb_enter_token_hint">Paste the token from @BotFather. It is stored encrypted on this device only.</string>
+    <string name="onb_token_label">Bot token</string>
+    <string name="onb_paste">Paste</string>
+    <string name="onb_check_token">Check</string>
+    <string name="onb_token_ok">Connected to @%1$s</string>
+    <string name="onb_error_invalid_token">Token doesn’t work. Check and paste it again.</string>
+    <string name="onb_error_network">No connection. Check your network and try again.</string>
+    <string name="onb_error_unknown">Something went wrong. Please try again.</string>
+    <string name="onb_channel_title">Connect channel</string>
+    <string name="onb_channel_intro">Create a PRIVATE channel, then add your bot as administrator with Post, Delete and Pin permissions.</string>
+    <string name="onb_channel_waiting">Waiting for you to add the bot…</string>
+    <string name="onb_channel_manual_hint">Or enter the channel manually:</string>
+    <string name="onb_channel_manual_label">@username or -100… id</string>
+    <string name="onb_channel_manual_submit">Use this channel</string>
+    <string name="onb_error_channel">Channel not found. Check the id/username and make sure the bot is an admin.</string>
+    <string name="onb_rights_title">Checking permissions</string>
+    <string name="onb_rights_channel">Channel: %1$s</string>
+    <string name="onb_rights_checking">Checking bot permissions…</string>
+    <string name="onb_right_post">Post messages</string>
+    <string name="onb_right_delete">Delete messages</string>
+    <string name="onb_right_pin">Pin messages</string>
+    <string name="onb_rights_fix_hint">Missing permissions: open channel settings → Administrators → your bot → enable the missing ones.</string>
+    <string name="onb_rights_recheck">Check again</string>
+    <string name="onb_done_title">All set!</string>
+    <string name="onb_done_message">Your Telegram vault is connected. Start uploading your first file.</string>
 </resources>

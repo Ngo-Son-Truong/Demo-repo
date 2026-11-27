@@ -116,6 +116,9 @@ jobs:
             echo "### Test thất bại (nếu có):"
             python3 tools/extract_failed_tests.py || true
             echo ""
+            echo "### Mọi lỗi trong XML test (kể cả lỗi khởi tạo framework):"
+            python3 tools/extract_test_errors.py || true
+            echo ""
             echo "### Tail log bước cuối:"
             tail -40 /tmp/step-output.log 2>&1 | strip_ansi || true
             echo ""

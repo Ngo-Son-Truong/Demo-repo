@@ -28,4 +28,43 @@
     <string name="notif_upload_done_title">Tải lên hoàn tất</string>
     <string name="notif_download_done_title">Tải xuống hoàn tất</string>
     <string name="notif_error_title">Truyền tải thất bại</string>
+
+    <!-- Onboarding (M4) -->
+    <string name="action_back">Quay lại</string>
+    <string name="onb_welcome_message">Lưu tệp của bạn trong một kênh Telegram riêng tư — chia nhỏ an toàn, đồng bộ tự động.</string>
+    <string name="onb_welcome_privacy">Tệp nằm trong kênh CỦA BẠN. Dùng Telegram làm kho lưu trữ nằm ngoài mục đích chính của nền tảng — hãy giữ bản sao lưu cho dữ liệu quan trọng.</string>
+    <string name="onb_start">Bắt đầu</string>
+    <string name="onb_create_bot_title">Tạo bot của bạn</string>
+    <string name="onb_create_bot_intro">Bot là chìa khoá để app nói chuyện với Telegram. Tạo trong một phút:</string>
+    <string name="onb_create_bot_step1">Mở @BotFather trong Telegram</string>
+    <string name="onb_create_bot_step2">Gửi /newbot và đặt tên</string>
+    <string name="onb_create_bot_step3">Chép token mà BotFather đưa</string>
+    <string name="onb_open_botfather">Mở @BotFather</string>
+    <string name="onb_have_token">Tôi đã có token</string>
+    <string name="onb_enter_token_title">Nhập token bot</string>
+    <string name="onb_enter_token_hint">Dán token từ @BotFather. Token được mã hoá, chỉ nằm trên máy này.</string>
+    <string name="onb_token_label">Token bot</string>
+    <string name="onb_paste">Dán</string>
+    <string name="onb_check_token">Kiểm tra</string>
+    <string name="onb_token_ok">Đã kết nối @%1$s</string>
+    <string name="onb_error_invalid_token">Token không đúng. Kiểm tra rồi dán lại.</string>
+    <string name="onb_error_network">Không có kết nối. Kiểm tra mạng rồi thử lại.</string>
+    <string name="onb_error_unknown">Có lỗi xảy ra. Vui lòng thử lại.</string>
+    <string name="onb_channel_title">Kết nối channel</string>
+    <string name="onb_channel_intro">Tạo một channel RIÊNG TƯ, rồi thêm bot làm quản trị với 3 quyền: Đăng, Xoá, Ghim tin.</string>
+    <string name="onb_channel_waiting">Đang chờ bạn thêm bot…</string>
+    <string name="onb_channel_manual_hint">Hoặc nhập tay channel:</string>
+    <string name="onb_channel_manual_label">@username hoặc id -100…</string>
+    <string name="onb_channel_manual_submit">Dùng channel này</string>
+    <string name="onb_error_channel">Không thấy channel. Kiểm tra id/username và đảm bảo bot đã là admin.</string>
+    <string name="onb_rights_title">Kiểm tra quyền</string>
+    <string name="onb_rights_channel">Channel: %1$s</string>
+    <string name="onb_rights_checking">Đang kiểm tra quyền của bot…</string>
+    <string name="onb_right_post">Đăng tin</string>
+    <string name="onb_right_delete">Xoá tin</string>
+    <string name="onb_right_pin">Ghim tin</string>
+    <string name="onb_rights_fix_hint">Thiếu quyền: mở cài đặt channel → Quản trị viên → bot của bạn → bật các quyền còn thiếu.</string>
+    <string name="onb_rights_recheck">Kiểm tra lại</string>
+    <string name="onb_done_title">Xong rồi!</string>
+    <string name="onb_done_message">Ổ Telegram của bạn đã kết nối. Bắt đầu tải tệp đầu tiên lên nào.</string>
 </resources>
