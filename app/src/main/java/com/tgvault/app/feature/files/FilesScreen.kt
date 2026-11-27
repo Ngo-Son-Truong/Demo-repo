@@ -1,6 +1,5 @@
 package com.tgvault.app.feature.files
 
-import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AudioFile
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CloudUpload
@@ -41,6 +39,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -54,7 +53,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -266,15 +264,24 @@ private fun SortMenu(
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.files_sort_name)) },
-                onClick = { onSelect(NodeSortField.NAME, if (current == NodeSortField.NAME) !ascending else true); open = false },
+                onClick = {
+                    onSelect(NodeSortField.NAME, if (current == NodeSortField.NAME) !ascending else true)
+                    open = false
+                },
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.files_sort_date)) },
-                onClick = { onSelect(NodeSortField.DATE, false); open = false },
+                onClick = {
+                    onSelect(NodeSortField.DATE, false)
+                    open = false
+                },
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.files_sort_size)) },
-                onClick = { onSelect(NodeSortField.SIZE, false); open = false },
+                onClick = {
+                    onSelect(NodeSortField.SIZE, false)
+                    open = false
+                },
             )
         }
     }
@@ -325,11 +332,17 @@ private fun NodeRow(
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.files_rename)) },
-                            onClick = { menuOpen = false; onRename() },
+                            onClick = {
+                                menuOpen = false
+                                onRename()
+                            },
                         )
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.files_trash)) },
-                            onClick = { menuOpen = false; onTrash() },
+                            onClick = {
+                                menuOpen = false
+                                onTrash()
+                            },
                         )
                     }
                 }
