@@ -70,6 +70,9 @@ jobs:
             echo "### Phần 'What went wrong' (nếu có):"
             grep -B2 -A 25 "What went wrong" /tmp/step-output.log 2>/dev/null | strip_ansi || echo "(không có — build không lỗi ở bước cuối)"
             echo ""
+            echo "### Lỗi biên dịch Kotlin (dòng 'e:') — nếu có:"
+            grep -E "^e: " /tmp/step-output.log 2>/dev/null | strip_ansi | head -100 || echo "(không có)"
+            echo ""
             echo "### Ktlint violations (txt reports):"
             find /home/runner/work -path "*reports/ktlint*" -name "*.txt" 2>/dev/null | while read -r f; do
               echo "--- $f"
