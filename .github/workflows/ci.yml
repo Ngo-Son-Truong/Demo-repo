@@ -38,12 +38,17 @@ jobs:
 
       # Khi thất bại: comment phần đuôi log vào PR (đọc được qua API)
       - name: Comment failure excerpt vào PR
-        if: failure() && github.event_name == 'pull_request'
+        if: failure()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
         run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          if [ -z "$PR_NUMBER" ]; then
+            PR_NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+          fi
           {
-            echo "## ❌ CI thất bại tại một bước verify — trích đoạn log"
+            echo "## ❌ CI thất bại — trích đoạn log bước lỗi"
             echo ""
             echo '<details><summary>Chi tiết (tail log)</summary>'
             echo ""
@@ -52,7 +57,7 @@ jobs:
             echo '```'
             echo "</details>"
           } > /tmp/ci-report.md
-          gh pr comment "${{ github.event.pull_request.number }}" --body-file /tmp/ci-report.md || true
+          [ -n "$PR_NUMBER" ] && gh pr comment "$PR_NUMBER" --body-file /tmp/ci-report.md || true
 
       - uses: actions/upload-artifact@v4
         if: always()
