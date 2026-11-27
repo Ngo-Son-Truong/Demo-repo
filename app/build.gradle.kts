@@ -39,6 +39,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    lint {
+        // thêm bản .txt cạnh .html để CI đọc được lỗi (HTML không grep gọn)
+        textReport = true
+    }
+
     kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -106,7 +111,25 @@ if (localPropsFile.exists()) {
     localPropsFile.inputStream().use { localProps.load(it) }
 }
 
+// Robolectric mặc định tải android-all từ Maven LÚC CHẠY TEST → hay flake trên CI.
+// Kéo trước bằng Gradle (được setup-gradle cache + retry) và trỏ Robolectric tới thư mục đó;
+// artifact nào thiếu Robolectric vẫn tự tải bổ sung.
+val robolectricJars = configurations.create("robolectricJars")
+dependencies {
+    "robolectricJars"(libs.robolectric.android.all)
+}
+val primeRobolectricJars =
+    tasks.register<Copy>("primeRobolectricJars") {
+        from(robolectricJars)
+        into(layout.buildDirectory.dir("robolectric-jars"))
+    }
+
 tasks.withType<Test>().configureEach {
+    dependsOn(primeRobolectricJars)
+    systemProperty(
+        "robolectric.dependency.dir",
+        layout.buildDirectory.dir("robolectric-jars").get().asFile.absolutePath,
+    )
     if (project.hasProperty("runTelegramLive")) {
         systemProperty("tgvault.runLive", "true")
         systemProperty("tgvault.botToken", localProps.getProperty("tgvault.botToken").orEmpty())

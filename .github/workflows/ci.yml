@@ -104,6 +104,12 @@ jobs:
               head -60 "$f"
             done || true
             echo ""
+            echo "### Lint report (nếu có):"
+            find /home/runner/work -path "*reports*" -name "lint-results-*.txt" 2>/dev/null | while read -r f; do
+              echo "--- $f"
+              head -120 "$f"
+            done || true
+            echo ""
             echo "### Test thất bại (nếu có):"
             python3 tools/extract_failed_tests.py || true
             echo ""
