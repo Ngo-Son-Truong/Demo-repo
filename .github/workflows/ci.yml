@@ -49,6 +49,18 @@ jobs:
             echo "### Phần 'What went wrong' (nếu có):"
             grep -B2 -A 25 "What went wrong" /tmp/step-output.log 2>/dev/null || echo "(không có — build không lỗi ở bước cuối)"
             echo ""
+            echo "### Ktlint violations (txt reports):"
+            find /home/runner/work -path "*reports/ktlint*" -name "*.txt" 2>/dev/null | while read -r f; do
+              echo "--- $f"
+              cat "$f"
+            done || true
+            echo ""
+            echo "### Detekt report (nếu có):"
+            find /home/runner/work -path "*reports/detekt*" -name "*.txt" 2>/dev/null | while read -r f; do
+              echo "--- $f"
+              head -60 "$f"
+            done || true
+            echo ""
             echo "### Tail log bước cuối:"
             tail -40 /tmp/step-output.log 2>&1 || true
             echo ""
