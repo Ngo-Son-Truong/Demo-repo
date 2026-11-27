@@ -24,9 +24,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /** M3-6: worker — chọn engine theo direction, bỏ qua transfer không chạy, requeue khi hệ thống dừng. */
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class TransferWorkerTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private lateinit var transfers: InMemoryTransferRepository

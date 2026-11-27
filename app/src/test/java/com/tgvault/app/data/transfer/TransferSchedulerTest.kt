@@ -20,10 +20,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.util.UUID
 
 /** M3-6: scheduler — enqueue unique work, pause/resume/cancel, phục hồi khi khởi động. */
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class TransferSchedulerTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private lateinit var workManager: WorkManager
