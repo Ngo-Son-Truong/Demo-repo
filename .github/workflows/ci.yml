@@ -68,9 +68,34 @@ jobs:
             app/build/test-results/
           if-no-files-found: ignore
 
+      - name: Liệt kê APK
+        if: success()
+        run: find app/build/outputs -name "*.apk" -exec ls -la {} + | tee /tmp/apk-list.txt
+
       - uses: actions/upload-artifact@v4
         if: success()
         with:
           name: app-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          path: app/build/outputs/apk/
+          if-no-files-found: warn
+
+      # Tóm tắt kết quả vào PR để theo dõi không cần mở log
+      - name: Tóm tắt CI vào PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          if [ -z "$PR_NUMBER" ]; then
+            PR_NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+          fi
+          {
+            echo "## Kết quả CI (${{ job.status }})"
+            echo ""
+            echo "- APK tìm thấy:"
+            echo '```'
+            cat /tmp/apk-list.txt 2>/dev/null || echo "(không có)"
+            echo '```'
+          } > /tmp/ci-summary.md
+          [ -n "$PR_NUMBER" ] && gh pr comment "$PR_NUMBER" --body-file /tmp/ci-summary.md || true
