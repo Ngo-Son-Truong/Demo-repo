@@ -135,9 +135,10 @@ class TransferSchedulerTest {
             items.value[id]?.let {
                 items.value =
                     items.value + (
-                        id to it.copy(
-                            state = if (paused) TransferState.PAUSED else TransferState.QUEUED,
-                        )
+                        id to
+                            it.copy(
+                                state = if (paused) TransferState.PAUSED else TransferState.QUEUED,
+                            )
                     )
             }
         }

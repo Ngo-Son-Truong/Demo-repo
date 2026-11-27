@@ -136,8 +136,7 @@ class TransferWorkerTest {
 
             override fun transferRepository(): TransferRepository = transfers
 
-            override fun notifier(): TransferNotifier =
-                TransferNotifier(context, transfers, mockk(relaxed = true))
+            override fun notifier(): TransferNotifier = TransferNotifier(context, transfers, mockk(relaxed = true))
 
             override fun concurrency(): TransferConcurrency = TransferConcurrency()
         }
@@ -199,9 +198,10 @@ class TransferWorkerTest {
             items.value[id]?.let {
                 items.value =
                     items.value + (
-                        id to it.copy(
-                            state = if (paused) TransferState.PAUSED else TransferState.QUEUED,
-                        )
+                        id to
+                            it.copy(
+                                state = if (paused) TransferState.PAUSED else TransferState.QUEUED,
+                            )
                     )
             }
         }

@@ -31,7 +31,6 @@ class TransferWorker(
     appContext: Context,
     params: WorkerParameters,
 ) : CoroutineWorker(appContext, params) {
-
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface Deps {
