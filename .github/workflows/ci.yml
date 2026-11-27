@@ -38,15 +38,23 @@ jobs:
         run: ./gradlew --stacktrace assembleDebug 2>&1 | tee /tmp/step-output.log
 
       # Gói APK + báo cáo để publish ra release (link tải ổn định, không cần Android Studio)
+      # Chẩn đoán ghi vào release notes (đọc được qua API khi không xem được log)
       - name: Gói kết quả build
         if: success()
         run: |
           mkdir -p /tmp/dist
-          find app/build/outputs -name "*.apk" -exec cp {} /tmp/dist/ \;
+          {
+            echo "### APK tìm thấy:"
+            find app/build -name "*.apk" 2>&1
+            echo ""
+            echo "### app/build/outputs:"
+            ls -laR app/build/outputs 2>&1 | head -60
+          } > /tmp/diag.txt
+          find app/build -name "*.apk" -exec cp {} /tmp/dist/ \; 2>>/tmp/diag.txt || true
           if [ -d app/build/reports ]; then
             (cd app/build && zip -qr /tmp/dist/build-reports.zip reports test-results) || true
           fi
-          ls -la /tmp/dist | tee /tmp/dist-list.txt
+          { echo ""; echo "### /tmp/dist:"; ls -la /tmp/dist; } >> /tmp/diag.txt 2>&1 || true
 
       - name: Publish release ci-debug
         if: success()
@@ -54,10 +62,15 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release view ci-debug >/dev/null 2>&1 || \
-            gh release create ci-debug --prerelease \
+            gh release create ci-debug --prerelease --target "${{ github.sha }}" \
               --title "CI debug build" \
               --notes "APK debug + báo cáo test mới nhất từ CI (tự động ghi đè mỗi lần build xanh)."
-          gh release upload ci-debug /tmp/dist/* --clobber
+          shopt -s nullglob
+          files=(/tmp/dist/*)
+          if [ ${#files[@]} -gt 0 ]; then
+            gh release upload ci-debug "${files[@]}" --clobber
+          fi
+          gh release edit ci-debug --notes-file /tmp/diag.txt || true
 
       # Tóm tắt kết quả vào PR (thành công hoặc thất bại) — đọc được qua API
       - name: Tóm tắt CI vào PR
