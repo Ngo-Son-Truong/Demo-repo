@@ -1,7 +1,7 @@
 package com.tgvault.app.core.engine
 
+import androidx.core.net.toUri
 import android.content.Context
-import android.net.Uri
 import androidx.room.withTransaction
 import com.tgvault.app.core.chunker.Chunker
 import com.tgvault.app.core.common.AppError
@@ -188,7 +188,7 @@ class UploadEngine
             when {
                 stagingPath != null -> java.io.File(stagingPath).inputStream().buffered()
                 sourceUri != null ->
-                    context.contentResolver.openInputStream(Uri.parse(sourceUri))
+                    context.contentResolver.openInputStream(sourceUri.toUri())
                         ?: throw AppError.SourceChanged()
                 else -> throw AppError.SourceChanged()
             }

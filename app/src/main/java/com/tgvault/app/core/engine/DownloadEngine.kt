@@ -1,7 +1,8 @@
 package com.tgvault.app.core.engine
 
+import android.os.storage.StorageManager
+import androidx.core.net.toUri
 import android.content.Context
-import android.net.Uri
 import androidx.room.withTransaction
 import com.tgvault.app.core.common.AppError
 import com.tgvault.app.core.common.TimeProvider
@@ -71,7 +72,7 @@ class DownloadEngine
                 // FR-TR-6: kiểm dung lượng trống trước khi tải
                 val existing = if (staging.exists()) staging.length() else 0L
                 val remaining = node.sizeBytes - existing
-                val free = stagingDir().usableSpace
+                val free = allocatableFreeBytes()
                 if (free < remaining + MIN_FREE_HEADROOM) {
                     throw AppError.Transient("không đủ dung lượng: cần ${remaining}B, còn ${free}B")
                 }
@@ -175,7 +176,17 @@ class DownloadEngine
             }
         }
 
-        private fun stagingDir(): File = File(context.cacheDir, "staging").apply { mkdirs() }
+        /** Dung lượng cấp phát được trên volume chứa staging (đã trừ vùng hệ thống giữ lại). */
+    private fun allocatableFreeBytes(): Long =
+        try {
+            val sm = context.getSystemService(StorageManager::class.java)
+            sm?.getAllocatableBytes(sm.getUuidForPath(stagingDir())) ?: stagingDir().usableSpace
+        } catch (e: Exception) {
+            Timber.w(e, "getAllocatableBytes lỗi — fallback usableSpace")
+            stagingDir().usableSpace
+        }
+
+    private fun stagingDir(): File = File(context.cacheDir, "staging").apply { mkdirs() }
 
         /** Chuyển staging sang đích: SAF document (destUri) hoặc thư mục Downloads công khai. */
         private fun moveToDestination(
@@ -184,7 +195,7 @@ class DownloadEngine
             destUri: String?,
         ) {
             if (destUri != null) {
-                context.contentResolver.openOutputStream(Uri.parse(destUri), "wt")?.use { out ->
+                context.contentResolver.openOutputStream(destUri.toUri(), "wt")?.use { out ->
                     staging.inputStream().use { it.copyTo(out, BUFFER_SIZE) }
                 } ?: throw AppError.Unknown("không mở được đích SAF")
                 staging.delete()
