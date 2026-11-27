@@ -1,8 +1,8 @@
 package com.tgvault.app.core.engine
 
+import android.content.Context
 import android.os.storage.StorageManager
 import androidx.core.net.toUri
-import android.content.Context
 import androidx.room.withTransaction
 import com.tgvault.app.core.common.AppError
 import com.tgvault.app.core.common.TimeProvider
@@ -177,16 +177,16 @@ class DownloadEngine
         }
 
         /** Dung lượng cấp phát được trên volume chứa staging (đã trừ vùng hệ thống giữ lại). */
-    private fun allocatableFreeBytes(): Long =
-        try {
-            val sm = context.getSystemService(StorageManager::class.java)
-            sm?.getAllocatableBytes(sm.getUuidForPath(stagingDir())) ?: stagingDir().usableSpace
-        } catch (e: Exception) {
-            Timber.w(e, "getAllocatableBytes lỗi — fallback usableSpace")
-            stagingDir().usableSpace
-        }
+        private fun allocatableFreeBytes(): Long =
+            try {
+                val sm = context.getSystemService(StorageManager::class.java)
+                sm?.getAllocatableBytes(sm.getUuidForPath(stagingDir())) ?: stagingDir().usableSpace
+            } catch (e: Exception) {
+                Timber.w(e, "getAllocatableBytes lỗi — fallback usableSpace")
+                stagingDir().usableSpace
+            }
 
-    private fun stagingDir(): File = File(context.cacheDir, "staging").apply { mkdirs() }
+        private fun stagingDir(): File = File(context.cacheDir, "staging").apply { mkdirs() }
 
         /** Chuyển staging sang đích: SAF document (destUri) hoặc thư mục Downloads công khai. */
         private fun moveToDestination(
