@@ -44,15 +44,26 @@ jobs:
         run: |
           mkdir -p /tmp/dist
           {
-            echo "### APK tìm thấy:"
-            find app/build -name "*.apk" 2>&1 || true
+            echo "### chẩn đoán môi trường"
+            echo "pwd = $(pwd)"
+            echo "GITHUB_WORKSPACE = $GITHUB_WORKSPACE"
             echo ""
-            echo "### app/build/outputs:"
-            ls -laR app/build/outputs 2>&1 | head -60 || true
+            echo "### ls CWD:"
+            ls -la 2>&1 | head -30 || true
+            echo ""
+            echo "### thư mục build trong workspace:"
+            find "$GITHUB_WORKSPACE" -maxdepth 3 -type d -name build 2>/dev/null || true
+            echo ""
+            echo "### APK quét toàn runner work dir:"
+            find /home/runner/work -name "*.apk" 2>/dev/null | head -10 || true
+            echo ""
+            echo "### APK tìm thấy (app/build):"
+            find app/build -name "*.apk" 2>&1 || true
           } > /tmp/diag.txt || true
-          find app/build -name "*.apk" -exec cp {} /tmp/dist/ \; >>/tmp/diag.txt 2>&1 || true
-          if [ -d app/build/reports ]; then
-            (cd app/build && zip -qr /tmp/dist/build-reports.zip reports test-results) || true
+          find "$GITHUB_WORKSPACE" -name "*.apk" -exec cp {} /tmp/dist/ \; >>/tmp/diag.txt 2>&1 || true
+          REPORTS_DIR=$(find "$GITHUB_WORKSPACE" -maxdepth 3 -type d -path "*app/build" 2>/dev/null | head -1)
+          if [ -n "$REPORTS_DIR" ] && [ -d "$REPORTS_DIR/reports" ]; then
+            (cd "$REPORTS_DIR" && zip -qr /tmp/dist/build-reports.zip reports test-results) || true
           fi
           { echo ""; echo "### /tmp/dist:"; ls -la /tmp/dist 2>&1 || true; } >> /tmp/diag.txt || true
           exit 0
