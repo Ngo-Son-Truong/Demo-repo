@@ -81,7 +81,7 @@ ksp {
 }
 
 ktlint {
-    version.set(libs.versions.ktlint.get())
+    version.set(libs.versions.ktlint.core.get())
     android.set(false)
     outputToConsole.set(true)
     ignoreFailures.set(false)
