@@ -25,6 +25,12 @@ interface TransferRepository {
     /** Thử lại tác vụ FAILED/CANCELLED → QUEUED. */
     suspend fun retry(id: String)
 
+    /** Id các tác vụ QUEUED (phục hồi khi khởi động — M3-5). */
+    suspend fun queuedIds(): List<String>
+
+    /** Worker bị hệ thống dừng → đưa về QUEUED (WorkManager tự chạy lại khi đủ constraint). */
+    suspend fun requeue(id: String)
+
     /** M3-5: RUNNING mồ côi (app bị kill) → QUEUED. Trả về số tác vụ đã đưa về hàng đợi. */
     suspend fun requeueOrphanedRunning(): Int
 

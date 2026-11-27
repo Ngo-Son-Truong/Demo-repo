@@ -43,6 +43,12 @@ class TransferRepositoryImpl
             transferDao.markRetry(id, timeProvider.nowMillis())
         }
 
+        override suspend fun queuedIds(): List<String> = transferDao.queuedIds()
+
+        override suspend fun requeue(id: String) {
+            transferDao.requeue(id, timeProvider.nowMillis())
+        }
+
         override suspend fun requeueOrphanedRunning(): Int = transferDao.requeueRunning(timeProvider.nowMillis())
 
         override suspend fun clearFinished() {

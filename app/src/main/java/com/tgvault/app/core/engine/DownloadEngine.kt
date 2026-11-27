@@ -44,9 +44,9 @@ class DownloadEngine
         private val transferDao: TransferDao,
         private val gatewayHolder: GatewayHolder,
         private val timeProvider: TimeProvider,
-    ) {
+    ) : TransferEngine {
         /** Chạy tới khi DONE/FAILED/CANCELLED. Trả true nếu DONE. */
-        suspend fun run(transferId: String): Boolean {
+        override suspend fun run(transferId: String): Boolean {
             val transfer = transferDao.getById(transferId) ?: return false
             val node = nodeDao.getById(transfer.nodeId) ?: return false
             if (node.status != NodeStatus.READY.name) {
@@ -135,8 +135,12 @@ class DownloadEngine
                 }
                 return true
             } catch (e: CancellationException) {
-                transferDao.updateState(transferId, TransferState.CANCELLED.name, timeProvider.nowMillis())
+                // Hệ thống dừng coroutine (constraint/timeout/kill) HOẶC huỷ từ ngoài —
+                // KHÔNG ghi trạng thái ở đây; TransferWorker đọc DB để phân biệt và requeue nếu cần.
                 throw e
+            } catch (e: TransferPausedException) {
+                Timber.d("transfer tạm dừng theo yêu cầu — giữ nguyên PAUSED")
+                return false
             } catch (e: TransferCancelledException) {
                 Timber.d(e, "transfer bị huỷ theo yêu cầu")
                 transferDao.updateState(transferId, TransferState.CANCELLED.name, timeProvider.nowMillis())
@@ -171,8 +175,9 @@ class DownloadEngine
             }
 
         private suspend fun ensureNotCancelled(transferId: String) {
-            if (transferDao.getById(transferId)?.state == TransferState.CANCELLED.name) {
-                throw TransferCancelledException()
+            when (transferDao.getById(transferId)?.state) {
+                TransferState.CANCELLED.name -> throw TransferCancelledException()
+                TransferState.PAUSED.name -> throw TransferPausedException()
             }
         }
 
@@ -241,6 +246,8 @@ class DownloadEngine
             }
 
         private class TransferCancelledException : Exception("transfer đã bị huỷ")
+
+        private class TransferPausedException : Exception("transfer đã tạm dừng")
 
         private companion object {
             const val BUFFER_SIZE = 64 * 1024

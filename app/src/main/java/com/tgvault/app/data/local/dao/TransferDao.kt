@@ -71,6 +71,16 @@ interface TransferDao {
         updatedAt: Long,
     )
 
+    @Query("SELECT id FROM transfers WHERE state = 'QUEUED'")
+    suspend fun queuedIds(): List<String>
+
+    /** Worker bị hệ thống dừng giữa chừng → về QUEUED (WM tự lên lịch lại) */
+    @Query("UPDATE transfers SET state = 'QUEUED', updatedAt = :now WHERE id = :id")
+    suspend fun requeue(
+        id: String,
+        now: Long,
+    )
+
     /** M3-5: RUNNING mồ côi sau khi app bị kill → QUEUED */
     @Query("UPDATE transfers SET state = 'QUEUED', updatedAt = :now WHERE state = 'RUNNING'")
     suspend fun requeueRunning(now: Long): Int

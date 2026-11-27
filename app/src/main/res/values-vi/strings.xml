@@ -19,4 +19,13 @@
     <!-- Màn hình Cài đặt -->
     <string name="settings_placeholder_title">Cài đặt</string>
     <string name="settings_placeholder_message">Tài khoản Telegram, truyền tải, lưu trữ và giao diện sẽ nằm ở đây.</string>
+
+    <!-- Thông báo truyền tải (M3) -->
+    <string name="notif_channel_progress">Tiến trình truyền tải</string>
+    <string name="notif_channel_alerts">Thông báo truyền tải</string>
+    <string name="notif_summary_title">Đang truyền tải</string>
+    <string name="notif_summary_text">%1$d đang tải lên · %2$d đang tải xuống · %3$d%%</string>
+    <string name="notif_upload_done_title">Tải lên hoàn tất</string>
+    <string name="notif_download_done_title">Tải xuống hoàn tất</string>
+    <string name="notif_error_title">Truyền tải thất bại</string>
 </resources>

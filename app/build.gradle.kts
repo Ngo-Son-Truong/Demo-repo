@@ -183,6 +183,10 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
 
+    // Truyền tải nền (M3) + lưu token an toàn (M4)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.tink.android)
+
     // Log (che token qua TokenRedactor — SPEC §14)
     implementation(libs.timber)
 
@@ -195,6 +199,7 @@ dependencies {
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.arch.core.testing)
+    testImplementation(libs.androidx.work.testing)
 
     // Test thiết bị (Compose UI — dùng từ M4)
     androidTestImplementation(platform(libs.compose.bom))
