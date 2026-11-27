@@ -40,7 +40,7 @@ class DownloadEngine @Inject constructor(
     private val chunkDao: ChunkDao,
     private val transferDao: TransferDao,
     private val gatewayHolder: GatewayHolder,
-    private val timeProvider: TimeProvider
+    private val timeProvider: TimeProvider,
 ) {
 
     /** Chạy tới khi DONE/FAILED/CANCELLED. Trả true nếu DONE. */
@@ -50,7 +50,7 @@ class DownloadEngine @Inject constructor(
         if (node.status != NodeStatus.READY.name) {
             transferDao.updateError(
                 transferId, TransferState.FAILED.name, "UNKNOWN",
-                "node chưa sẵn sàng", timeProvider.nowMillis()
+                "node chưa sẵn sàng", timeProvider.nowMillis(),
             )
             return false
         }
@@ -94,11 +94,11 @@ class DownloadEngine @Inject constructor(
                     }
                     if (chunkBytes != chunk.storedSizeBytes) {
                         throw AppError.Transient(
-                            "chunk ${chunk.idx} tải thiếu: $chunkBytes/${chunk.storedSizeBytes}"
+                            "chunk ${chunk.idx} tải thiếu: $chunkBytes/${chunk.storedSizeBytes}",
                         )
                     }
                     transferDao.updateProgress(
-                        transferId, bytesDone, node.sizeBytes, chunk.idx, timeProvider.nowMillis()
+                        transferId, bytesDone, node.sizeBytes, chunk.idx, timeProvider.nowMillis(),
                     )
                 }
                 raf.fd.sync()
@@ -116,7 +116,7 @@ class DownloadEngine @Inject constructor(
             moveToDestination(staging, node.name, transfer.destUri)
             db.withTransaction {
                 transferDao.updateProgress(
-                    transferId, node.sizeBytes, node.sizeBytes, node.chunkCount, timeProvider.nowMillis()
+                    transferId, node.sizeBytes, node.sizeBytes, node.chunkCount, timeProvider.nowMillis(),
                 )
                 transferDao.updateState(transferId, TransferState.DONE.name, timeProvider.nowMillis())
             }
@@ -134,7 +134,7 @@ class DownloadEngine @Inject constructor(
                 TransferState.FAILED.name,
                 e.toTransferErrorCode(),
                 e.message?.take(200),
-                timeProvider.nowMillis()
+                timeProvider.nowMillis(),
             )
             return false
         }
@@ -169,9 +169,9 @@ class DownloadEngine @Inject constructor(
         val target = uniqueTarget(
             File(
                 android.os.Environment.getExternalStoragePublicDirectory(
-                    android.os.Environment.DIRECTORY_DOWNLOADS
+                    android.os.Environment.DIRECTORY_DOWNLOADS,
                 ),
-                name
+                name,
             )
         )
         staging.copyTo(target, overwrite = false)

@@ -23,7 +23,7 @@ import com.tgvault.app.data.local.entity.TransferEntity
         OrphanChunkEntity::class
     ],
     version = 1,
-    exportSchema = true
+    exportSchema = true,
 )
 abstract class TgVaultDatabase : RoomDatabase() {
     abstract fun nodeDao(): NodeDao

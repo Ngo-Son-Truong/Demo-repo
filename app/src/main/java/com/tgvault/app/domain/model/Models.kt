@@ -66,7 +66,7 @@ data class Transfer(
     val errorMessage: String?,
     val retryCount: Int,
     val createdAt: Long,
-    val updatedAt: Long
+    val updatedAt: Long,
 ) {
     val progress: Float
         get() = if (bytesTotal <= 0L) 0f else (bytesDone.toFloat() / bytesTotal).coerceIn(0f, 1f)
@@ -108,7 +108,7 @@ enum class NodeSortField { NAME, DATE, SIZE }
 
 data class NodeSort(
     val field: NodeSortField = NodeSortField.NAME,
-    val ascending: Boolean = true
+    val ascending: Boolean = true,
 )
 
 data class StorageStats(val fileCount: Long, val totalBytes: Long, val chunkCount: Long)

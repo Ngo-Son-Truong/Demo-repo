@@ -26,7 +26,7 @@ private val Context.configDataStore by preferencesDataStore(name = "tgvault_conf
 /** Cấu hình qua DataStore (SPEC §8, PLAN M2-2). */
 @Singleton
 class ConfigRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
 ) : ConfigRepository {
 
     private object Keys {
@@ -163,7 +163,7 @@ class ConfigRepositoryImpl @Inject constructor(
         lastIndexBackupAt = this[Keys.LAST_INDEX_BACKUP_AT],
         downloadTreeUri = this[Keys.DOWNLOAD_TREE_URI],
         deviceId = this[Keys.DEVICE_ID].orEmpty(),
-        onboardingDone = this[Keys.ONBOARDING_DONE] ?: false
+        onboardingDone = this[Keys.ONBOARDING_DONE] ?: false,
     )
 
     private companion object {

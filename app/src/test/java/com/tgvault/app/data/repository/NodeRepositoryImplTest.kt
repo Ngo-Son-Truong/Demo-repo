@@ -52,7 +52,7 @@ class NodeRepositoryImplTest {
     fun setUp() {
         db = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
-            TgVaultDatabase::class.java
+            TgVaultDatabase::class.java,
         ).allowMainThreadQueries().build()
         repo = NodeRepositoryImpl(
             db = db,
@@ -62,7 +62,7 @@ class NodeRepositoryImplTest {
             orphanChunkDao = db.orphanChunkDao(),
             configRepository = FakeConfigRepository(),
             gatewayHolder = GatewayHolder(),
-            timeProvider = SystemTimeProvider
+            timeProvider = SystemTimeProvider,
         )
     }
 
@@ -100,7 +100,7 @@ class NodeRepositoryImplTest {
             mimeType = "video/mp4",
             sizeBytes = 1000,
             sourceUri = "content://x",
-            stagingPath = null
+            stagingPath = null,
         )
         assertEquals("PENDING", node.status.name)
         assertEquals("QUEUED", transfer.state.name)

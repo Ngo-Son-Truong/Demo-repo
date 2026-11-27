@@ -71,7 +71,7 @@ class TelegramLiveTest {
         finding(
             "Q1",
             "upload 19 MiB OK (${"%.2f".format(size / 1_048_576.0 / upSec)} MB/s), " +
-                "file_path=$path, download OK (${"%.2f".format(size / 1_048_576.0 / dlSec)} MB/s)"
+                "file_path=$path, download OK (${"%.2f".format(size / 1_048_576.0 / dlSec)} MB/s)",
         )
         gateway.deleteMessage(CHAT_ID, sent.messageId) // dọn dẹp
         Unit
@@ -96,7 +96,7 @@ class TelegramLiveTest {
             finding(
                 "Q2b",
                 "CHƯA KIỂM TRA file_id xuyên ngày. Lưu fileId ở Q2a, chạy lại ngày mai với " +
-                    "-Dtgvault.knownFileId=<fileId> (thêm systemProperty trong app/build.gradle.kts nếu cần)"
+                    "-Dtgvault.knownFileId=<fileId> (thêm systemProperty trong app/build.gradle.kts nếu cần)",
             )
         }
         gateway.deleteMessage(CHAT_ID, sent.messageId)
@@ -119,7 +119,7 @@ class TelegramLiveTest {
             finding(
                 "Q3b",
                 "CHƯA KIỂM TRA tin >48h. Đã gửi tin message_id=${keep.messageId}; " +
-                    "chạy lại sau 48h với -Dtgvault.oldMessageId=${keep.messageId}"
+                    "chạy lại sau 48h với -Dtgvault.oldMessageId=${keep.messageId}",
             )
         }
         Unit
@@ -142,7 +142,7 @@ class TelegramLiveTest {
         finding(
             "Q4",
             "gửi $sent/30 chunk 32 KiB trong ${"%.1f".format(elapsedSec)}s " +
-                "(limiter đã pace 1,1s/lệnh). Lỗi gặp: ${error ?: "không có — không thấy 429 trần"}"
+                "(limiter đã pace 1,1s/lệnh). Lỗi gặp: ${error ?: "không có — không thấy 429 trần"}",
         )
         Unit
     }
@@ -163,7 +163,7 @@ class TelegramLiveTest {
         finding(
             "Q5",
             "pinChatMessage OK; getChat().pinned_message sau khi ghim tin thứ 2 trả về: " +
-                (if (secondPinned?.contains("q5-second") == true) "tin MỚI NHẤT được ghim" else "tin khác: $secondPinned")
+                (if (secondPinned?.contains("q5-second") == true) "tin MỚI NHẤT được ghim" else "tin khác: $secondPinned"),
         )
 
         gateway.unpinMessage(CHAT_ID, second.messageId)
@@ -204,7 +204,7 @@ class TelegramLiveTest {
             Assume.assumeTrue(
                 "Bỏ qua live test: cần ./gradlew testDebugUnitTest -PrunTelegramLive=true " +
                     "và tgvault.botToken/tgvault.chatId trong local.properties",
-                RUN_LIVE && TOKEN.isNotBlank() && CHAT_ID != 0L
+                RUN_LIVE && TOKEN.isNotBlank() && CHAT_ID != 0L,
             )
             val json = Json {
                 ignoreUnknownKeys = true
@@ -227,7 +227,7 @@ class TelegramLiveTest {
                 okHttpClient = client,
                 json = json,
                 tokenProvider = BotTokenProvider { TOKEN },
-                rateLimiter = TelegramRateLimiter(TimeProvider { System.currentTimeMillis() })
+                rateLimiter = TelegramRateLimiter(TimeProvider { System.currentTimeMillis() }),
             )
         }
     }

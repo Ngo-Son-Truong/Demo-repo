@@ -20,7 +20,7 @@ import kotlinx.coroutines.sync.withLock
  */
 class TelegramRateLimiter(
     private val timeProvider: TimeProvider,
-    private val config: Config = Config()
+    private val config: Config = Config(),
 ) {
 
     data class Config(
@@ -30,7 +30,7 @@ class TelegramRateLimiter(
         val windowMaxCalls: Int = 18,
         val rateLimitExtraDelayMs: Long = 1_000,
         /** Số lần thành công liên tiếp trước khi nới nhịp gửi về gần mặc định */
-        val successStreakToRelax: Int = 5
+        val successStreakToRelax: Int = 5,
     )
 
     private inner class ChatState {
@@ -75,7 +75,7 @@ class TelegramRateLimiter(
             var waitMs = maxOf(
                 state.pauseUntil - now,
                 state.lastCallAt + state.currentIntervalMs - now,
-                0L
+                0L,
             )
             if (state.window.size >= config.windowMaxCalls) {
                 val oldest = state.window.first()
@@ -91,7 +91,7 @@ class TelegramRateLimiter(
     private fun onSuccess(state: ChatState) {
         state.consecutiveSuccesses++
         if (state.consecutiveSuccesses >= config.successStreakToRelax &&
-            state.currentIntervalMs > config.minIntervalMs
+            state.currentIntervalMs > config.minIntervalMs,
         ) {
             state.currentIntervalMs = maxOf(config.minIntervalMs, state.currentIntervalMs * 9 / 10)
         }

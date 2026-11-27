@@ -48,7 +48,7 @@ class NodeRepositoryImpl @Inject constructor(
     private val orphanChunkDao: OrphanChunkDao,
     private val configRepository: ConfigRepository,
     private val gatewayHolder: GatewayHolder,
-    private val timeProvider: TimeProvider
+    private val timeProvider: TimeProvider,
 ) : NodeRepository {
 
     override fun observeChildren(parentId: String?, sort: NodeSort): Flow<List<Node>> {
@@ -104,7 +104,7 @@ class NodeRepositoryImpl @Inject constructor(
             createdAt = now,
             modifiedAt = now,
             trashedAt = null,
-            trashRootId = null
+            trashRootId = null,
         )
         nodeDao.upsert(node)
         configRepository.incrementLocalRevision()
@@ -165,7 +165,7 @@ class NodeRepositoryImpl @Inject constructor(
             createdAt = now,
             modifiedAt = now,
             trashedAt = null,
-            trashRootId = null
+            trashRootId = null,
         )
         val transfer = TransferEntity(
             id = UUID.randomUUID().toString(),
@@ -182,7 +182,7 @@ class NodeRepositoryImpl @Inject constructor(
             errorMessage = null,
             retryCount = 0,
             createdAt = now,
-            updatedAt = now
+            updatedAt = now,
         )
         db.withTransaction {
             nodeDao.upsert(node)
@@ -228,7 +228,7 @@ class NodeRepositoryImpl @Inject constructor(
                             tgMessageId = messageId,
                             nodeName = root.name,
                             reason = result.reason,
-                            createdAt = timeProvider.nowMillis()
+                            createdAt = timeProvider.nowMillis(),
                         )
                     )
                 }
@@ -259,7 +259,7 @@ class NodeRepositoryImpl @Inject constructor(
             StorageStats(
                 fileCount = stats.fileCount,
                 totalBytes = stats.totalBytes,
-                chunkCount = chunkCount
+                chunkCount = chunkCount,
             )
         }
 
@@ -276,7 +276,7 @@ class NodeRepositoryImpl @Inject constructor(
     private suspend fun deleteMessageWithRetry(
         gateway: TelegramGateway,
         chatId: Long,
-        messageId: Long
+        messageId: Long,
     ): DeleteResult {
         var lastError: String? = null
         repeat(MAX_DELETE_ATTEMPTS) { attempt ->

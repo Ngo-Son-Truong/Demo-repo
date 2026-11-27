@@ -32,7 +32,7 @@ class RoomDatabaseTest {
         sizeBytes: Long = 0,
         status: NodeStatus = NodeStatus.READY,
         trashedAt: Long? = null,
-        trashRootId: String? = null
+        trashRootId: String? = null,
     ) = NodeEntity(
         id = id,
         parentId = parentId,
@@ -49,14 +49,14 @@ class RoomDatabaseTest {
         createdAt = 1L,
         modifiedAt = 1L,
         trashedAt = trashedAt,
-        trashRootId = trashRootId
+        trashRootId = trashRootId,
     )
 
     @Before
     fun setUp() {
         db = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
-            TgVaultDatabase::class.java
+            TgVaultDatabase::class.java,
         ).allowMainThreadQueries().build()
     }
 
@@ -117,7 +117,7 @@ class RoomDatabaseTest {
         db.chunkDao().upsert(
             com.tgvault.app.data.local.entity.ChunkEntity(
                 nodeId = "f", idx = 0, plainSizeBytes = 10, storedSizeBytes = 10,
-                tgChatId = 1, tgMessageId = 2, tgFileId = "fid", tgFileUniqueId = null, sha256 = null
+                tgChatId = 1, tgMessageId = 2, tgFileId = "fid", tgFileUniqueId = null, sha256 = null,
             )
         )
         assertEquals(1, db.chunkDao().forNode("f").size)
@@ -130,7 +130,7 @@ class RoomDatabaseTest {
         db.nodeDao().upsert(node("f", type = NodeType.FILE))
         val chunk = com.tgvault.app.data.local.entity.ChunkEntity(
             nodeId = "f", idx = 0, plainSizeBytes = 10, storedSizeBytes = 10,
-            tgChatId = null, tgMessageId = null, tgFileId = null, tgFileUniqueId = null, sha256 = null
+            tgChatId = null, tgMessageId = null, tgFileId = null, tgFileUniqueId = null, sha256 = null,
         )
         db.chunkDao().upsert(chunk)
         try {
@@ -150,7 +150,7 @@ class RoomDatabaseTest {
                 bytesDone = 0, bytesTotal = 10, currentChunk = 0,
                 sourceUri = null, destUri = null, stagingPath = null,
                 errorCode = null, errorMessage = null, retryCount = 0,
-                createdAt = 1L, updatedAt = 1L
+                createdAt = 1L, updatedAt = 1L,
             )
         )
         assertEquals(1, db.transferDao().requeueRunning(2L))

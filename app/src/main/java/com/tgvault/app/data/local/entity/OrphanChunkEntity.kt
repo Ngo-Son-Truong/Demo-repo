@@ -15,5 +15,5 @@ data class OrphanChunkEntity(
     /** tên node gốc để hiển thị */
     val nodeName: String,
     val reason: String?,
-    val createdAt: Long
+    val createdAt: Long,
 )

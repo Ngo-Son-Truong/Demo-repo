@@ -25,7 +25,7 @@ fun rememberReduceMotion(): Boolean {
         Settings.Global.getFloat(
             context.contentResolver,
             Settings.Global.ANIMATOR_DURATION_SCALE,
-            1f
+            1f,
         ) == 0f
     }
 }
@@ -46,13 +46,13 @@ object MotionSpecs {
         androidx.compose.animation.core.tween(
             durationMillis = config.durationMs(durationMs),
             delayMillis = delayMs,
-            easing = emphasizedDecelerate
+            easing = emphasizedDecelerate,
         )
 
     /** Spring mềm (FAB mở rộng/thu gọn: dampingRatio 0.8, stiffness Medium — SPEC §15.4). */
     fun <T> spring(config: MotionConfig) = spring<T>(
         dampingRatio = if (config.reduceMotion) Spring.DampingRatioNoBouncy else 0.8f,
-        stiffness = Spring.StiffnessMedium
+        stiffness = Spring.StiffnessMedium,
     )
 
     fun fadeIn(config: MotionConfig, durationMs: Int = MotionConfig.DURATION_MEDIUM): EnterTransition =

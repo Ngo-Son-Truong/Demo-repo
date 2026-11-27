@@ -12,7 +12,7 @@ fun TgPrimaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     Button(onClick = onClick, modifier = modifier, enabled = enabled, content = content)
 }
@@ -22,7 +22,7 @@ fun TgSecondaryButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     OutlinedButton(onClick = onClick, modifier = modifier, enabled = enabled, content = content)
 }

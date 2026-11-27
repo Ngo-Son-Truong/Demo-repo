@@ -15,7 +15,7 @@ class TelegramRateLimiterTest {
 
     private fun runTestWithLimiter(
         config: TelegramRateLimiter.Config = TelegramRateLimiter.Config(),
-        block: suspend kotlinx.coroutines.test.TestScope.(TelegramRateLimiter) -> Unit
+        block: suspend kotlinx.coroutines.test.TestScope.(TelegramRateLimiter) -> Unit,
     ) = runTest {
         val limiter = TelegramRateLimiter(TimeProvider { testScheduler.currentTime }, config)
         block(limiter)
@@ -42,7 +42,7 @@ class TelegramRateLimiterTest {
 
     @Test
     fun `cua so truot 18 lenh moi 60 giay`() = runTestWithLimiter(
-        TelegramRateLimiter.Config(minIntervalMs = 0)
+        TelegramRateLimiter.Config(minIntervalMs = 0),
     ) { limiter ->
         repeat(18) { limiter.withPermit(CHAT) { } }
         assertEquals(0, testScheduler.currentTime)
@@ -50,7 +50,7 @@ class TelegramRateLimiterTest {
         limiter.withPermit(CHAT) { }
         assertTrue(
             "lệnh thứ 19 phải chờ cửa sổ 60s, currentTime=${testScheduler.currentTime}",
-            testScheduler.currentTime >= 60_000
+            testScheduler.currentTime >= 60_000,
         )
     }
 

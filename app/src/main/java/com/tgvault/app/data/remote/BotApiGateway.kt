@@ -42,7 +42,7 @@ class BotApiGateway(
     json: Json,
     private val tokenProvider: BotTokenProvider,
     private val rateLimiter: TelegramRateLimiter,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : TelegramGateway {
 
     private val errorMapper = TelegramErrorMapper(json)
@@ -88,7 +88,7 @@ class BotApiGateway(
             chatId = chat.id,
             title = chat.title,
             username = chat.username,
-            pinnedMessageText = chat.pinnedMessage?.text
+            pinnedMessageText = chat.pinnedMessage?.text,
         )
     }
 
@@ -98,7 +98,7 @@ class BotApiGateway(
         return BotRights(
             canPost = member.canPostMessages == true,
             canDelete = member.canDeleteMessages == true,
-            canPin = member.canPinMessages == true
+            canPin = member.canPinMessages == true,
         )
     }
 
@@ -107,13 +107,13 @@ class BotApiGateway(
         part: ChunkSource,
         fileName: String,
         caption: String?,
-        onProgress: (bytesWritten: Long) -> Unit
+        onProgress: (bytesWritten: Long) -> Unit,
     ): SentDocument {
         val token = token()
         val documentPart = MultipartBody.Part.createFormData(
             PART_DOCUMENT,
             fileName,
-            ChunkRequestBody(part, onProgress)
+            ChunkRequestBody(part, onProgress),
         )
         val chatIdBody = chatId.toString().toRequestBody(PlainTextMediaType)
         val captionBody = caption?.toRequestBody(PlainTextMediaType)
@@ -126,7 +126,7 @@ class BotApiGateway(
         return SentDocument(
             messageId = message.messageId,
             fileId = document.fileId,
-            fileUniqueId = document.fileUniqueId
+            fileUniqueId = document.fileUniqueId,
         )
     }
 
@@ -155,7 +155,7 @@ class BotApiGateway(
         filePath: String,
         sink: OutputStream,
         range: LongRange?,
-        onProgress: (bytesWritten: Long) -> Unit
+        onProgress: (bytesWritten: Long) -> Unit,
     ) {
         downloadPermits.withPermit {
             withContext(ioDispatcher) {
@@ -226,7 +226,7 @@ class BotApiGateway(
                 throw errorMapper.mapStatus(
                     code = response.errorCode ?: 0,
                     description = response.description.orEmpty(),
-                    retryAfter = response.parameters?.retryAfter
+                    retryAfter = response.parameters?.retryAfter,
                 )
             }
             return response.result ?: throw AppError.Unknown(detail = "API response thiếu result")
@@ -263,7 +263,7 @@ class BotApiGateway(
         when {
             code == HTTP_UNAUTHORIZED -> throw AppError.InvalidToken()
             code == HTTP_TOO_MANY_REQUESTS -> throw AppError.RateLimited(
-                retryAfterHeader?.toLongOrNull() ?: TelegramErrorMapper.DEFAULT_RETRY_AFTER_SECONDS
+                retryAfterHeader?.toLongOrNull() ?: TelegramErrorMapper.DEFAULT_RETRY_AFTER_SECONDS,
             )
             code in 500..599 -> throw AppError.Transient(detail = "HTTP $code khi tải file")
             code == HTTP_OK || code == HTTP_PARTIAL_CONTENT -> Unit
@@ -274,7 +274,7 @@ class BotApiGateway(
     /** RequestBody streaming từ ChunkSource (multipart sendDocument). Không buffer vào RAM. */
     private class ChunkRequestBody(
         private val source: ChunkSource,
-        private val onProgress: (Long) -> Unit
+        private val onProgress: (Long) -> Unit,
     ) : RequestBody() {
 
         override fun contentType(): MediaType = OctetStreamMediaType

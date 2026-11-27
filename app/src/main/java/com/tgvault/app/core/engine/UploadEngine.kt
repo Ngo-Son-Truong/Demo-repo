@@ -42,7 +42,7 @@ class UploadEngine @Inject constructor(
     private val transferDao: TransferDao,
     private val gatewayHolder: GatewayHolder,
     private val timeProvider: TimeProvider,
-    private val configRepository: com.tgvault.app.domain.repository.ConfigRepository
+    private val configRepository: com.tgvault.app.domain.repository.ConfigRepository,
 ) {
 
     /** Chạy tới khi DONE/FAILED/CANCELLED. Trả true nếu DONE. */
@@ -87,7 +87,7 @@ class UploadEngine @Inject constructor(
                         chatId = chatId,
                         part = HashingChunkSource(source, sha),
                         fileName = "${node.name}.part${chunkIdx.toString().padStart(4, '0')}",
-                        caption = null
+                        caption = null,
                     ).let { sent ->
                         chunkDao.upsert(
                             ChunkEntity(
@@ -99,13 +99,13 @@ class UploadEngine @Inject constructor(
                                 tgMessageId = sent.messageId,
                                 tgFileId = sent.fileId,
                                 tgFileUniqueId = sent.fileUniqueId,
-                                sha256 = null
+                                sha256 = null,
                             )
                         )
                     }
                     bytesDone += plainSize
                     transferDao.updateProgress(
-                        transferId, bytesDone, node.sizeBytes, chunkIdx, timeProvider.nowMillis()
+                        transferId, bytesDone, node.sizeBytes, chunkIdx, timeProvider.nowMillis(),
                     )
                     idx++
                 }
@@ -120,7 +120,7 @@ class UploadEngine @Inject constructor(
                     chunkCount = totalChunks,
                     chunkSize = node.chunkSize,
                     status = NodeStatus.READY.name,
-                    modifiedAt = timeProvider.nowMillis()
+                    modifiedAt = timeProvider.nowMillis(),
                 )
                 transferDao.updateState(transferId, TransferState.DONE.name, timeProvider.nowMillis())
             }
@@ -138,7 +138,7 @@ class UploadEngine @Inject constructor(
                 TransferState.FAILED.name,
                 e.toTransferErrorCode(),
                 e.message?.take(200),
-                timeProvider.nowMillis()
+                timeProvider.nowMillis(),
             )
             return false
         }
@@ -180,13 +180,13 @@ class UploadEngine @Inject constructor(
     /** Bọc source để tích luỹ SHA-256 toàn tệp trong khi streaming. */
     private class HashingChunkSource(
         private val delegate: ChunkSource,
-        private val digest: MessageDigest
+        private val digest: MessageDigest,
     ) : ChunkSource {
         override val length: Long get() = delegate.length
 
         override suspend fun writeTo(
             out: java.io.OutputStream,
-            onProgress: (bytesWritten: Long) -> Unit
+            onProgress: (bytesWritten: Long) -> Unit,
         ) {
             val digestOut = java.security.DigestOutputStream(out, digest)
             delegate.writeTo(digestOut, onProgress)

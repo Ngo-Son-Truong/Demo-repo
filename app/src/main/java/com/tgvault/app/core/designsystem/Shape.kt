@@ -12,7 +12,7 @@ val TgShapes = Shapes(
     small = RoundedCornerShape(12.dp),
     medium = RoundedCornerShape(16.dp),
     large = RoundedCornerShape(20.dp),
-    extraLarge = RoundedCornerShape(28.dp)
+    extraLarge = RoundedCornerShape(28.dp),
 )
 
 /** Lưới khoảng cách 4 dp (SPEC §15.2): 4/8/12/16/24/32 */

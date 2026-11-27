@@ -13,6 +13,6 @@ fun SettingsScreen() {
     EmptyState(
         icon = Icons.Rounded.Settings,
         title = stringResource(R.string.settings_placeholder_title),
-        message = stringResource(R.string.settings_placeholder_message)
+        message = stringResource(R.string.settings_placeholder_message),
     )
 }

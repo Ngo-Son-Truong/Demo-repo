@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 @Singleton
 class TransferRepositoryImpl @Inject constructor(
     private val transferDao: TransferDao,
-    private val timeProvider: TimeProvider
+    private val timeProvider: TimeProvider,
 ) : TransferRepository {
 
     override fun observeAll(): Flow<List<Transfer>> =

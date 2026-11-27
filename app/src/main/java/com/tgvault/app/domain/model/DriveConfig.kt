@@ -18,7 +18,7 @@ data class DriveConfig(
     val lastIndexBackupAt: Long?,
     val downloadTreeUri: String?,
     val deviceId: String,
-    val onboardingDone: Boolean
+    val onboardingDone: Boolean,
 ) {
     companion object {
         val DEFAULT = DriveConfig(
@@ -37,7 +37,7 @@ data class DriveConfig(
             lastIndexBackupAt = null,
             downloadTreeUri = null,
             deviceId = "",
-            onboardingDone = false
+            onboardingDone = false,
         )
     }
 }

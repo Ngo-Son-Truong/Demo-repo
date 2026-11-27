@@ -27,7 +27,7 @@ fun NodeEntity.toDomain(): Node = Node(
     createdAt = createdAt,
     modifiedAt = modifiedAt,
     trashedAt = trashedAt,
-    trashRootId = trashRootId
+    trashRootId = trashRootId,
 )
 
 fun Node.toEntity(): NodeEntity = NodeEntity(
@@ -46,7 +46,7 @@ fun Node.toEntity(): NodeEntity = NodeEntity(
     createdAt = createdAt,
     modifiedAt = modifiedAt,
     trashedAt = trashedAt,
-    trashRootId = trashRootId
+    trashRootId = trashRootId,
 )
 
 fun ChunkEntity.toDomain(): Chunk = Chunk(
@@ -59,7 +59,7 @@ fun ChunkEntity.toDomain(): Chunk = Chunk(
     tgMessageId = tgMessageId,
     tgFileId = tgFileId,
     tgFileUniqueId = tgFileUniqueId,
-    sha256 = sha256
+    sha256 = sha256,
 )
 
 fun Chunk.toEntity(): ChunkEntity = ChunkEntity(
@@ -72,7 +72,7 @@ fun Chunk.toEntity(): ChunkEntity = ChunkEntity(
     tgMessageId = tgMessageId,
     tgFileId = tgFileId,
     tgFileUniqueId = tgFileUniqueId,
-    sha256 = sha256
+    sha256 = sha256,
 )
 
 fun TransferEntity.toDomain(): Transfer = Transfer(
@@ -90,7 +90,7 @@ fun TransferEntity.toDomain(): Transfer = Transfer(
     errorMessage = errorMessage,
     retryCount = retryCount,
     createdAt = createdAt,
-    updatedAt = updatedAt
+    updatedAt = updatedAt,
 )
 
 fun Transfer.toEntity(): TransferEntity = TransferEntity(
@@ -108,5 +108,5 @@ fun Transfer.toEntity(): TransferEntity = TransferEntity(
     errorMessage = errorMessage,
     retryCount = retryCount,
     createdAt = createdAt,
-    updatedAt = updatedAt
+    updatedAt = updatedAt,
 )

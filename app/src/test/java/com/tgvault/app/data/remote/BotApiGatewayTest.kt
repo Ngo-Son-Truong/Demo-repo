@@ -53,14 +53,14 @@ class BotApiGatewayTest {
         // minInterval=0, extraDelay=0 để test không phải chờ thật
         val rateLimiter = TelegramRateLimiter(
             TimeProvider { System.currentTimeMillis() },
-            TelegramRateLimiter.Config(minIntervalMs = 0, rateLimitExtraDelayMs = 0)
+            TelegramRateLimiter.Config(minIntervalMs = 0, rateLimitExtraDelayMs = 0),
         )
         gateway = BotApiGateway(
             api = api,
             okHttpClient = client,
             json = json,
             tokenProvider = BotTokenProvider { TEST_TOKEN },
-            rateLimiter = rateLimiter
+            rateLimiter = rateLimiter,
         )
     }
 
@@ -129,7 +129,7 @@ class BotApiGatewayTest {
         server.enqueue(
             jsonResponse(
                 """{"ok":false,"error_code":429,"description":"Too Many Requests","parameters":{"retry_after":0}}""",
-                429
+                429,
             )
         )
         server.enqueue(jsonResponse("""{"ok":true,"result":{"message_id":42}}"""))
@@ -147,7 +147,7 @@ class BotApiGatewayTest {
                 .setResponseCode(200)
                 .addHeader("Content-Type", "application/json")
                 .setBody("x".repeat(64 * 1024))
-                .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY)
+                .setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY),
         )
         var error: AppError? = null
         try {
@@ -162,7 +162,7 @@ class BotApiGatewayTest {
     fun `sendDocument multipart dung dinh dang va streaming`() = runTest {
         server.enqueue(
             jsonResponse(
-                """{"ok":true,"result":{"message_id":7,"document":{"file_id":"FILEID","file_unique_id":"UNIQ","file_size":19}}}"""
+                """{"ok":true,"result":{"message_id":7,"document":{"file_id":"FILEID","file_unique_id":"UNIQ","file_size":19}}}""",
             )
         )
         val payload = "HELLO-TGVAULT-CHUNK".toByteArray()
@@ -240,7 +240,7 @@ class BotApiGatewayTest {
         server.enqueue(jsonResponse("""{"ok":true,"result":true}""")) // deleteWebhook
         server.enqueue(
             jsonResponse(
-                """{"ok":true,"result":[{"update_id":10,"my_chat_member":{"chat":{"id":-1002003004,"type":"channel","title":"Vault"},"new_chat_member":{"status":"administrator"}}}]}"""
+                """{"ok":true,"result":[{"update_id":10,"my_chat_member":{"chat":{"id":-1002003004,"type":"channel","title":"Vault"},"new_chat_member":{"status":"administrator"}}}]}""",
             )
         )
 
@@ -255,7 +255,7 @@ class BotApiGatewayTest {
         server.enqueue(jsonResponse("""{"ok":true,"result":{"id":123,"first_name":"Vault Bot","is_bot":true,"username":"vault_bot"}}"""))
         server.enqueue(
             jsonResponse(
-                """{"ok":true,"result":{"status":"administrator","can_post_messages":true,"can_delete_messages":true,"can_pin_messages":false}}"""
+                """{"ok":true,"result":{"status":"administrator","can_post_messages":true,"can_delete_messages":true,"can_pin_messages":false}}""",
             )
         )
 
@@ -272,7 +272,7 @@ class BotApiGatewayTest {
         server.enqueue(
             jsonResponse(
                 """{"ok":false,"error_code":400,"description":"Bad Request: message to delete not found"}""",
-                400
+                400,
             )
         )
 

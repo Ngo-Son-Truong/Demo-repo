@@ -13,10 +13,10 @@ import androidx.room.PrimaryKey
             entity = NodeEntity::class,
             parentColumns = ["id"],
             childColumns = ["nodeId"],
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.CASCADE,
         )
     ],
-    indices = [Index(value = ["nodeId", "idx"], unique = true)]
+    indices = [Index(value = ["nodeId", "idx"], unique = true)],
 )
 data class ChunkEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

@@ -13,6 +13,6 @@ fun TransfersScreen() {
     EmptyState(
         icon = Icons.Rounded.SwapVert,
         title = stringResource(R.string.transfers_empty_title),
-        message = stringResource(R.string.transfers_empty_message)
+        message = stringResource(R.string.transfers_empty_message),
     )
 }

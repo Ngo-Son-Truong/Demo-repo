@@ -93,7 +93,7 @@ interface NodeDao {
         chunkCount: Int,
         chunkSize: Int,
         status: String,
-        modifiedAt: Long
+        modifiedAt: Long,
     )
 
     @Query("DELETE FROM nodes WHERE id = :id")

@@ -19,7 +19,7 @@ fun TgTextField(
     supportingText: String? = null,
     isError: Boolean = false,
     singleLine: Boolean = true,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     OutlinedTextField(
         value = value,
@@ -31,6 +31,6 @@ fun TgTextField(
         isError = isError,
         singleLine = singleLine,
         keyboardOptions = keyboardOptions,
-        shape = MaterialTheme.shapes.small
+        shape = MaterialTheme.shapes.small,
     )
 }

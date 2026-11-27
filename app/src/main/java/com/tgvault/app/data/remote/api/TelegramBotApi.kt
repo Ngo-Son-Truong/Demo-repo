@@ -33,20 +33,20 @@ interface TelegramBotApi {
         @Path("token") token: String,
         @Query("offset") offset: Long?,
         @Query("timeout") timeoutSeconds: Int,
-        @Query("allowed_updates") allowedUpdates: String
+        @Query("allowed_updates") allowedUpdates: String,
     ): ApiResponse<List<UpdateDto>>
 
     @GET("bot{token}/getChat")
     suspend fun getChat(
         @Path("token") token: String,
-        @Query("chat_id") chatId: Long
+        @Query("chat_id") chatId: Long,
     ): ApiResponse<ChatDto>
 
     @GET("bot{token}/getChatMember")
     suspend fun getChatMember(
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,
-        @Query("user_id") userId: Long
+        @Query("user_id") userId: Long,
     ): ApiResponse<ChatMemberDto>
 
     @Multipart
@@ -56,14 +56,14 @@ interface TelegramBotApi {
         @Part("chat_id") chatId: RequestBody,
         @Part document: MultipartBody.Part,
         @Part("caption") caption: RequestBody?,
-        @Part("disable_notification") disableNotification: RequestBody
+        @Part("disable_notification") disableNotification: RequestBody,
     ): ApiResponse<MessageDto>
 
     @POST("bot{token}/sendMessage")
     suspend fun sendMessage(
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,
-        @Query("text") text: String
+        @Query("text") text: String,
     ): ApiResponse<MessageDto>
 
     @POST("bot{token}/pinChatMessage")
@@ -71,26 +71,26 @@ interface TelegramBotApi {
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,
         @Query("message_id") messageId: Long,
-        @Query("disable_notification") disableNotification: Boolean = true
+        @Query("disable_notification") disableNotification: Boolean = true,
     ): ApiResponse<Boolean>
 
     @POST("bot{token}/unpinChatMessage")
     suspend fun unpinChatMessage(
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,
-        @Query("message_id") messageId: Long
+        @Query("message_id") messageId: Long,
     ): ApiResponse<Boolean>
 
     @GET("bot{token}/getFile")
     suspend fun getFile(
         @Path("token") token: String,
-        @Query("file_id") fileId: String
+        @Query("file_id") fileId: String,
     ): ApiResponse<FileDto>
 
     @POST("bot{token}/deleteMessage")
     suspend fun deleteMessage(
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,
-        @Query("message_id") messageId: Long
+        @Query("message_id") messageId: Long,
     ): ApiResponse<Boolean>
 }

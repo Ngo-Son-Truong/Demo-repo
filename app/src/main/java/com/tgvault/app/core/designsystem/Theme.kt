@@ -36,7 +36,7 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = LightSurfaceVariant,
     onSurfaceVariant = LightOnSurfaceVariant,
     outline = LightOutline,
-    outlineVariant = LightOutlineVariant
+    outlineVariant = LightOutlineVariant,
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -63,7 +63,7 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = DarkSurfaceVariant,
     onSurfaceVariant = DarkOnSurfaceVariant,
     outline = DarkOutline,
-    outlineVariant = DarkOutlineVariant
+    outlineVariant = DarkOutlineVariant,
 )
 
 /**
@@ -74,7 +74,7 @@ private val DarkColorScheme = darkColorScheme(
 fun TgVaultTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -90,7 +90,7 @@ fun TgVaultTheme(
             colorScheme = colorScheme,
             shapes = TgShapes,
             typography = Typography(),
-            content = content
+            content = content,
         )
     }
 }

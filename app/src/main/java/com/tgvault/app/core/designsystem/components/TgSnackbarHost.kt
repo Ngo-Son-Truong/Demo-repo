@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 @Composable
 fun TgSnackbarHost(
     hostState: SnackbarHostState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     SnackbarHost(hostState = hostState, modifier = modifier) { data ->
         Snackbar(snackbarData = data, shape = MaterialTheme.shapes.small)

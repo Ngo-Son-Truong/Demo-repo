@@ -47,7 +47,7 @@ fun TgVaultNavHost() {
                     icon = {
                         Icon(
                             imageVector = destination.icon,
-                            contentDescription = stringResource(destination.labelRes)
+                            contentDescription = stringResource(destination.labelRes),
                         )
                     },
                     label = { Text(stringResource(destination.labelRes)) }
