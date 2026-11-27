@@ -91,7 +91,7 @@ class TelegramRateLimiter(
     private fun onSuccess(state: ChatState) {
         state.consecutiveSuccesses++
         if (state.consecutiveSuccesses >= config.successStreakToRelax &&
-            state.currentIntervalMs > config.minIntervalMs,
+            state.currentIntervalMs > config.minIntervalMs
         ) {
             state.currentIntervalMs = maxOf(config.minIntervalMs, state.currentIntervalMs * 9 / 10)
         }

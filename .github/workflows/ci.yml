@@ -21,6 +21,26 @@ jobs:
       # gradle-wrapper.jar đã commit sẵn trong repo — setup-gradle chỉ để cache
       - uses: gradle/actions/setup-gradle@v4
 
+      # Tự format bằng ktlintFormat rồi push lại (chỉ push event) — môi trường
+      # không có IDE vẫn giữ style chuẩn; ktlintFormat idempotent nên không loop
+      - name: ktlintFormat (auto-fix)
+        run: ./gradlew ktlintFormat > /tmp/format.log 2>&1 || true
+
+      - name: Push format nếu có thay đổi
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "style: ktlintFormat tự động"
+            git push origin "HEAD:${{ github.ref_name }}"
+          else
+            echo "không có gì cần format"
+          fi
+
       # Redirect thẳng vào file (KHÔNG pipe qua tee — pipefail che mất exit code).
       # Tách từng bước để biết chính xác bước nào hỏng.
       - name: ktlintCheck
