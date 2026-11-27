@@ -45,16 +45,17 @@ jobs:
           mkdir -p /tmp/dist
           {
             echo "### APK tìm thấy:"
-            find app/build -name "*.apk" 2>&1
+            find app/build -name "*.apk" 2>&1 || true
             echo ""
             echo "### app/build/outputs:"
-            ls -laR app/build/outputs 2>&1 | head -60
-          } > /tmp/diag.txt
-          find app/build -name "*.apk" -exec cp {} /tmp/dist/ \; 2>>/tmp/diag.txt || true
+            ls -laR app/build/outputs 2>&1 | head -60 || true
+          } > /tmp/diag.txt || true
+          find app/build -name "*.apk" -exec cp {} /tmp/dist/ \; >>/tmp/diag.txt 2>&1 || true
           if [ -d app/build/reports ]; then
             (cd app/build && zip -qr /tmp/dist/build-reports.zip reports test-results) || true
           fi
-          { echo ""; echo "### /tmp/dist:"; ls -la /tmp/dist; } >> /tmp/diag.txt 2>&1 || true
+          { echo ""; echo "### /tmp/dist:"; ls -la /tmp/dist 2>&1 || true; } >> /tmp/diag.txt || true
+          exit 0
 
       - name: Publish release ci-debug
         if: success()
