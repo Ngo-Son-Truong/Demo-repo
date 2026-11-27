@@ -98,8 +98,7 @@ fun AppError.toTransferErrorCode(): String =
     }
 
 /** Throwable bất kỳ (IOException, SQLite...) → errorCode; AppError thì map đúng loại. */
-fun Throwable.toTransferErrorCode(): String =
-    (this as? AppError)?.toTransferErrorCode() ?: TransferErrorCodes.UNKNOWN
+fun Throwable.toTransferErrorCode(): String = (this as? AppError)?.toTransferErrorCode() ?: TransferErrorCodes.UNKNOWN
 
 /** Quy tắc chunk (SPEC §10.1). */
 object ChunkRules {
