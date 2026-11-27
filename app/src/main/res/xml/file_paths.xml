@@ -3,4 +3,5 @@
     <external-path name="downloads" path="Download/" />
     <cache-path name="staging" path="staging/" />
     <files-path name="files" path="." />
-</xml>
+</paths>
+
