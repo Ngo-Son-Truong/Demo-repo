@@ -43,16 +43,17 @@ jobs:
         if: always()
         run: |
           mkdir -p /tmp/dist
+          strip_ansi() { sed -e 's/\x1b\[[0-9;]*m//g'; }
           {
             echo "## Chẩn đoán CI (job status: ${{ job.status }})"
             echo ""
             echo "### Phần 'What went wrong' (nếu có):"
-            grep -B2 -A 25 "What went wrong" /tmp/step-output.log 2>/dev/null || echo "(không có — build không lỗi ở bước cuối)"
+            grep -B2 -A 25 "What went wrong" /tmp/step-output.log 2>/dev/null | strip_ansi || echo "(không có — build không lỗi ở bước cuối)"
             echo ""
             echo "### Ktlint violations (txt reports):"
             find /home/runner/work -path "*reports/ktlint*" -name "*.txt" 2>/dev/null | while read -r f; do
               echo "--- $f"
-              cat "$f"
+              strip_ansi < "$f"
             done || true
             echo ""
             echo "### Detekt report (nếu có):"
@@ -61,14 +62,21 @@ jobs:
               head -60 "$f"
             done || true
             echo ""
+            echo "### Test thất bại (nếu có):"
+            grep -rl "failure message" /home/runner/work --include="*.xml" 2>/dev/null | head -5 | while read -r f; do
+              echo "--- $f"
+              grep -o 'testcase name="[^"]*"' "$f" | head -10
+              grep -o 'message="[^"]*"' "$f" | head -5
+            done || true
+            echo ""
             echo "### Tail log bước cuối:"
-            tail -40 /tmp/step-output.log 2>&1 || true
+            tail -40 /tmp/step-output.log 2>&1 | strip_ansi || true
             echo ""
             echo "### APK tìm thấy:"
             find /home/runner/work -name "*.apk" 2>/dev/null | head -10 || true
           } > /tmp/diag.txt || true
           find /home/runner/work -name "*.apk" -exec cp {} /tmp/dist/ \; 2>>/tmp/diag.txt || true
-          REPORTS_DIR=$(find /home/runner/work -maxdepth 4 -type d -path "*app/build" 2>/dev/null | head -1)
+          REPORTS_DIR=$(find /home/runner/work -maxdepth 7 -type d -path "*app/build" 2>/dev/null | head -1)
           if [ -n "$REPORTS_DIR" ] && [ -d "$REPORTS_DIR/reports" ]; then
             (cd "$REPORTS_DIR" && zip -qr /tmp/dist/build-reports.zip reports test-results) || true
           fi
@@ -115,3 +123,27 @@ jobs:
           } > /tmp/ci-summary.md
           [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ] && \
             gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file /tmp/ci-summary.md || true
+
+      # Kênh dự phòng đáng tin cậy: comment chẩn đoán ĐẦY ĐỦ vào PR (đọc được qua API)
+      - name: Comment chẩn đoán chi tiết vào PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_REF: ${{ github.head_ref }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          BRANCH="${HEAD_REF:-$REF_NAME}"
+          PR_NUMBER=$(gh api "repos/${REPO}/pulls?head=${REPO%/*}:${BRANCH}&state=open" --jq '.[0].number' 2>/dev/null || true)
+          {
+            echo "### Chẩn đoán chi tiết (run ${{ github.run_number }})"
+            echo ""
+            echo '<details><summary>Mở rộng</summary>'
+            echo ""
+            echo '```text'
+            head -c 55000 /tmp/diag.txt 2>/dev/null || echo "(không có diag)"
+            echo '```'
+            echo "</details>"
+          } > /tmp/ci-diag-comment.md
+          [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ] && \
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file /tmp/ci-diag-comment.md || true
