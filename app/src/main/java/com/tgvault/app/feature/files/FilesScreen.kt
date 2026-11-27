@@ -453,4 +453,4 @@ private fun NameDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     )
-}d1de566 (fix(M5/M6): khôi phục FilesScreen (bị rebase-resolve nuốt) + áp lại vá M6 (download/share trong menu))
+}
