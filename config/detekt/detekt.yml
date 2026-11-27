@@ -1,4 +1,5 @@
 # detekt config — buildUponDefaultConfig=true, chỉ override (lý do: docs/DECISIONS.md)
+# Tên section theo default-detekt-config.yml của detekt 1.23.8 (đã đối chiếu source)
 complexity:
   LongParameterList:
     ignoreAnnotated: ['Composable']
@@ -14,23 +15,21 @@ complexity:
 style:
   MagicNumber:
     active: false # số dp/ms trong UI Compose là bình thường
-  MatchingDeclarationName:
-    active: false # cho phép file gom nhiều khai báo nhỏ (Models.kt, DTOs...)
+  ForbiddenComment:
+    active: false # cho phép TODO(Mx)/FIXME có chủ đích, có ghi milestone
   ReturnCount:
     active: true
     max: 4
     excludeGuardClauses: true
 
 naming:
+  MatchingDeclarationName:
+    active: false # cho phép file gom nhiều khai báo nhỏ (Models.kt, DTOs...)
   FunctionNaming:
     ignoreAnnotated: ['Composable']
   TopLevelPropertyNaming:
     active: false # CompositionLocal theo convention PascalCase
 
-comments:
-  ForbiddenComment:
-    active: false # cho phép TODO(Mx)/FIXME có chủ đích, có ghi milestone
-
-potential-bugs:
+exceptions:
   TooGenericExceptionCaught:
-    active: false # engine cần bắt Exception để map sang AppError.Unknown (SPEC §9.2)
+    active: false # engine cần bắt Exception/Throwable để map sang errorCode (SPEC §9.2)

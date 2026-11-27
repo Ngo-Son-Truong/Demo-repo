@@ -135,6 +135,7 @@ class UploadEngine
                 transferDao.updateState(transferId, TransferState.CANCELLED.name, timeProvider.nowMillis())
                 throw e
             } catch (e: TransferCancelledException) {
+            Timber.d(e, "transfer bị huỷ theo yêu cầu")
                 transferDao.updateState(transferId, TransferState.CANCELLED.name, timeProvider.nowMillis())
                 return false
             } catch (e: Throwable) {
