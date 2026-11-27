@@ -46,33 +46,33 @@ class TransferRepositoryImpl
         override suspend fun queuedIds(): List<String> = transferDao.queuedIds()
 
         override suspend fun createDownload(
-        nodeId: String,
-        bytesTotal: Long,
-    ): Transfer {
-        val now = timeProvider.nowMillis()
-        val entity =
-            TransferEntity(
-                id = "dl-$nodeId",
-                nodeId = nodeId,
-                direction = TransferDirection.DOWNLOAD.name,
-                state = TransferState.QUEUED.name,
-                bytesDone = 0,
-                bytesTotal = bytesTotal,
-                currentChunk = 0,
-                sourceUri = null,
-                destUri = null,
-                stagingPath = null,
-                errorCode = null,
-                errorMessage = null,
-                retryCount = 0,
-                createdAt = now,
-                updatedAt = now,
-            )
-        transferDao.upsert(entity)
-        return entity.toDomain()
-    }
+            nodeId: String,
+            bytesTotal: Long,
+        ): Transfer {
+            val now = timeProvider.nowMillis()
+            val entity =
+                TransferEntity(
+                    id = "dl-$nodeId",
+                    nodeId = nodeId,
+                    direction = TransferDirection.DOWNLOAD.name,
+                    state = TransferState.QUEUED.name,
+                    bytesDone = 0,
+                    bytesTotal = bytesTotal,
+                    currentChunk = 0,
+                    sourceUri = null,
+                    destUri = null,
+                    stagingPath = null,
+                    errorCode = null,
+                    errorMessage = null,
+                    retryCount = 0,
+                    createdAt = now,
+                    updatedAt = now,
+                )
+            transferDao.upsert(entity)
+            return entity.toDomain()
+        }
 
-    override suspend fun requeue(id: String) {
+        override suspend fun requeue(id: String) {
             transferDao.requeue(id, timeProvider.nowMillis())
         }
 

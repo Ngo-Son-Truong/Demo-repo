@@ -1,6 +1,7 @@
 package com.tgvault.app.feature.files
 
 import android.net.Uri
+import android.os.Environment
 import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,7 +11,6 @@ import com.tgvault.app.data.transfer.TransferScheduler
 import com.tgvault.app.domain.model.Node
 import com.tgvault.app.domain.model.NodeSort
 import com.tgvault.app.domain.model.NodeSortField
-import android.os.Environment
 import com.tgvault.app.domain.model.TransferState
 import com.tgvault.app.domain.repository.NodeRepository
 import com.tgvault.app.domain.repository.TransferRepository
