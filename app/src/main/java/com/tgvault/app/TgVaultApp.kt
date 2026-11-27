@@ -7,8 +7,8 @@ import com.tgvault.app.data.remote.ConnectionManager
 import com.tgvault.app.data.transfer.TransferNotifier
 import com.tgvault.app.data.transfer.TransferScheduler
 import dagger.hilt.EntryPoint
-import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
