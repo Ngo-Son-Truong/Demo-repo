@@ -23,7 +23,7 @@ data class Node(
     val createdAt: Long,
     val modifiedAt: Long,
     val trashedAt: Long?,
-    val trashRootId: String?
+    val trashRootId: String?,
 ) {
     val isFolder: Boolean get() = type == NodeType.FOLDER
     val isTrashed: Boolean get() = trashedAt != null
@@ -41,7 +41,7 @@ data class Chunk(
     val tgFileId: String?,
     val tgFileUniqueId: String?,
     /** SHA-256 hex của byte ĐÃ LƯU trên Telegram (bản mã nếu mã hoá) */
-    val sha256: String?
+    val sha256: String?,
 ) {
     val isUploaded: Boolean get() = tgFileId != null
 }
@@ -84,16 +84,18 @@ object TransferErrorCodes {
 }
 
 /** Map AppError → errorCode (redact token trong message — SPEC §14). */
-fun AppError.toTransferErrorCode(): String = when (this) {
-    is AppError.InvalidToken, is AppError.BotNoAccess, is AppError.ChannelNotFound,
-    is AppError.NotConnected -> TransferErrorCodes.AUTH
-    is AppError.RateLimited -> TransferErrorCodes.RATE_LIMITED
-    is AppError.Transient -> TransferErrorCodes.NETWORK
-    is AppError.IntegrityMismatch -> TransferErrorCodes.INTEGRITY
-    is AppError.SourceChanged -> TransferErrorCodes.SOURCE_CHANGED
-    is AppError.ChunkTooLarge -> TransferErrorCodes.CHUNK_TOO_LARGE
-    else -> TransferErrorCodes.UNKNOWN
-}
+fun AppError.toTransferErrorCode(): String =
+    when (this) {
+        is AppError.InvalidToken, is AppError.BotNoAccess, is AppError.ChannelNotFound,
+        is AppError.NotConnected,
+        -> TransferErrorCodes.AUTH
+        is AppError.RateLimited -> TransferErrorCodes.RATE_LIMITED
+        is AppError.Transient -> TransferErrorCodes.NETWORK
+        is AppError.IntegrityMismatch -> TransferErrorCodes.INTEGRITY
+        is AppError.SourceChanged -> TransferErrorCodes.SOURCE_CHANGED
+        is AppError.ChunkTooLarge -> TransferErrorCodes.CHUNK_TOO_LARGE
+        else -> TransferErrorCodes.UNKNOWN
+    }
 
 /** Quy tắc chunk (SPEC §10.1). */
 object ChunkRules {

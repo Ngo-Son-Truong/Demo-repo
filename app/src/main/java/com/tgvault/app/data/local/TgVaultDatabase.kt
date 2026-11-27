@@ -20,15 +20,18 @@ import com.tgvault.app.data.local.entity.TransferEntity
         NodeEntity::class,
         ChunkEntity::class,
         TransferEntity::class,
-        OrphanChunkEntity::class
+        OrphanChunkEntity::class,
     ],
     version = 1,
     exportSchema = true,
 )
 abstract class TgVaultDatabase : RoomDatabase() {
     abstract fun nodeDao(): NodeDao
+
     abstract fun chunkDao(): ChunkDao
+
     abstract fun transferDao(): TransferDao
+
     abstract fun orphanChunkDao(): OrphanChunkDao
 
     companion object {

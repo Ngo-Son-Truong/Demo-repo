@@ -50,17 +50,17 @@ fun TgVaultNavHost() {
                             contentDescription = stringResource(destination.labelRes),
                         )
                     },
-                    label = { Text(stringResource(destination.labelRes)) }
+                    label = { Text(stringResource(destination.labelRes)) },
                 )
             }
-        }
+        },
     ) {
         NavHost(
             navController = navController,
             startDestination = TopLevelDestination.FILES.route,
             modifier = Modifier.fillMaxSize(),
             enterTransition = { MotionSpecs.fadeIn(motion, MotionConfig.DURATION_NAV) },
-            exitTransition = { MotionSpecs.fadeOut(motion, MotionConfig.DURATION_NAV) }
+            exitTransition = { MotionSpecs.fadeOut(motion, MotionConfig.DURATION_NAV) },
         ) {
             composable(TopLevelDestination.FILES.route) { FilesScreen() }
             composable(TopLevelDestination.TRANSFERS.route) { TransfersScreen() }

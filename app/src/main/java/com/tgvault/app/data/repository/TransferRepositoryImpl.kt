@@ -11,39 +11,41 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class TransferRepositoryImpl @Inject constructor(
-    private val transferDao: TransferDao,
-    private val timeProvider: TimeProvider,
-) : TransferRepository {
+class TransferRepositoryImpl
+    @Inject
+    constructor(
+        private val transferDao: TransferDao,
+        private val timeProvider: TimeProvider,
+    ) : TransferRepository {
+        override fun observeAll(): Flow<List<Transfer>> =
+            transferDao.observeAll().map { list -> list.map { it.toDomain() } }
 
-    override fun observeAll(): Flow<List<Transfer>> =
-        transferDao.observeAll().map { list -> list.map { it.toDomain() } }
+        override fun observeActive(): Flow<List<Transfer>> =
+            transferDao.observeActive().map { list -> list.map { it.toDomain() } }
 
-    override fun observeActive(): Flow<List<Transfer>> =
-        transferDao.observeActive().map { list -> list.map { it.toDomain() } }
+        override fun observeById(id: String): Flow<Transfer?> = transferDao.observeById(id).map { it?.toDomain() }
 
-    override fun observeById(id: String): Flow<Transfer?> =
-        transferDao.observeById(id).map { it?.toDomain() }
+        override suspend fun getById(id: String): Transfer? = transferDao.getById(id)?.toDomain()
 
-    override suspend fun getById(id: String): Transfer? = transferDao.getById(id)?.toDomain()
+        override suspend fun setPaused(
+            id: String,
+            paused: Boolean,
+        ) {
+            val target = if (paused) TransferState.PAUSED.name else TransferState.QUEUED.name
+            transferDao.updateState(id, target, timeProvider.nowMillis())
+        }
 
-    override suspend fun setPaused(id: String, paused: Boolean) {
-        val target = if (paused) TransferState.PAUSED.name else TransferState.QUEUED.name
-        transferDao.updateState(id, target, timeProvider.nowMillis())
+        override suspend fun cancel(id: String) {
+            transferDao.updateState(id, TransferState.CANCELLED.name, timeProvider.nowMillis())
+        }
+
+        override suspend fun retry(id: String) {
+            transferDao.markRetry(id, timeProvider.nowMillis())
+        }
+
+        override suspend fun requeueOrphanedRunning(): Int = transferDao.requeueRunning(timeProvider.nowMillis())
+
+        override suspend fun clearFinished() {
+            transferDao.deleteFinished()
+        }
     }
-
-    override suspend fun cancel(id: String) {
-        transferDao.updateState(id, TransferState.CANCELLED.name, timeProvider.nowMillis())
-    }
-
-    override suspend fun retry(id: String) {
-        transferDao.markRetry(id, timeProvider.nowMillis())
-    }
-
-    override suspend fun requeueOrphanedRunning(): Int =
-        transferDao.requeueRunning(timeProvider.nowMillis())
-
-    override suspend fun clearFinished() {
-        transferDao.deleteFinished()
-    }
-}

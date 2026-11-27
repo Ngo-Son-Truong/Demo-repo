@@ -4,7 +4,6 @@ import java.text.Normalizer
 
 /** Chuẩn hoá tên để tìm kiếm (FR-FILE-6): chữ thường, bỏ dấu (kể cả đ/Đ), trim. */
 object NameNormalizer {
-
     private val DIACRITICS = Regex("\\p{M}+")
 
     fun normalize(name: String): String {

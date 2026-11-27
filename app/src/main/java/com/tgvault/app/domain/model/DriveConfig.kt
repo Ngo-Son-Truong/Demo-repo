@@ -21,24 +21,25 @@ data class DriveConfig(
     val onboardingDone: Boolean,
 ) {
     companion object {
-        val DEFAULT = DriveConfig(
-            botUsername = null,
-            chatId = null,
-            chunkSizeBytes = ChunkRules.DEFAULT_CHUNK_SIZE,
-            wifiOnly = false,
-            maxParallelTransfers = 2,
-            themeMode = ThemeMode.SYSTEM,
-            dynamicColor = true,
-            language = null,
-            encryptionEnabled = false,
-            appLockEnabled = false,
-            appLockTimeoutSec = 60,
-            localRevision = 0L,
-            lastIndexBackupAt = null,
-            downloadTreeUri = null,
-            deviceId = "",
-            onboardingDone = false,
-        )
+        val DEFAULT =
+            DriveConfig(
+                botUsername = null,
+                chatId = null,
+                chunkSizeBytes = ChunkRules.DEFAULT_CHUNK_SIZE,
+                wifiOnly = false,
+                maxParallelTransfers = 2,
+                themeMode = ThemeMode.SYSTEM,
+                dynamicColor = true,
+                language = null,
+                encryptionEnabled = false,
+                appLockEnabled = false,
+                appLockTimeoutSec = 60,
+                localRevision = 0L,
+                lastIndexBackupAt = null,
+                downloadTreeUri = null,
+                deviceId = "",
+                onboardingDone = false,
+            )
     }
 }
 

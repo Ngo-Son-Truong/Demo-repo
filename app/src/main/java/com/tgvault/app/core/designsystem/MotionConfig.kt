@@ -6,7 +6,6 @@ package com.tgvault.app.core.designsystem
  * (ANIMATOR_DURATION_SCALE == 0) thì mọi thời lượng về 0 (= chuyển đổi tức thì/snap()).
  */
 data class MotionConfig(val reduceMotion: Boolean) {
-
     /** Thời lượng thực tế của một animation có thời lượng chuẩn [base] ms. */
     fun durationMs(base: Int): Int = if (reduceMotion) 0 else base
 

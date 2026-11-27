@@ -22,7 +22,6 @@ class TelegramRateLimiter(
     private val timeProvider: TimeProvider,
     private val config: Config = Config(),
 ) {
-
     data class Config(
         val minIntervalMs: Long = 1_100,
         val maxIntervalMs: Long = 5_000,
@@ -35,6 +34,7 @@ class TelegramRateLimiter(
 
     private inner class ChatState {
         val mutex = Mutex()
+
         // MIN_VALUE = chưa gửi lệnh nào (tránh chờ oan ở lệnh đầu tiên, kể cả với đồng hồ ảo bắt đầu từ 0)
         var lastCallAt = Long.MIN_VALUE
         var pauseUntil = 0L
@@ -49,7 +49,10 @@ class TelegramRateLimiter(
      * Chạy [block] (MỘT lệnh gửi) sau khi chờ đủ nhịp. Giữ mutex trong suốt lệnh gọi
      * nên các lệnh gửi cùng chatId luôn nối tiếp nhau (SPEC §9.3: hàng đợi dùng chung).
      */
-    suspend fun <T> withPermit(chatId: Long, block: suspend () -> T): T {
+    suspend fun <T> withPermit(
+        chatId: Long,
+        block: suspend () -> T,
+    ): T {
         val state = states.getOrPut(chatId) { ChatState() }
         return state.mutex.withLock {
             awaitTurn(state)
@@ -72,11 +75,12 @@ class TelegramRateLimiter(
                 state.window.removeFirst()
             }
 
-            var waitMs = maxOf(
-                state.pauseUntil - now,
-                state.lastCallAt + state.currentIntervalMs - now,
-                0L,
-            )
+            var waitMs =
+                maxOf(
+                    state.pauseUntil - now,
+                    state.lastCallAt + state.currentIntervalMs - now,
+                    0L,
+                )
             if (state.window.size >= config.windowMaxCalls) {
                 val oldest = state.window.first()
                 waitMs = maxOf(waitMs, oldest + config.windowSizeMs - now + 1)
@@ -97,7 +101,10 @@ class TelegramRateLimiter(
         }
     }
 
-    private fun onRateLimited(state: ChatState, retryAfterSeconds: Long) {
+    private fun onRateLimited(
+        state: ChatState,
+        retryAfterSeconds: Long,
+    ) {
         val now = timeProvider.nowMillis()
         state.pauseUntil = now + retryAfterSeconds * 1_000 + config.rateLimitExtraDelayMs
         state.currentIntervalMs =

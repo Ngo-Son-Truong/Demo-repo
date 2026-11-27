@@ -16,5 +16,8 @@ interface ChunkSource {
      * Ghi toàn bộ dữ liệu ra [sink] (blocking — OkHttp gọi trên thread IO).
      * Implementation PHẢI mở stream mới mỗi lần gọi (OkHttp có thể gọi lại khi retry/redirect).
      */
-    fun writeTo(sink: OutputStream, onProgress: (bytesWritten: Long) -> Unit = {})
+    fun writeTo(
+        sink: OutputStream,
+        onProgress: (bytesWritten: Long) -> Unit = {},
+    )
 }

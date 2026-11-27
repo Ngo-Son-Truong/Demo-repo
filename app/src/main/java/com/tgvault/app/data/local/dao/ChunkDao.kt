@@ -9,12 +9,14 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ChunkDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(chunk: ChunkEntity): Long
 
     @Query("SELECT * FROM chunks WHERE nodeId = :nodeId AND idx = :idx")
-    suspend fun get(nodeId: String, idx: Int): ChunkEntity?
+    suspend fun get(
+        nodeId: String,
+        idx: Int,
+    ): ChunkEntity?
 
     @Query("SELECT * FROM chunks WHERE nodeId = :nodeId ORDER BY idx ASC")
     suspend fun forNode(nodeId: String): List<ChunkEntity>

@@ -34,5 +34,5 @@ data class NodeEntity(
     /** null = không ở thùng rác */
     val trashedAt: Long?,
     /** khi xoá thư mục: mọi hậu duệ nhận trashRootId = id thư mục gốc bị xoá */
-    val trashRootId: String?
+    val trashRootId: String?,
 )

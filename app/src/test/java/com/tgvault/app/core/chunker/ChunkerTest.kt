@@ -13,8 +13,8 @@ import kotlin.random.Random
 class ChunkerTest {
     private fun data(size: Int): ByteArray =
         Random(42).let { rng ->
-        ByteArray(size).also { rng.nextBytes(it) }
-    }
+            ByteArray(size).also { rng.nextBytes(it) }
+        }
 
     @Test
     fun `chia đúng số chunk và kích thước`() {
@@ -38,30 +38,30 @@ class ChunkerTest {
     @Test
     fun `ghép các chunk ra đúng nguyên văn dữ liệu gốc`() =
         runTest {
-        val original = data(5 * 1024 * 1024 + 777)
-        val chunker = Chunker(ByteArrayInputStream(original), 1024 * 1024, original.size.toLong())
-        val reassembled = ByteArrayOutputStream()
-        while (true) {
-            val source = chunker.next() ?: break
-            val chunkOut = ByteArrayOutputStream()
-            source.writeTo(chunkOut) { }
-            assertEquals(source.length, chunkOut.size().toLong())
-            reassembled.write(chunkOut.toByteArray())
+            val original = data(5 * 1024 * 1024 + 777)
+            val chunker = Chunker(ByteArrayInputStream(original), 1024 * 1024, original.size.toLong())
+            val reassembled = ByteArrayOutputStream()
+            while (true) {
+                val source = chunker.next() ?: break
+                val chunkOut = ByteArrayOutputStream()
+                source.writeTo(chunkOut) { }
+                assertEquals(source.length, chunkOut.size().toLong())
+                reassembled.write(chunkOut.toByteArray())
+            }
+            assertArrayEquals(original, reassembled.toByteArray())
         }
-        assertArrayEquals(original, reassembled.toByteArray())
-    }
 
     @Test
     fun `progress callback tăng dần và kết thúc đúng tổng`() =
         runTest {
-        val original = data(300_000)
-        val chunker = Chunker(ByteArrayInputStream(original), 100_000, original.size.toLong())
-        val source = chunker.next()!!
-        val events = mutableListOf<Long>()
-        source.writeTo(ByteArrayOutputStream()) { events.add(it) }
-        assertEquals(events.sorted(), events) // tăng dần
-        assertEquals(100_000L, events.last())
-    }
+            val original = data(300_000)
+            val chunker = Chunker(ByteArrayInputStream(original), 100_000, original.size.toLong())
+            val source = chunker.next()!!
+            val events = mutableListOf<Long>()
+            source.writeTo(ByteArrayOutputStream()) { events.add(it) }
+            assertEquals(events.sorted(), events) // tăng dần
+            assertEquals(100_000L, events.last())
+        }
 
     @Test
     fun `hết chunk thì next trả null`() {
@@ -73,16 +73,16 @@ class ChunkerTest {
     @Test
     fun `nguồn kết thúc sớm thì báo lỗi`() =
         runTest {
-        // Khai báo 100 byte nhưng chỉ có 10
-        val chunker = Chunker(ByteArrayInputStream(ByteArray(10)), 100, 100L)
-        val source = chunker.next()!!
-        try {
-            source.writeTo(ByteArrayOutputStream()) { }
-            fail("phải ném IOException khi nguồn thiếu byte")
-        } catch (e: java.io.IOException) {
-            // kỳ vọng
+            // Khai báo 100 byte nhưng chỉ có 10
+            val chunker = Chunker(ByteArrayInputStream(ByteArray(10)), 100, 100L)
+            val source = chunker.next()!!
+            try {
+                source.writeTo(ByteArrayOutputStream()) { }
+                fail("phải ném IOException khi nguồn thiếu byte")
+            } catch (e: java.io.IOException) {
+                // kỳ vọng
+            }
         }
-    }
 
     @Test
     fun `từ chối tệp rỗng`() {

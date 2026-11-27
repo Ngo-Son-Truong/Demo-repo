@@ -26,7 +26,10 @@ private class FakeConfigRepository : ConfigRepository {
 
     override suspend fun current(): DriveConfig = state.value
 
-    override suspend fun setConnection(botUsername: String, chatId: Long) {}
+    override suspend fun setConnection(
+        botUsername: String,
+        chatId: Long,
+    ) {}
 
     override suspend fun clearConnection() {}
 
@@ -44,7 +47,10 @@ private class FakeConfigRepository : ConfigRepository {
 
     override suspend fun setEncryptionEnabled(value: Boolean) {}
 
-    override suspend fun setAppLock(enabled: Boolean, timeoutSec: Int) {}
+    override suspend fun setAppLock(
+        enabled: Boolean,
+        timeoutSec: Int,
+    ) {}
 
     override suspend fun incrementLocalRevision(): Long = 1L
 
@@ -65,20 +71,22 @@ class NodeRepositoryImplTest {
 
     @Before
     fun setUp() {
-        db = Room.inMemoryDatabaseBuilder(
-            ApplicationProvider.getApplicationContext(),
-            TgVaultDatabase::class.java,
-        ).allowMainThreadQueries().build()
-        repo = NodeRepositoryImpl(
-            db = db,
-            nodeDao = db.nodeDao(),
-            chunkDao = db.chunkDao(),
-            transferDao = db.transferDao(),
-            orphanChunkDao = db.orphanChunkDao(),
-            configRepository = FakeConfigRepository(),
-            gatewayHolder = GatewayHolder(),
-            timeProvider = SystemTimeProvider,
-        )
+        db =
+            Room.inMemoryDatabaseBuilder(
+                ApplicationProvider.getApplicationContext(),
+                TgVaultDatabase::class.java,
+            ).allowMainThreadQueries().build()
+        repo =
+            NodeRepositoryImpl(
+                db = db,
+                nodeDao = db.nodeDao(),
+                chunkDao = db.chunkDao(),
+                transferDao = db.transferDao(),
+                orphanChunkDao = db.orphanChunkDao(),
+                configRepository = FakeConfigRepository(),
+                gatewayHolder = GatewayHolder(),
+                timeProvider = SystemTimeProvider,
+            )
     }
 
     @After
@@ -89,74 +97,74 @@ class NodeRepositoryImplTest {
     @Test
     fun `createFolder sinh tên duy nhất khi trùng`() =
         runTest {
-        val a = repo.createFolder(null, "Tài liệu")
-        val b = repo.createFolder(null, "tài liệu") // khác hoa thường
-        assertNotEquals(a.name, b.name)
-        assertEquals("Tài liệu", a.name)
-        assertEquals("tài liệu (1)", b.name)
-    }
+            val a = repo.createFolder(null, "Tài liệu")
+            val b = repo.createFolder(null, "tài liệu") // khác hoa thường
+            assertNotEquals(a.name, b.name)
+            assertEquals("Tài liệu", a.name)
+            assertEquals("tài liệu (1)", b.name)
+        }
 
     @Test
     fun `moveNode chặn di chuyển vào hậu duệ`() =
         runTest {
-        val a = repo.createFolder(null, "A")
-        val b = repo.createFolder(a.id, "B")
-        try {
-            repo.moveNode(a.id, b.id)
-            org.junit.Assert.fail("phải chặn move vào hậu duệ")
-        } catch (e: IllegalArgumentException) {
-            // kỳ vọng
+            val a = repo.createFolder(null, "A")
+            val b = repo.createFolder(a.id, "B")
+            try {
+                repo.moveNode(a.id, b.id)
+                org.junit.Assert.fail("phải chặn move vào hậu duệ")
+            } catch (e: IllegalArgumentException) {
+                // kỳ vọng
+            }
         }
-    }
 
     @Test
     fun `createPendingUpload tạo node PENDING và transfer QUEUED nguyên tử`() =
         runTest {
-        val (node, transfer) =
-            repo.createPendingUpload(
-            parentId = null,
-            name = "video.mp4",
-            mimeType = "video/mp4",
-            sizeBytes = 1000,
-            sourceUri = "content://x",
-            stagingPath = null,
-        )
-        assertEquals("PENDING", node.status.name)
-        assertEquals("QUEUED", transfer.state.name)
-        assertEquals(node.id, transfer.nodeId)
-    }
+            val (node, transfer) =
+                repo.createPendingUpload(
+                    parentId = null,
+                    name = "video.mp4",
+                    mimeType = "video/mp4",
+                    sizeBytes = 1000,
+                    sourceUri = "content://x",
+                    stagingPath = null,
+                )
+            assertEquals("PENDING", node.status.name)
+            assertEquals("QUEUED", transfer.state.name)
+            assertEquals(node.id, transfer.nodeId)
+        }
 
     @Test
     fun `createPendingUpload từ chối tệp rỗng`() =
         runTest {
-        try {
-            repo.createPendingUpload(null, "empty.txt", null, 0, "content://x", null)
-            org.junit.Assert.fail("phải từ chối tệp rỗng")
-        } catch (e: IllegalArgumentException) {
-            // kỳ vọng
+            try {
+                repo.createPendingUpload(null, "empty.txt", null, 0, "content://x", null)
+                org.junit.Assert.fail("phải từ chối tệp rỗng")
+            } catch (e: IllegalArgumentException) {
+                // kỳ vọng
+            }
         }
-    }
 
     @Test
     fun `trash và khôi phục`() =
         runTest {
-        val a = repo.createFolder(null, "A")
-        val b = repo.createFolder(a.id, "B")
-        repo.trashNodes(listOf(a.id))
-        val trashed = db.nodeDao().getById(b.id)!!
-        assertEquals(a.id, trashed.trashRootId)
+            val a = repo.createFolder(null, "A")
+            val b = repo.createFolder(a.id, "B")
+            repo.trashNodes(listOf(a.id))
+            val trashed = db.nodeDao().getById(b.id)!!
+            assertEquals(a.id, trashed.trashRootId)
 
-        repo.restoreFromTrash(a.id)
-        org.junit.Assert.assertNull(db.nodeDao().getById(b.id)!!.trashedAt)
-    }
+            repo.restoreFromTrash(a.id)
+            org.junit.Assert.assertNull(db.nodeDao().getById(b.id)!!.trashedAt)
+        }
 
     @Test
     fun `renameNode sinh tên duy nhất`() =
         runTest {
-        val a = repo.createFolder(null, "A")
-        val b = repo.createFolder(null, "B")
-        repo.renameNode(b.id, "a") // trùng chuẩn hoá với "A"
-        val renamed = db.nodeDao().getById(b.id)!!
-        assertEquals("a (1)", renamed.name)
-    }
+            val a = repo.createFolder(null, "A")
+            val b = repo.createFolder(null, "B")
+            repo.renameNode(b.id, "a") // trùng chuẩn hoá với "A"
+            val renamed = db.nodeDao().getById(b.id)!!
+            assertEquals("a (1)", renamed.name)
+        }
 }

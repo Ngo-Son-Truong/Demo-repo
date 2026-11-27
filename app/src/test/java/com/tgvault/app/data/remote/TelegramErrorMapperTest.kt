@@ -15,7 +15,10 @@ import java.io.IOException
 class TelegramErrorMapperTest {
     private val mapper = TelegramErrorMapper(Json { ignoreUnknownKeys = true })
 
-    private fun httpError(code: Int, body: String): HttpException {
+    private fun httpError(
+        code: Int,
+        body: String,
+    ): HttpException {
         val response = Response.error<Any>(code, body.toResponseBody("application/json".toMediaType()))
         return HttpException(response)
     }
@@ -30,9 +33,9 @@ class TelegramErrorMapperTest {
     fun `403 kicked thanh BotNoAccess`() {
         val e =
             httpError(
-            403,
-            """{"ok":false,"error_code":403,"description":"Forbidden: bot was kicked from the channel"}""",
-        )
+                403,
+                """{"ok":false,"error_code":403,"description":"Forbidden: bot was kicked from the channel"}""",
+            )
         assertTrue(mapper.map(e) is AppError.BotNoAccess)
     }
 
@@ -52,9 +55,9 @@ class TelegramErrorMapperTest {
     fun `429 co retry_after thanh RateLimited voi so giay`() {
         val e =
             httpError(
-            429,
-            """{"ok":false,"error_code":429,"description":"Too Many Requests","parameters":{"retry_after":7}}""",
-        )
+                429,
+                """{"ok":false,"error_code":429,"description":"Too Many Requests","parameters":{"retry_after":7}}""",
+            )
         val error = mapper.map(e)
         assertTrue(error is AppError.RateLimited)
         assertEquals(7L, (error as AppError.RateLimited).retryAfterSeconds)
@@ -82,9 +85,9 @@ class TelegramErrorMapperTest {
     fun `mo ta loi duoc che token`() {
         val e =
             httpError(
-            400,
-            """{"ok":false,"error_code":400,"description":"Bad Request: chat not found for bot123456789:AAEhBOweik6ad9r_QXMENQjcrGbq7C1bxptz8"}""",
-        )
+                400,
+                """{"ok":false,"error_code":400,"description":"Bad Request: chat not found for bot123456789:AAEhBOweik6ad9r_QXMENQjcrGbq7C1bxptz8"}""",
+            )
         val error = mapper.map(e)
         assertTrue(error.message.orEmpty().contains("bot***"))
     }

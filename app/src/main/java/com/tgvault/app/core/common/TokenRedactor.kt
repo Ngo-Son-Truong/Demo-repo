@@ -6,7 +6,6 @@ package com.tgvault.app.core.common
  * Dùng trong HttpLoggingInterceptor.Logger và mọi chỗ log Throwable/HTTP.
  */
 object TokenRedactor {
-
     private val TOKEN_PATTERN = Regex("""(?:bot)?\d{6,}:[A-Za-z0-9_-]{20,}""")
 
     const val PLACEHOLDER = "bot***"

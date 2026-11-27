@@ -6,7 +6,6 @@ package com.tgvault.app.core.common
  * tầng feature map AppError -> strings.xml (SPEC §15.1.3).
  */
 sealed class AppError(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
-
     /** HTTP 401 — token sai/thu hồi */
     class InvalidToken(detail: String? = null) : AppError(detail)
 

@@ -21,12 +21,15 @@ import retrofit2.http.Query
  * Token đi trong path ("bot{token}/...") — mọi log đều qua TokenRedactor (SPEC §14).
  */
 interface TelegramBotApi {
-
     @GET("bot{token}/getMe")
-    suspend fun getMe(@Path("token") token: String): ApiResponse<UserDto>
+    suspend fun getMe(
+        @Path("token") token: String,
+    ): ApiResponse<UserDto>
 
     @POST("bot{token}/deleteWebhook")
-    suspend fun deleteWebhook(@Path("token") token: String): ApiResponse<Boolean>
+    suspend fun deleteWebhook(
+        @Path("token") token: String,
+    ): ApiResponse<Boolean>
 
     @GET("bot{token}/getUpdates")
     suspend fun getUpdates(

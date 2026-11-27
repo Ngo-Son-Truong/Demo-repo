@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface OrphanChunkDao {
-
     @Insert
     suspend fun insert(orphan: OrphanChunkEntity)
 

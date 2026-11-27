@@ -16,8 +16,10 @@ object SystemTimeProvider : TimeProvider {
 
 /** Dispatchers inject được để test. */
 @Singleton
-class DispatcherProvider @Inject constructor() {
-    val io: CoroutineDispatcher = Dispatchers.IO
-    val default: CoroutineDispatcher = Dispatchers.Default
-    val main: CoroutineDispatcher = Dispatchers.Main
-}
+class DispatcherProvider
+    @Inject
+    constructor() {
+        val io: CoroutineDispatcher = Dispatchers.IO
+        val default: CoroutineDispatcher = Dispatchers.Default
+        val main: CoroutineDispatcher = Dispatchers.Main
+    }

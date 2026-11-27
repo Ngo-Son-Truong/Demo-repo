@@ -15,7 +15,7 @@ data class ChatInfo(
     val title: String?,
     val username: String?,
     /** Nội dung tin ghim mới nhất (manifest index — SPEC §11) */
-    val pinnedMessageText: String?
+    val pinnedMessageText: String?,
 )
 
 /** Quyền cần của bot trong channel (FR-ONB-3). */
@@ -48,7 +48,6 @@ fun interface BotTokenProvider {
  * Implementation: [BotApiGateway] (Bot API công cộng); backlog: Local Bot API server / TDLib.
  */
 interface TelegramGateway {
-
     suspend fun getMe(): BotInfo
 
     /** Long polling getUpdates (deleteWebhook trước) để phát hiện channel. Huỷ bằng cancel Flow. */
@@ -69,14 +68,23 @@ interface TelegramGateway {
         part: ChunkSource,
         fileName: String,
         caption: String?,
-        onProgress: (bytesWritten: Long) -> Unit = {}
+        onProgress: (bytesWritten: Long) -> Unit = {},
     ): SentDocument
 
-    suspend fun sendText(chatId: Long, text: String): SentMessage
+    suspend fun sendText(
+        chatId: Long,
+        text: String,
+    ): SentMessage
 
-    suspend fun pinMessage(chatId: Long, messageId: Long)
+    suspend fun pinMessage(
+        chatId: Long,
+        messageId: Long,
+    )
 
-    suspend fun unpinMessage(chatId: Long, messageId: Long)
+    suspend fun unpinMessage(
+        chatId: Long,
+        messageId: Long,
+    )
 
     /** getFile → file_path (hết hạn ~1 giờ — gọi ngay trước khi tải từng chunk, SPEC §5). */
     suspend fun resolveFilePath(fileId: String): String
@@ -93,5 +101,8 @@ interface TelegramGateway {
         onProgress: (bytesWritten: Long) -> Unit = {},
     )
 
-    suspend fun deleteMessage(chatId: Long, messageId: Long): DeleteResult
+    suspend fun deleteMessage(
+        chatId: Long,
+        messageId: Long,
+    ): DeleteResult
 }

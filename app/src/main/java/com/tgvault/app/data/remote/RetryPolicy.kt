@@ -13,7 +13,6 @@ class RetryPolicy(
     val baseDelayMs: Long = 1_000,
     val maxDelayMs: Long = 60_000,
 ) {
-
     /** Delay trước lần retry sau khi lần thử thứ [failedAttempt] (1-based) thất bại. */
     fun backoffDelayMs(failedAttempt: Int): Long {
         val shift = (failedAttempt - 1).coerceIn(0, 20)
