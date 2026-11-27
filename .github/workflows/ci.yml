@@ -52,6 +52,25 @@ jobs:
       - name: testDebugUnitTest
         run: ./gradlew --stacktrace testDebugUnitTest > /tmp/step-output.log 2>&1
 
+      # Live test Telegram thật (PLAN M1-7): chỉ chạy khi repo có secrets
+      # TELEGRAM_BOT_TOKEN + TELEGRAM_CHANNEL_ID (bot phải là admin của channel đó).
+      # Token nằm trong GitHub secrets — KHÔNG commit vào repo; local.properties đã gitignore.
+      - name: Chuẩn bị local.properties cho live test
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+        run: |
+          if [ -n "$TG_BOT_TOKEN" ] && [ -n "$TG_CHANNEL_ID" ]; then
+            printf 'tgvault.botToken=%s\ntgvault.chatId=%s\n' "$TG_BOT_TOKEN" "$TG_CHANNEL_ID" > local.properties
+            echo "TELEGRAM_LIVE=1" >> "$GITHUB_ENV"
+          else
+            echo "thiếu secrets TELEGRAM_BOT_TOKEN/TELEGRAM_CHANNEL_ID — bỏ qua live test"
+          fi
+
+      - name: Telegram live test (khi có secrets)
+        if: env.TELEGRAM_LIVE == '1'
+        run: ./gradlew --stacktrace testDebugUnitTest -PrunTelegramLive=true --tests "com.tgvault.app.data.remote.TelegramLiveTest" > /tmp/step-output.log 2>&1
+
       - name: lintDebug
         run: ./gradlew --stacktrace lintDebug > /tmp/step-output.log 2>&1
 

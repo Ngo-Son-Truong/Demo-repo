@@ -75,10 +75,14 @@ class TelegramRateLimiter(
                 state.window.removeFirst()
             }
 
+            // lastCallAt = MIN_VALUE nghĩa là chưa gửi lệnh nào — phải loại ra khỏi
+            // phép cộng, nếu không MIN_VALUE + interval - now tràn sang số dương khổng lồ
+            val sinceLastCall =
+                if (state.lastCallAt == Long.MIN_VALUE) 0L else state.lastCallAt + state.currentIntervalMs - now
             var waitMs =
                 maxOf(
                     state.pauseUntil - now,
-                    state.lastCallAt + state.currentIntervalMs - now,
+                    sinceLastCall,
                     0L,
                 )
             if (state.window.size >= config.windowMaxCalls) {
