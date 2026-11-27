@@ -2,13 +2,17 @@ name: CI
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
@@ -16,15 +20,47 @@ jobs:
       # gradle-wrapper.jar đã commit sẵn trong repo — setup-gradle chỉ để cache
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: ktlint + detekt + lint + unit tests + assembleDebug
-        run: ./gradlew --stacktrace ktlintCheck detekt lintDebug testDebugUnitTest assembleDebug
+      # Tách từng bước + tee log ra file để bước comment đọc được khi thất bại
+      - name: ktlintCheck
+        run: ./gradlew --stacktrace ktlintCheck 2>&1 | tee /tmp/step-output.log
 
-      # Cho phép kiểm thử không cần Android Studio: tải APK + báo cáo test từ trang Actions
+      - name: detekt
+        run: ./gradlew --stacktrace detekt 2>&1 | tee /tmp/step-output.log
+
+      - name: testDebugUnitTest
+        run: ./gradlew --stacktrace testDebugUnitTest 2>&1 | tee /tmp/step-output.log
+
+      - name: lintDebug
+        run: ./gradlew --stacktrace lintDebug 2>&1 | tee /tmp/step-output.log
+
+      - name: assembleDebug
+        run: ./gradlew --stacktrace assembleDebug 2>&1 | tee /tmp/step-output.log
+
+      # Khi thất bại: comment phần đuôi log vào PR (đọc được qua API)
+      - name: Comment failure excerpt vào PR
+        if: failure() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "## ❌ CI thất bại tại một bước verify — trích đoạn log"
+            echo ""
+            echo '<details><summary>Chi tiết (tail log)</summary>'
+            echo ""
+            echo '```text'
+            tail -c 55000 /tmp/step-output.log 2>/dev/null || echo "(không đọc được log)"
+            echo '```'
+            echo "</details>"
+          } > /tmp/ci-report.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file /tmp/ci-report.md || true
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-reports
-          path: app/build/reports/tests/
+          name: build-reports
+          path: |
+            app/build/reports/
+            app/build/test-results/
           if-no-files-found: ignore
 
       - uses: actions/upload-artifact@v4
