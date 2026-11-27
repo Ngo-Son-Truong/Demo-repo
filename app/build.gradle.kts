@@ -42,6 +42,14 @@ android {
     lint {
         // thêm bản .txt cạnh .html để CI đọc được lỗi (HTML không grep gọn)
         textReport = true
+        // Version pin có chủ đích (docs/DECISIONS.md) — tắt các check "đã có bản mới"
+        disable +=
+            listOf(
+                "GradleDependency",
+                "NewerVersionAvailable",
+                "OldTargetApi",
+                "AndroidGradlePluginVersion",
+            )
     }
 
     kotlin {
