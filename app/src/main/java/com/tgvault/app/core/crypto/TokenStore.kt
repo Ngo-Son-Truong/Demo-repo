@@ -2,6 +2,7 @@ package com.tgvault.app.core.crypto
 
 import android.content.Context
 import android.util.Base64
+import androidx.core.content.edit
 import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeyTemplates
 import com.google.crypto.tink.aead.AeadConfig
@@ -47,11 +48,11 @@ class TokenStore
 
         fun write(token: String) {
             val encrypted = aead.encrypt(token.toByteArray(Charsets.UTF_8), ASSOCIATED_DATA)
-            prefs.edit().putString(KEY_TOKEN, Base64.encodeToString(encrypted, Base64.NO_WRAP)).apply()
+            prefs.edit { putString(KEY_TOKEN, Base64.encodeToString(encrypted, Base64.NO_WRAP)) }
         }
 
         fun clear() {
-            prefs.edit().remove(KEY_TOKEN).apply()
+            prefs.edit { remove(KEY_TOKEN) }
         }
 
         private companion object {

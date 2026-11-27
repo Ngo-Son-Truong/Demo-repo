@@ -24,7 +24,7 @@
     <string name="notif_channel_progress">Transfer progress</string>
     <string name="notif_channel_alerts">Transfer alerts</string>
     <string name="notif_summary_title">Transferring files</string>
-    <string name="notif_summary_text">%1$d uploading · %2$d downloading · %3$d%%</string>
+    <string name="notif_summary_text">↑ %1$d · ↓ %2$d · %3$d%%</string>
     <string name="notif_upload_done_title">Upload complete</string>
     <string name="notif_download_done_title">Download complete</string>
     <string name="notif_error_title">Transfer failed</string>
@@ -98,6 +98,4 @@
     <string name="files_download">Download</string>
     <string name="files_share">Share</string>
     <string name="share_received">Adding to upload queue…</string>
-    <string name="notif_permission_title">Transfer notifications</string>
-    <string name="notif_permission_message">Allow notifications to follow upload/download progress.</string>
 </resources>

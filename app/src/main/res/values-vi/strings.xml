@@ -24,7 +24,7 @@
     <string name="notif_channel_progress">Tiến trình truyền tải</string>
     <string name="notif_channel_alerts">Thông báo truyền tải</string>
     <string name="notif_summary_title">Đang truyền tải</string>
-    <string name="notif_summary_text">%1$d đang tải lên · %2$d đang tải xuống · %3$d%%</string>
+    <string name="notif_summary_text">↑ %1$d · ↓ %2$d · %3$d%%</string>
     <string name="notif_upload_done_title">Tải lên hoàn tất</string>
     <string name="notif_download_done_title">Tải xuống hoàn tất</string>
     <string name="notif_error_title">Truyền tải thất bại</string>
@@ -98,6 +98,4 @@
     <string name="files_download">Tải về</string>
     <string name="files_share">Chia sẻ</string>
     <string name="share_received">Đang thêm vào hàng đợi tải lên…</string>
-    <string name="notif_permission_title">Thông báo truyền tải</string>
-    <string name="notif_permission_message">Cho phép thông báo để theo dõi tiến trình tải lên/xuống.</string>
 </resources>
