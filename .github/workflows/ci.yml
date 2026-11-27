@@ -21,58 +21,56 @@ jobs:
       # gradle-wrapper.jar đã commit sẵn trong repo — setup-gradle chỉ để cache
       - uses: gradle/actions/setup-gradle@v4
 
-      # Tách từng bước + tee log ra file để bước comment đọc được khi thất bại
+      # Redirect thẳng vào file (KHÔNG pipe qua tee — pipefail che mất exit code).
+      # Tách từng bước để biết chính xác bước nào hỏng.
       - name: ktlintCheck
-        run: ./gradlew --stacktrace ktlintCheck 2>&1 | tee /tmp/step-output.log
+        run: ./gradlew --stacktrace ktlintCheck > /tmp/step-output.log 2>&1
 
       - name: detekt
-        run: ./gradlew --stacktrace detekt 2>&1 | tee /tmp/step-output.log
+        run: ./gradlew --stacktrace detekt > /tmp/step-output.log 2>&1
 
       - name: testDebugUnitTest
-        run: ./gradlew --stacktrace testDebugUnitTest 2>&1 | tee /tmp/step-output.log
+        run: ./gradlew --stacktrace testDebugUnitTest > /tmp/step-output.log 2>&1
 
       - name: lintDebug
-        run: ./gradlew --stacktrace lintDebug 2>&1 | tee /tmp/step-output.log
+        run: ./gradlew --stacktrace lintDebug > /tmp/step-output.log 2>&1
 
       - name: assembleDebug
-        run: ./gradlew --stacktrace assembleDebug 2>&1 | tee /tmp/step-output.log
+        run: ./gradlew --stacktrace assembleDebug > /tmp/step-output.log 2>&1
 
-      # Gói APK + báo cáo để publish ra release (link tải ổn định, không cần Android Studio)
-      # Chẩn đoán ghi vào release notes (đọc được qua API khi không xem được log)
+      # Chạy DÙ THÀNH CÔNG HAY THẤT BẠI: gói log + APK + báo cáo
       - name: Gói kết quả build
-        if: success()
+        if: always()
         run: |
           mkdir -p /tmp/dist
           {
-            echo "### TAIL LOG assembleDebug (step-output.log):"
-            tail -80 /tmp/step-output.log 2>&1 || true
+            echo "## Chẩn đoán CI (job status: ${{ job.status }})"
             echo ""
-            echo "### chẩn đoán môi trường"
-            echo "pwd = $(pwd)"
+            echo "### Phần 'What went wrong' (nếu có):"
+            grep -B2 -A 25 "What went wrong" /tmp/step-output.log 2>/dev/null || echo "(không có — build không lỗi ở bước cuối)"
             echo ""
-            echo "### ls app/:"
-            ls -la app/ 2>&1 | head -20 || true
+            echo "### Tail log bước cuối:"
+            tail -40 /tmp/step-output.log 2>&1 || true
             echo ""
-            echo "### thư mục build trong workspace:"
-            find "$GITHUB_WORKSPACE" -maxdepth 3 -type d -name build 2>/dev/null || true
+            echo "### APK tìm thấy:"
+            find /home/runner/work -name "*.apk" 2>/dev/null | head -10 || true
           } > /tmp/diag.txt || true
-          find "$GITHUB_WORKSPACE" -name "*.apk" -exec cp {} /tmp/dist/ \; >>/tmp/diag.txt 2>&1 || true
-          REPORTS_DIR=$(find "$GITHUB_WORKSPACE" -maxdepth 3 -type d -path "*app/build" 2>/dev/null | head -1)
+          find /home/runner/work -name "*.apk" -exec cp {} /tmp/dist/ \; 2>>/tmp/diag.txt || true
+          REPORTS_DIR=$(find /home/runner/work -maxdepth 4 -type d -path "*app/build" 2>/dev/null | head -1)
           if [ -n "$REPORTS_DIR" ] && [ -d "$REPORTS_DIR/reports" ]; then
             (cd "$REPORTS_DIR" && zip -qr /tmp/dist/build-reports.zip reports test-results) || true
           fi
-          { echo ""; echo "### /tmp/dist:"; ls -la /tmp/dist 2>&1 || true; } >> /tmp/diag.txt || true
           exit 0
 
       - name: Publish release ci-debug
-        if: success()
+        if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release view ci-debug >/dev/null 2>&1 || \
             gh release create ci-debug --prerelease --target "${{ github.sha }}" \
               --title "CI debug build" \
-              --notes "APK debug + báo cáo test mới nhất từ CI (tự động ghi đè mỗi lần build xanh)."
+              --notes "Kết quả CI mới nhất (tự động ghi đè mỗi lần chạy)."
           shopt -s nullglob
           files=(/tmp/dist/*)
           if [ ${#files[@]} -gt 0 ]; then
@@ -80,7 +78,7 @@ jobs:
           fi
           gh release edit ci-debug --notes-file /tmp/diag.txt || true
 
-      # Tóm tắt kết quả vào PR (thành công hoặc thất bại) — đọc được qua API
+      # Tóm tắt vào PR nếu có PR đang mở cho branch này
       - name: Tóm tắt CI vào PR
         if: always()
         env:
@@ -99,14 +97,8 @@ jobs:
               echo "- APK: https://github.com/${REPO}/releases/download/ci-debug/app-debug.apk"
               echo "- Báo cáo test/lint: https://github.com/${REPO}/releases/download/ci-debug/build-reports.zip"
             else
-              echo "## ❌ CI thất bại — trích đoạn log bước lỗi"
-              echo ""
-              echo '<details><summary>Chi tiết (tail log)</summary>'
-              echo ""
-              echo '```text'
-              tail -c 50000 /tmp/step-output.log 2>/dev/null || echo "(không đọc được log)"
-              echo '```'
-              echo "</details>"
+              echo "## ❌ CI thất bại — xem chẩn đoán trong release notes:"
+              echo "https://github.com/${REPO}/releases/tag/ci-debug"
             fi
           } > /tmp/ci-summary.md
           [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ] && \
