@@ -51,7 +51,6 @@ interface TelegramBotApi {
         @Query("chat_id") username: String,
     ): ApiResponse<ChatDto>
 
-
     @GET("/bot{token}/getChatMember")
     suspend fun getChatMember(
         @Path("token") token: String,
