@@ -1,6 +1,6 @@
 name: CI
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: write
@@ -109,6 +109,9 @@ jobs:
               echo "--- $f"
               head -120 "$f"
             done || true
+            echo ""
+            echo "### Telegram live findings (nếu có):"
+            grep -rho "TELEGRAM_FINDINGS[^<]*" /home/runner/work --include="*.xml" 2>/dev/null | sort -u | head -40 || echo "(không chạy live test)"
             echo ""
             echo "### Test thất bại (nếu có):"
             python3 tools/extract_failed_tests.py || true
