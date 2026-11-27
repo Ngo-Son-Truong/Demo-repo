@@ -3,6 +3,7 @@ package com.tgvault.app.data.local
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
+import com.tgvault.app.core.common.NameNormalizer
 import com.tgvault.app.data.local.entity.NodeEntity
 import com.tgvault.app.domain.model.NodeStatus
 import com.tgvault.app.domain.model.NodeType
@@ -37,7 +38,7 @@ class RoomDatabaseTest {
         parentId = parentId,
         type = type.name,
         name = name,
-        nameNormalized = name.lowercase(),
+        nameNormalized = NameNormalizer.normalize(name),
         mimeType = null,
         sizeBytes = sizeBytes,
         sha256 = null,

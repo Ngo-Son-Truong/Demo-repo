@@ -67,6 +67,7 @@ class BotApiGatewayTest {
                 json = json,
                 tokenProvider = BotTokenProvider { TEST_TOKEN },
                 rateLimiter = rateLimiter,
+                downloadUrlPrefix = server.url("/file/bot").toString(),
             )
     }
 

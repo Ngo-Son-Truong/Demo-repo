@@ -18,20 +18,20 @@ import retrofit2.http.Query
 
 /**
  * Endpoint Bot API dùng trong app (SPEC §9.1).
- * Token đi trong path ("bot{token}/...") — mọi log đều qua TokenRedactor (SPEC §14).
+ * Token đi trong path ("/bot{token}/...") — mọi log đều qua TokenRedactor (SPEC §14).
  */
 interface TelegramBotApi {
-    @GET("bot{token}/getMe")
+    @GET("/bot{token}/getMe")
     suspend fun getMe(
         @Path("token") token: String,
     ): ApiResponse<UserDto>
 
-    @POST("bot{token}/deleteWebhook")
+    @POST("/bot{token}/deleteWebhook")
     suspend fun deleteWebhook(
         @Path("token") token: String,
     ): ApiResponse<Boolean>
 
-    @GET("bot{token}/getUpdates")
+    @GET("/bot{token}/getUpdates")
     suspend fun getUpdates(
         @Path("token") token: String,
         @Query("offset") offset: Long?,
@@ -39,13 +39,13 @@ interface TelegramBotApi {
         @Query("allowed_updates") allowedUpdates: String,
     ): ApiResponse<List<UpdateDto>>
 
-    @GET("bot{token}/getChat")
+    @GET("/bot{token}/getChat")
     suspend fun getChat(
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,
     ): ApiResponse<ChatDto>
 
-    @GET("bot{token}/getChatMember")
+    @GET("/bot{token}/getChatMember")
     suspend fun getChatMember(
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,
@@ -53,7 +53,7 @@ interface TelegramBotApi {
     ): ApiResponse<ChatMemberDto>
 
     @Multipart
-    @POST("bot{token}/sendDocument")
+    @POST("/bot{token}/sendDocument")
     suspend fun sendDocument(
         @Path("token") token: String,
         @Part("chat_id") chatId: RequestBody,
@@ -62,14 +62,14 @@ interface TelegramBotApi {
         @Part("disable_notification") disableNotification: RequestBody,
     ): ApiResponse<MessageDto>
 
-    @POST("bot{token}/sendMessage")
+    @POST("/bot{token}/sendMessage")
     suspend fun sendMessage(
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,
         @Query("text") text: String,
     ): ApiResponse<MessageDto>
 
-    @POST("bot{token}/pinChatMessage")
+    @POST("/bot{token}/pinChatMessage")
     suspend fun pinChatMessage(
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,
@@ -77,20 +77,20 @@ interface TelegramBotApi {
         @Query("disable_notification") disableNotification: Boolean = true,
     ): ApiResponse<Boolean>
 
-    @POST("bot{token}/unpinChatMessage")
+    @POST("/bot{token}/unpinChatMessage")
     suspend fun unpinChatMessage(
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,
         @Query("message_id") messageId: Long,
     ): ApiResponse<Boolean>
 
-    @GET("bot{token}/getFile")
+    @GET("/bot{token}/getFile")
     suspend fun getFile(
         @Path("token") token: String,
         @Query("file_id") fileId: String,
     ): ApiResponse<FileDto>
 
-    @POST("bot{token}/deleteMessage")
+    @POST("/bot{token}/deleteMessage")
     suspend fun deleteMessage(
         @Path("token") token: String,
         @Query("chat_id") chatId: Long,

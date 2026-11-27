@@ -43,6 +43,8 @@ class BotApiGateway(
     private val tokenProvider: BotTokenProvider,
     private val rateLimiter: TelegramRateLimiter,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    /** Prefix URL tải file — inject được để test trỏ về MockWebServer; mặc định Telegram thật */
+    private val downloadUrlPrefix: String = DOWNLOAD_URL_PREFIX,
 ) : TelegramGateway {
     private val errorMapper = TelegramErrorMapper(json)
 
@@ -174,7 +176,7 @@ class BotApiGateway(
     ) {
         downloadPermits.withPermit {
             withContext(ioDispatcher) {
-                val url = "$DOWNLOAD_URL_PREFIX${token()}/$filePath"
+                val url = "$downloadUrlPrefix${token()}/$filePath"
                 val requestBuilder = Request.Builder().url(url).get()
                 if (range != null) {
                     requestBuilder.header(HEADER_RANGE, "bytes=${range.first}-${range.last}")

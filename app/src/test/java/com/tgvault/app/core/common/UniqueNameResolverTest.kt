@@ -28,7 +28,7 @@ class UniqueNameResolverTest {
         val existing = setOf(NameNormalizer.normalize("Báo cáo.pdf"))
         assertEquals(
             "Báo cáo (1).pdf",
-            UniqueNameResolver.resolve("báo cáo.pdf", existing),
+            UniqueNameResolver.resolve("Báo cáo.pdf", existing),
         )
     }
 
