@@ -29,7 +29,15 @@ class TransferScheduler
         private val transferRepository: TransferRepository,
         private val configRepository: ConfigRepository,
     ) {
-        private val workManager = WorkManager.getInstance(context)
+        // Lazy + try/catch: Robolectric test (RoomDatabaseTest) chạy Application.onCreate
+        // khi WorkManager chưa init — không được làm hỏng test DB.
+        private val workManager by lazy {
+            try {
+                WorkManager.getInstance(context)
+            } catch (e: IllegalStateException) {
+                null
+            }
+        }
 
         /** Đưa transfer (đã QUEUED trong Room) vào WorkManager với constraint mạng theo cài đặt. */
         suspend fun enqueue(transferId: String) {
@@ -46,7 +54,7 @@ class TransferScheduler
                     .setConstraints(constraints)
                     .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, BACKOFF_SECONDS, TimeUnit.SECONDS)
                     .build()
-            workManager.enqueueUniqueWork(
+            workManager?.enqueueUniqueWork(
                 TransferWorker.workName(transferId),
                 ExistingWorkPolicy.REPLACE,
                 request,
@@ -63,7 +71,7 @@ class TransferScheduler
 
         suspend fun cancel(transferId: String) {
             transferRepository.cancel(transferId)
-            workManager.cancelUniqueWork(TransferWorker.workName(transferId))
+            workManager?.cancelUniqueWork(TransferWorker.workName(transferId))
         }
 
         suspend fun retry(transferId: String) {
