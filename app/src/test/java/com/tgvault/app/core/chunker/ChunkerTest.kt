@@ -11,8 +11,8 @@ import java.io.ByteArrayOutputStream
 import kotlin.random.Random
 
 class ChunkerTest {
-
-    private fun data(size: Int): ByteArray = Random(42).let { rng ->
+    private fun data(size: Int): ByteArray =
+        Random(42).let { rng ->
         ByteArray(size).also { rng.nextBytes(it) }
     }
 
@@ -36,7 +36,8 @@ class ChunkerTest {
     }
 
     @Test
-    fun `ghép các chunk ra đúng nguyên văn dữ liệu gốc`() = runTest {
+    fun `ghép các chunk ra đúng nguyên văn dữ liệu gốc`() =
+        runTest {
         val original = data(5 * 1024 * 1024 + 777)
         val chunker = Chunker(ByteArrayInputStream(original), 1024 * 1024, original.size.toLong())
         val reassembled = ByteArrayOutputStream()
@@ -51,7 +52,8 @@ class ChunkerTest {
     }
 
     @Test
-    fun `progress callback tăng dần và kết thúc đúng tổng`() = runTest {
+    fun `progress callback tăng dần và kết thúc đúng tổng`() =
+        runTest {
         val original = data(300_000)
         val chunker = Chunker(ByteArrayInputStream(original), 100_000, original.size.toLong())
         val source = chunker.next()!!
@@ -69,7 +71,8 @@ class ChunkerTest {
     }
 
     @Test
-    fun `nguồn kết thúc sớm thì báo lỗi`() = runTest {
+    fun `nguồn kết thúc sớm thì báo lỗi`() =
+        runTest {
         // Khai báo 100 byte nhưng chỉ có 10
         val chunker = Chunker(ByteArrayInputStream(ByteArray(10)), 100, 100L)
         val source = chunker.next()!!

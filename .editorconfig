@@ -15,3 +15,7 @@ ktlint_code_style = ktlint_official
 ktlint_function_naming_ignore_when_annotated_with = Composable
 ktlint_standard_property-naming = disabled
 ktlint_standard_filename = disabled
+
+# Test chứa fixture JSON một dòng (không tách được) — nới max-line-length cho test (xem DECISIONS)
+[app/src/test/**.{kt,kts}]
+ktlint_standard_max-line-length = disabled

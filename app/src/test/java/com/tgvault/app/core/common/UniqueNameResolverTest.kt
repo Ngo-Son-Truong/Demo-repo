@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class UniqueNameResolverTest {
-
     @Test
     fun `không trùng thì giữ nguyên`() {
         assertEquals("photo.jpg", UniqueNameResolver.resolve("photo.jpg", setOf("other.jpg")))

@@ -21,7 +21,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class RoomDatabaseTest {
-
     private lateinit var db: TgVaultDatabase
 
     private fun node(
@@ -66,7 +65,8 @@ class RoomDatabaseTest {
     }
 
     @Test
-    fun `upsert và đọc node`() = runTest {
+    fun `upsert và đọc node`() =
+        runTest {
         db.nodeDao().upsert(node("root"))
         val loaded = db.nodeDao().getById("root")
         assertEquals("root", loaded?.id)
@@ -74,7 +74,8 @@ class RoomDatabaseTest {
     }
 
     @Test
-    fun `subtreeIds trả về cả cây con`() = runTest {
+    fun `subtreeIds trả về cả cây con`() =
+        runTest {
         db.nodeDao().upsert(node("a"))
         db.nodeDao().upsert(node("b", parentId = "a"))
         db.nodeDao().upsert(node("c", parentId = "b"))
@@ -84,7 +85,8 @@ class RoomDatabaseTest {
     }
 
     @Test
-    fun `trash đánh dấu cả cây và restore gỡ đúng root`() = runTest {
+    fun `trash đánh dấu cả cây và restore gỡ đúng root`() =
+        runTest {
         db.nodeDao().upsert(node("a"))
         db.nodeDao().upsert(node("b", parentId = "a"))
         db.nodeDao().upsert(node("c", parentId = "b"))
@@ -100,7 +102,8 @@ class RoomDatabaseTest {
     }
 
     @Test
-    fun `observeTrashRoots chỉ trả gốc thùng rác`() = runTest {
+    fun `observeTrashRoots chỉ trả gốc thùng rác`() =
+        runTest {
         db.nodeDao().upsert(node("a", trashedAt = 100L, trashRootId = "a"))
         db.nodeDao().upsert(node("b", parentId = "a", trashedAt = 100L, trashRootId = "a"))
         db.nodeDao().upsert(node("x"))
@@ -112,7 +115,8 @@ class RoomDatabaseTest {
     }
 
     @Test
-    fun `xoá node cascade xoá chunks`() = runTest {
+    fun `xoá node cascade xoá chunks`() =
+        runTest {
         db.nodeDao().upsert(node("f", type = NodeType.FILE))
         db.chunkDao().upsert(
             com.tgvault.app.data.local.entity.ChunkEntity(
@@ -126,9 +130,11 @@ class RoomDatabaseTest {
     }
 
     @Test
-    fun `unique index nodeId+idx chặn chunk trùng`() = runTest {
+    fun `unique index nodeId+idx chặn chunk trùng`() =
+        runTest {
         db.nodeDao().upsert(node("f", type = NodeType.FILE))
-        val chunk = com.tgvault.app.data.local.entity.ChunkEntity(
+        val chunk =
+            com.tgvault.app.data.local.entity.ChunkEntity(
             nodeId = "f", idx = 0, plainSizeBytes = 10, storedSizeBytes = 10,
             tgChatId = null, tgMessageId = null, tgFileId = null, tgFileUniqueId = null, sha256 = null,
         )
@@ -142,7 +148,8 @@ class RoomDatabaseTest {
     }
 
     @Test
-    fun `requeueRunning chuyển RUNNING về QUEUED`() = runTest {
+    fun `requeueRunning chuyển RUNNING về QUEUED`() =
+        runTest {
         db.nodeDao().upsert(node("f", type = NodeType.FILE))
         db.transferDao().upsert(
             com.tgvault.app.data.local.entity.TransferEntity(
@@ -158,7 +165,8 @@ class RoomDatabaseTest {
     }
 
     @Test
-    fun `searchByName tìm theo tên chuẩn hoá`() = runTest {
+    fun `searchByName tìm theo tên chuẩn hoá`() =
+        runTest {
         db.nodeDao().upsert(node("f1", type = NodeType.FILE, name = "Báo cáo.pdf"))
         db.nodeDao().observeById("f1")
         val results = mutableListOf<List<NodeEntity>>()

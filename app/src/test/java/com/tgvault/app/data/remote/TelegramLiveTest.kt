@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit
  * -Dtgvault.oldMessageId=... / -Dtgvault.knownFileId=... (xem hướng dẫn in ra ở lần chạy đầu).
  */
 class TelegramLiveTest {
-
     private fun finding(question: String, message: String) {
         println("[TELEGRAM_FINDINGS] $question: $message")
     }
@@ -55,10 +54,12 @@ class TelegramLiveTest {
     }
 
     @Test
-    fun `Q1 chunk 19 MiB gui roi tai lai duoc`() = runBlocking {
+    fun `Q1 chunk 19 MiB gui roi tai lai duoc`() =
+        runBlocking {
         val size = 19L * 1024 * 1024
         val upStart = System.currentTimeMillis()
-        val sent = gateway.sendDocument(
+        val sent =
+            gateway.sendDocument(
             CHAT_ID,
             SyntheticChunkSource(size),
             "tgvault-live-19mib.bin",
@@ -83,8 +84,10 @@ class TelegramLiveTest {
     }
 
     @Test
-    fun `Q2 file_id tai lai duoc (va kiem tra file_id cu neu co)`() = runBlocking {
-        val sent = gateway.sendDocument(
+    fun `Q2 file_id tai lai duoc (va kiem tra file_id cu neu co)`() =
+        runBlocking {
+        val sent =
+            gateway.sendDocument(
             CHAT_ID,
             SyntheticChunkSource(128 * 1024),
             "tgvault-live-q2.bin",
@@ -114,7 +117,8 @@ class TelegramLiveTest {
     }
 
     @Test
-    fun `Q3 deleteMessage tin moi va tin cu`() = runBlocking {
+    fun `Q3 deleteMessage tin moi va tin cu`() =
+        runBlocking {
         val sent = gateway.sendText(CHAT_ID, "#tgvault live q3 - tin mới")
         val result = gateway.deleteMessage(CHAT_ID, sent.messageId)
         finding("Q3a", "deleteMessage tin vừa gửi: $result")
@@ -136,7 +140,8 @@ class TelegramLiveTest {
     }
 
     @Test
-    fun `Q4 gui 30 chunk nho quan sat 429`() = runBlocking {
+    fun `Q4 gui 30 chunk nho quan sat 429`() =
+        runBlocking {
         val started = System.currentTimeMillis()
         var sent = 0
         var error: String? = null
@@ -163,7 +168,8 @@ class TelegramLiveTest {
     }
 
     @Test
-    fun `Q5 pin va getChat pinned_message`() = runBlocking {
+    fun `Q5 pin va getChat pinned_message`() =
+        runBlocking {
         val first = gateway.sendText(CHAT_ID, "TGVAULT_INDEX_V1\n{\"revision\":1,\"test\":\"q5-first\"}")
         gateway.pinMessage(CHAT_ID, first.messageId)
         val afterFirst = gateway.getChat(CHAT_ID)
@@ -175,7 +181,8 @@ class TelegramLiveTest {
         gateway.pinMessage(CHAT_ID, second.messageId)
         val afterSecond = gateway.getChat(CHAT_ID)
         val secondPinned = afterSecond.pinnedMessageText
-        val pinnedState = if (secondPinned?.contains("q5-second") == true) {
+        val pinnedState =
+            if (secondPinned?.contains("q5-second") == true) {
             "tin MỚI NHẤT được ghim"
         } else {
             "tin khác: $secondPinned"
@@ -192,8 +199,10 @@ class TelegramLiveTest {
     }
 
     @Test
-    fun `Q6 header Range khi tai file`() = runBlocking {
-        val sent = gateway.sendDocument(
+    fun `Q6 header Range khi tai file`() =
+        runBlocking {
+        val sent =
+            gateway.sendDocument(
             CHAT_ID,
             SyntheticChunkSource(64 * 1024),
             "tgvault-live-q6.bin",
@@ -230,17 +239,20 @@ class TelegramLiveTest {
                     "và tgvault.botToken/tgvault.chatId trong local.properties",
                 RUN_LIVE && TOKEN.isNotBlank() && CHAT_ID != 0L,
             )
-            val json = Json {
+            val json =
+                Json {
                 ignoreUnknownKeys = true
                 explicitNulls = false
             }
-            val client = OkHttpClient.Builder()
+            val client =
+                OkHttpClient.Builder()
                 .connectTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(600, TimeUnit.SECONDS)
                 .readTimeout(600, TimeUnit.SECONDS)
                 .callTimeout(0, TimeUnit.SECONDS)
                 .build()
-            val api = Retrofit.Builder()
+            val api =
+                Retrofit.Builder()
                 .baseUrl(BotApiGateway.API_BASE_URL)
                 .client(client)
                 .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))

@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class NameNormalizerTest {
-
     @Test
     fun `tiếng Việt có dấu về dạng không dấu`() {
         assertEquals("bao cao tai chinh", NameNormalizer.normalize("Báo cáo Tài chính"))

@@ -26,13 +26,13 @@ import java.util.concurrent.TimeUnit
 
 /** PLAN M1-6: MockWebServer — thành công, 401, 403, 429+retry_after, 5xx, mất kết nối, multipart. */
 class BotApiGatewayTest {
-
     private lateinit var server: MockWebServer
     private lateinit var gateway: BotApiGateway
     private val json = Json { ignoreUnknownKeys = true }
 
     private class ByteArrayChunkSource(private val bytes: ByteArray) : ChunkSource {
         override val length: Long get() = bytes.size.toLong()
+
         override fun writeTo(sink: OutputStream, onProgress: (Long) -> Unit) {
             sink.write(bytes)
             onProgress(length)
@@ -44,14 +44,16 @@ class BotApiGatewayTest {
         server = MockWebServer()
         server.start()
         val client = OkHttpClient.Builder().build()
-        val api = Retrofit.Builder()
+        val api =
+            Retrofit.Builder()
             .baseUrl(server.url("/"))
             .client(client)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
             .create(TelegramBotApi::class.java)
         // minInterval=0, extraDelay=0 để test không phải chờ thật
-        val rateLimiter = TelegramRateLimiter(
+        val rateLimiter =
+            TelegramRateLimiter(
             TimeProvider { System.currentTimeMillis() },
             TelegramRateLimiter.Config(minIntervalMs = 0, rateLimitExtraDelayMs = 0),
         )
@@ -69,13 +71,15 @@ class BotApiGatewayTest {
         server.shutdown()
     }
 
-    private fun jsonResponse(body: String, code: Int = 200): MockResponse = MockResponse()
+    private fun jsonResponse(body: String, code: Int =
+        200): MockResponse = MockResponse()
         .setResponseCode(code)
         .addHeader("Content-Type", "application/json")
         .setBody(body)
 
     @Test
-    fun `getMe thanh cong va token nam trong path`() = runTest {
+    fun `getMe thanh cong va token nam trong path`() =
+        runTest {
         server.enqueue(
             jsonResponse(
                 """{"ok":true,"result":{"id":123,"first_name":"Vault Bot","is_bot":true,"username":"vault_bot"}}""",
@@ -92,7 +96,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `401 thanh InvalidToken`() = runTest {
+    fun `401 thanh InvalidToken`() =
+        runTest {
         server.enqueue(jsonResponse("""{"ok":false,"error_code":401,"description":"Unauthorized"}""", 401))
         var error: AppError? = null
         try {
@@ -104,7 +109,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `403 thanh BotNoAccess`() = runTest {
+    fun `403 thanh BotNoAccess`() =
+        runTest {
         server.enqueue(
             jsonResponse(
                 """{"ok":false,"error_code":403,"description":"Forbidden: bot was kicked from the channel"}""",
@@ -121,7 +127,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `5xx thanh Transient`() = runTest {
+    fun `5xx thanh Transient`() =
+        runTest {
         server.enqueue(jsonResponse("""{"ok":false,"error_code":500,"description":"Internal Server Error"}""", 500))
         var error: AppError? = null
         try {
@@ -133,7 +140,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `429 retry_after duoc pause roi tu thu lai`() = runTest {
+    fun `429 retry_after duoc pause roi tu thu lai`() =
+        runTest {
         server.enqueue(
             jsonResponse(
                 """{"ok":false,"error_code":429,"description":"Too Many Requests","parameters":{"retry_after":0}}""",
@@ -149,7 +157,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `mat ket noi giua chung thanh Transient`() = runTest {
+    fun `mat ket noi giua chung thanh Transient`() =
+        runTest {
         server.enqueue(
             MockResponse()
                 .setResponseCode(200)
@@ -167,7 +176,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `sendDocument multipart dung dinh dang va streaming`() = runTest {
+    fun `sendDocument multipart dung dinh dang va streaming`() =
+        runTest {
         server.enqueue(
             jsonResponse(
                 """{"ok":true,"result":{"message_id":7,"document":{"file_id":"FILEID","file_unique_id":"UNIQ","file_size":19}}}""",
@@ -176,7 +186,8 @@ class BotApiGatewayTest {
         val payload = "HELLO-TGVAULT-CHUNK".toByteArray()
         var progressSeen = 0L
 
-        val sent = gateway.sendDocument(CHAT_ID, ByteArrayChunkSource(payload), "photo.bin", "cap-1") {
+        val sent =
+            gateway.sendDocument(CHAT_ID, ByteArrayChunkSource(payload), "photo.bin", "cap-1") {
             progressSeen = it
         }
 
@@ -202,7 +213,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `download streaming ra sink co bao tien do`() = runTest {
+    fun `download streaming ra sink co bao tien do`() =
+        runTest {
         val data = "hello-chunk-bytes"
         server.enqueue(MockResponse().setResponseCode(200).setBody(data))
 
@@ -217,7 +229,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `download voi Range gui header va nhan 206`() = runTest {
+    fun `download voi Range gui header va nhan 206`() =
+        runTest {
         server.enqueue(MockResponse().setResponseCode(206).setBody("llo"))
 
         val sink = ByteArrayOutputStream()
@@ -229,7 +242,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `download Range bi bo qua thi nem RangeNotSupported truoc khi ghi`() = runTest {
+    fun `download Range bi bo qua thi nem RangeNotSupported truoc khi ghi`() =
+        runTest {
         server.enqueue(MockResponse().setResponseCode(200).setBody("abcdef"))
 
         val sink = ByteArrayOutputStream()
@@ -244,7 +258,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `watchForChannel phat hien bot duoc them lam admin`() = runTest {
+    fun `watchForChannel phat hien bot duoc them lam admin`() =
+        runTest {
         server.enqueue(jsonResponse("""{"ok":true,"result":true}""")) // deleteWebhook
         server.enqueue(
             jsonResponse(
@@ -259,7 +274,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `getBotRights doc quyen cua chinh bot`() = runTest {
+    fun `getBotRights doc quyen cua chinh bot`() =
+        runTest {
         server.enqueue(
             jsonResponse(
                 """{"ok":true,"result":{"id":123,"first_name":"Vault Bot","is_bot":true,"username":"vault_bot"}}""",
@@ -280,7 +296,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `deleteMessage tin khong thay thi AlreadyGone`() = runTest {
+    fun `deleteMessage tin khong thay thi AlreadyGone`() =
+        runTest {
         server.enqueue(
             jsonResponse(
                 """{"ok":false,"error_code":400,"description":"Bad Request: message to delete not found"}""",
@@ -294,7 +311,8 @@ class BotApiGatewayTest {
     }
 
     @Test
-    fun `deleteMessage thanh cong`() = runTest {
+    fun `deleteMessage thanh cong`() =
+        runTest {
         server.enqueue(jsonResponse("""{"ok":true,"result":true}"""))
         val result = gateway.deleteMessage(CHAT_ID, 556)
         assertTrue(result is DeleteResult.Deleted)

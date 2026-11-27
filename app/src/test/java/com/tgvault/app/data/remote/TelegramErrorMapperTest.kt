@@ -13,7 +13,6 @@ import java.io.IOException
 
 /** Ánh xạ lỗi theo bảng SPEC §9.2. */
 class TelegramErrorMapperTest {
-
     private val mapper = TelegramErrorMapper(Json { ignoreUnknownKeys = true })
 
     private fun httpError(code: Int, body: String): HttpException {
@@ -29,7 +28,8 @@ class TelegramErrorMapperTest {
 
     @Test
     fun `403 kicked thanh BotNoAccess`() {
-        val e = httpError(
+        val e =
+            httpError(
             403,
             """{"ok":false,"error_code":403,"description":"Forbidden: bot was kicked from the channel"}""",
         )
@@ -50,7 +50,8 @@ class TelegramErrorMapperTest {
 
     @Test
     fun `429 co retry_after thanh RateLimited voi so giay`() {
-        val e = httpError(
+        val e =
+            httpError(
             429,
             """{"ok":false,"error_code":429,"description":"Too Many Requests","parameters":{"retry_after":7}}""",
         )
@@ -79,7 +80,8 @@ class TelegramErrorMapperTest {
 
     @Test
     fun `mo ta loi duoc che token`() {
-        val e = httpError(
+        val e =
+            httpError(
             400,
             """{"ok":false,"error_code":400,"description":"Bad Request: chat not found for bot123456789:AAEhBOweik6ad9r_QXMENQjcrGbq7C1bxptz8"}""",
         )

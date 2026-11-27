@@ -12,7 +12,6 @@ import org.junit.Test
  * delay() trong limiter chạy trên cùng ảo thời gian đó.
  */
 class TelegramRateLimiterTest {
-
     private fun runTestWithLimiter(
         config: TelegramRateLimiter.Config = TelegramRateLimiter.Config(),
         block: suspend kotlinx.coroutines.test.TestScope.(TelegramRateLimiter) -> Unit,
@@ -22,7 +21,8 @@ class TelegramRateLimiterTest {
     }
 
     @Test
-    fun `hai lenh gui cach nhau toi thieu 1,1 giay`() = runTestWithLimiter { limiter ->
+    fun `hai lenh gui cach nhau toi thieu 1,1 giay`() =
+        runTestWithLimiter { limiter ->
         limiter.withPermit(CHAT) { }
         assertEquals(0, testScheduler.currentTime)
 
@@ -34,14 +34,16 @@ class TelegramRateLimiterTest {
     }
 
     @Test
-    fun `chat khac nhau co hang doi rieng`() = runTestWithLimiter { limiter ->
+    fun `chat khac nhau co hang doi rieng`() =
+        runTestWithLimiter { limiter ->
         limiter.withPermit(CHAT) { }
         limiter.withPermit(CHAT + 1) { }
         assertEquals(0, testScheduler.currentTime)
     }
 
     @Test
-    fun `cua so truot 18 lenh moi 60 giay`() = runTestWithLimiter(
+    fun `cua so truot 18 lenh moi 60 giay`() =
+        runTestWithLimiter(
         TelegramRateLimiter.Config(minIntervalMs = 0),
     ) { limiter ->
         repeat(18) { limiter.withPermit(CHAT) { } }
@@ -55,7 +57,8 @@ class TelegramRateLimiterTest {
     }
 
     @Test
-    fun `429 dat pauseUntil va nhan doi khoang cach toi thieu`() = runTestWithLimiter { limiter ->
+    fun `429 dat pauseUntil va nhan doi khoang cach toi thieu`() =
+        runTestWithLimiter { limiter ->
         var calls = 0
         var thrown: AppError.RateLimited? = null
         try {
@@ -77,7 +80,8 @@ class TelegramRateLimiterTest {
     }
 
     @Test
-    fun `nhi nhip gui ve mac dinh sau chuoi thanh cong`() = runTestWithLimiter { limiter ->
+    fun `nhi nhip gui ve mac dinh sau chuoi thanh cong`() =
+        runTestWithLimiter { limiter ->
         // gây 429 để interval lên 2200
         var calls = 0
         try {

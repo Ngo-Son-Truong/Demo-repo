@@ -5,7 +5,6 @@ import org.junit.Test
 
 /** Test thử cho M0 (PLAN M0 Acceptance) + quy tắc giảm chuyển động (SPEC §15.4). */
 class MotionConfigTest {
-
     @Test
     fun `thời lượng giữ nguyên khi không giảm chuyển động`() {
         val config = MotionConfig(reduceMotion = false)
