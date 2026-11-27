@@ -1,8 +1,8 @@
 package com.tgvault.app.data.remote
 
 import com.tgvault.app.domain.model.ChunkSource
-import java.io.OutputStream
 import kotlinx.coroutines.flow.Flow
+import java.io.OutputStream
 
 /** Thông tin bot (từ getMe). */
 data class BotInfo(val id: Long, val username: String, val firstName: String)
@@ -86,7 +86,12 @@ interface TelegramGateway {
      * nếu server trả 200 thay vì 206 → ném AppError.RangeNotSupported TRƯỚC khi ghi byte nào
      * (xem DECISIONS 2026-11-26).
      */
-    suspend fun download(filePath: String, sink: OutputStream, range: LongRange?, onProgress: (bytesWritten: Long) -> Unit = {})
+    suspend fun download(
+        filePath: String,
+        sink: OutputStream,
+        range: LongRange?,
+        onProgress: (bytesWritten: Long) -> Unit = {},
+    )
 
     suspend fun deleteMessage(chatId: Long, messageId: Long): DeleteResult
 }

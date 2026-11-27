@@ -1,7 +1,6 @@
 package com.tgvault.app.data.remote
 
 import com.tgvault.app.core.common.AppError
-import java.io.IOException
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -10,6 +9,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import retrofit2.HttpException
 import retrofit2.Response
+import java.io.IOException
 
 /** Ánh xạ lỗi theo bảng SPEC §9.2. */
 class TelegramErrorMapperTest {
@@ -29,7 +29,10 @@ class TelegramErrorMapperTest {
 
     @Test
     fun `403 kicked thanh BotNoAccess`() {
-        val e = httpError(403, """{"ok":false,"error_code":403,"description":"Forbidden: bot was kicked from the channel"}""")
+        val e = httpError(
+            403,
+            """{"ok":false,"error_code":403,"description":"Forbidden: bot was kicked from the channel"}""",
+        )
         assertTrue(mapper.map(e) is AppError.BotNoAccess)
     }
 

@@ -118,7 +118,7 @@ class RoomDatabaseTest {
             com.tgvault.app.data.local.entity.ChunkEntity(
                 nodeId = "f", idx = 0, plainSizeBytes = 10, storedSizeBytes = 10,
                 tgChatId = 1, tgMessageId = 2, tgFileId = "fid", tgFileUniqueId = null, sha256 = null,
-            )
+            ),
         )
         assertEquals(1, db.chunkDao().forNode("f").size)
         db.nodeDao().deleteById("f")
@@ -151,7 +151,7 @@ class RoomDatabaseTest {
                 sourceUri = null, destUri = null, stagingPath = null,
                 errorCode = null, errorMessage = null, retryCount = 0,
                 createdAt = 1L, updatedAt = 1L,
-            )
+            ),
         )
         assertEquals(1, db.transferDao().requeueRunning(2L))
         assertEquals("QUEUED", db.transferDao().getById("t1")!!.state)

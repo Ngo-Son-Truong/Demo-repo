@@ -14,15 +14,15 @@ import com.tgvault.app.domain.model.NodeStatus
 import com.tgvault.app.domain.model.TransferState
 import com.tgvault.app.domain.model.toTransferErrorCode
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import java.io.File
 import java.io.RandomAccessFile
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers as KtDispatchers
-import kotlinx.coroutines.withContext
-import timber.log.Timber
 
 /**
  * Engine download theo chunk (PLAN M2-3, SPEC §10.2):
@@ -172,7 +172,7 @@ class DownloadEngine @Inject constructor(
                     android.os.Environment.DIRECTORY_DOWNLOADS,
                 ),
                 name,
-            )
+            ),
         )
         staging.copyTo(target, overwrite = false)
         staging.delete()

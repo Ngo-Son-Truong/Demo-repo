@@ -5,10 +5,10 @@ import com.tgvault.app.data.local.dao.TransferDao
 import com.tgvault.app.domain.model.Transfer
 import com.tgvault.app.domain.model.TransferState
 import com.tgvault.app.domain.repository.TransferRepository
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class TransferRepositoryImpl @Inject constructor(

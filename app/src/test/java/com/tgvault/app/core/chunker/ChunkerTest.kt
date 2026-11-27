@@ -1,14 +1,14 @@
 package com.tgvault.app.core.chunker
 
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import kotlin.random.Random
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.fail
 import org.junit.Test
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import kotlin.random.Random
 
 class ChunkerTest {
 

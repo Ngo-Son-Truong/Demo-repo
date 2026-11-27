@@ -5,8 +5,6 @@ import com.tgvault.app.core.common.TokenRedactor
 import com.tgvault.app.data.remote.api.TelegramBotApi
 import com.tgvault.app.data.remote.dto.ApiResponse
 import com.tgvault.app.domain.model.ChunkSource
-import java.io.IOException
-import java.io.OutputStream
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +26,8 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import retrofit2.HttpException
+import java.io.IOException
+import java.io.OutputStream
 
 /**
  * Telegram Bot API (HTTPS) — SPEC §9. Upload multipart STREAMING từ ChunkSource,

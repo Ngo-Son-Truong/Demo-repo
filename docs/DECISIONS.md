@@ -65,7 +65,9 @@ và **đồng bộ với Kotlin 2.2.21** (tránh lỗi metadata Kotlin khi dùng
   Hỗ trợ Range thực tế của Telegram cần test live (TELEGRAM_FINDINGS câu 6).
 
 ## 2026-11-26 · ktlint/detekt nới một số rule
-- ktlint: `ktlint_code_style = intellij_idea` (không bắt buộc trailing comma), tắt `property-naming`
+- ktlint: ban đầu định dùng `intellij_idea`, nhưng ktlint 1.5.x không còn hỗ trợ style này (rơi về mặc định)
+  → chốt `ktlint_official`: BẮT BUỘC trailing comma, import theo layout `*,java.**,javax.**,kotlin.**,^`;
+  tắt `property-naming`
   (CompositionLocal đặt tên PascalCase), tắt `filename`, cho phép Composable đặt tên PascalCase; `max_line_length = 120`.
 - detekt: `buildUponDefaultConfig`; tắt `MagicNumber` (số dp/ms trong UI), `MatchingDeclarationName`
   (file nhiều khai báo), `ForbiddenComment` (cho phép TODO(Mx) có chủ đích), `TopLevelPropertyNaming`;

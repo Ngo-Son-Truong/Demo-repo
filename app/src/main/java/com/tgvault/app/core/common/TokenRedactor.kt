@@ -14,5 +14,6 @@ object TokenRedactor {
     fun redact(text: String): String = TOKEN_PATTERN.replace(text, PLACEHOLDER)
 
     /** Dùng khi log Throwable: message của exception có thể chứa URL kèm token. */
-    fun redact(throwable: Throwable?): String = redact(throwable?.message ?: throwable?.javaClass?.simpleName ?: "unknown")
+    fun redact(throwable: Throwable?): String =
+        redact(throwable?.message ?: throwable?.javaClass?.simpleName ?: "unknown")
 }

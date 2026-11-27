@@ -4,9 +4,6 @@ import com.tgvault.app.core.common.AppError
 import com.tgvault.app.core.common.TimeProvider
 import com.tgvault.app.data.remote.api.TelegramBotApi
 import com.tgvault.app.domain.model.ChunkSource
-import java.io.ByteArrayOutputStream
-import java.io.OutputStream
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -19,6 +16,9 @@ import org.junit.BeforeClass
 import org.junit.Test
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.io.ByteArrayOutputStream
+import java.io.OutputStream
+import java.util.concurrent.TimeUnit
 
 /**
  * PLAN M1-7 — Bộ test Telegram THẬT (không chạy trong CI):
@@ -58,7 +58,12 @@ class TelegramLiveTest {
     fun `Q1 chunk 19 MiB gui roi tai lai duoc`() = runBlocking {
         val size = 19L * 1024 * 1024
         val upStart = System.currentTimeMillis()
-        val sent = gateway.sendDocument(CHAT_ID, SyntheticChunkSource(size), "tgvault-live-19mib.bin", "#tgvault live q1") {}
+        val sent = gateway.sendDocument(
+            CHAT_ID,
+            SyntheticChunkSource(size),
+            "tgvault-live-19mib.bin",
+            "#tgvault live q1",
+        )
         val upSec = (System.currentTimeMillis() - upStart) / 1000.0
 
         val path = gateway.resolveFilePath(sent.fileId)
@@ -79,7 +84,12 @@ class TelegramLiveTest {
 
     @Test
     fun `Q2 file_id tai lai duoc (va kiem tra file_id cu neu co)`() = runBlocking {
-        val sent = gateway.sendDocument(CHAT_ID, SyntheticChunkSource(128 * 1024), "tgvault-live-q2.bin", "#tgvault live q2") {}
+        val sent = gateway.sendDocument(
+            CHAT_ID,
+            SyntheticChunkSource(128 * 1024),
+            "tgvault-live-q2.bin",
+            "#tgvault live q2",
+        )
         val path = gateway.resolveFilePath(sent.fileId)
         val out = ByteArrayOutputStream()
         gateway.download(path, out, null) {}
@@ -132,7 +142,12 @@ class TelegramLiveTest {
         var error: String? = null
         try {
             repeat(30) { i ->
-                gateway.sendDocument(CHAT_ID, SyntheticChunkSource(32 * 1024), "tgvault-live-q4-$i.bin", "#tgvault live q4 $i/30") {}
+                gateway.sendDocument(
+                    CHAT_ID,
+                    SyntheticChunkSource(32 * 1024),
+                    "tgvault-live-q4-$i.bin",
+                    "#tgvault live q4 $i/30",
+                )
                 sent++
             }
         } catch (e: AppError) {
@@ -160,10 +175,14 @@ class TelegramLiveTest {
         gateway.pinMessage(CHAT_ID, second.messageId)
         val afterSecond = gateway.getChat(CHAT_ID)
         val secondPinned = afterSecond.pinnedMessageText
+        val pinnedState = if (secondPinned?.contains("q5-second") == true) {
+            "tin MỚI NHẤT được ghim"
+        } else {
+            "tin khác: $secondPinned"
+        }
         finding(
             "Q5",
-            "pinChatMessage OK; getChat().pinned_message sau khi ghim tin thứ 2 trả về: " +
-                (if (secondPinned?.contains("q5-second") == true) "tin MỚI NHẤT được ghim" else "tin khác: $secondPinned"),
+            "pinChatMessage OK; getChat().pinned_message sau khi ghim tin thứ 2 trả về: $pinnedState",
         )
 
         gateway.unpinMessage(CHAT_ID, second.messageId)
@@ -174,7 +193,12 @@ class TelegramLiveTest {
 
     @Test
     fun `Q6 header Range khi tai file`() = runBlocking {
-        val sent = gateway.sendDocument(CHAT_ID, SyntheticChunkSource(64 * 1024), "tgvault-live-q6.bin", "#tgvault live q6") {}
+        val sent = gateway.sendDocument(
+            CHAT_ID,
+            SyntheticChunkSource(64 * 1024),
+            "tgvault-live-q6.bin",
+            "#tgvault live q6",
+        )
         val path = gateway.resolveFilePath(sent.fileId)
         val sink = ByteArrayOutputStream()
         try {

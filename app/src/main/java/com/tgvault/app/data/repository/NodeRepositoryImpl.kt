@@ -30,13 +30,13 @@ import com.tgvault.app.domain.model.TransferDirection
 import com.tgvault.app.domain.model.TransferState
 import com.tgvault.app.domain.repository.ConfigRepository
 import com.tgvault.app.domain.repository.NodeRepository
-import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /** NodeRepository trên Room; thao tác nhiều bảng luôn trong transaction (SPEC §16). */
 @Singleton
@@ -229,7 +229,7 @@ class NodeRepositoryImpl @Inject constructor(
                             nodeName = root.name,
                             reason = result.reason,
                             createdAt = timeProvider.nowMillis(),
-                        )
+                        ),
                     )
                 }
             }

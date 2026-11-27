@@ -3,10 +3,10 @@ package com.tgvault.app.data.remote
 import com.tgvault.app.core.common.AppError
 import com.tgvault.app.core.common.TokenRedactor
 import com.tgvault.app.data.remote.dto.ApiResponse
-import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.Json
 import retrofit2.HttpException
+import java.io.IOException
 
 /**
  * Ánh xạ lỗi Telegram/HTTP → AppError (SPEC §9.2).

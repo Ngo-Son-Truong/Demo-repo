@@ -18,11 +18,11 @@ import com.tgvault.app.domain.model.NodeStatus
 import com.tgvault.app.domain.model.TransferState
 import com.tgvault.app.domain.model.toTransferErrorCode
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
+import timber.log.Timber
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.CancellationException
-import timber.log.Timber
 
 /**
  * Engine upload theo chunk (PLAN M2-3, SPEC §10.1).
@@ -100,7 +100,7 @@ class UploadEngine @Inject constructor(
                                 tgFileId = sent.fileId,
                                 tgFileUniqueId = sent.fileUniqueId,
                                 sha256 = null,
-                            )
+                            ),
                         )
                     }
                     bytesDone += plainSize

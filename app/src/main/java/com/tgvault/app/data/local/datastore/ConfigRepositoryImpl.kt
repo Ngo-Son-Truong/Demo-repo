@@ -13,13 +13,13 @@ import com.tgvault.app.domain.model.DriveConfig
 import com.tgvault.app.domain.model.ThemeMode
 import com.tgvault.app.domain.repository.ConfigRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
-import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
 private val Context.configDataStore by preferencesDataStore(name = "tgvault_config")
 
