@@ -10,7 +10,10 @@ import com.tgvault.app.data.transfer.TransferScheduler
 import com.tgvault.app.domain.model.Node
 import com.tgvault.app.domain.model.NodeSort
 import com.tgvault.app.domain.model.NodeSortField
+import android.os.Environment
+import com.tgvault.app.domain.model.TransferState
 import com.tgvault.app.domain.repository.NodeRepository
+import com.tgvault.app.domain.repository.TransferRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +21,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -41,6 +45,7 @@ class FilesViewModel
     @Inject
     constructor(
         private val nodeRepository: NodeRepository,
+        private val transferRepository: TransferRepository,
         private val transferScheduler: TransferScheduler,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(FilesUiState())
@@ -160,6 +165,36 @@ class FilesViewModel
                         _uiState.update { it.copy(error = e.message) }
                     }
                 }
+            }
+        }
+
+        /** Tải node về Downloads công khai (đích mặc định FR-FILE-4) rồi theo dõi qua WorkManager. */
+        fun download(node: Node) {
+            viewModelScope.launch {
+                runCatching {
+                    val transfer = transferRepository.createDownload(node.id, node.sizeBytes)
+                    transferScheduler.enqueue(transfer.id)
+                }.onFailure { e ->
+                    Timber.w(e, "download lỗi")
+                    _uiState.update { it.copy(error = e.message) }
+                }
+            }
+        }
+
+        /**
+         * Tải node rồi CHỜ DONE; trả File trong Downloads public (share-out).
+         * Huỷ bởi caller hủy coroutine; thất bại/hủy trả null.
+         */
+        suspend fun downloadAndAwait(node: Node): java.io.File? {
+            val transfer = transferRepository.createDownload(node.id, node.sizeBytes)
+            transferScheduler.enqueue(transfer.id)
+            return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                val done =
+                    transferRepository.observeById(transfer.id)
+                        .first { it?.state in setOf(TransferState.DONE, TransferState.FAILED, TransferState.CANCELLED) }
+                if (done?.state != TransferState.DONE) return@withContext null
+                val dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                java.io.File(dir, node.name).takeIf { it.exists() }
             }
         }
 

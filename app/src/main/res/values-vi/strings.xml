@@ -83,4 +83,21 @@
     <string name="files_sort_name">Tên</string>
     <string name="files_sort_date">Ngày</string>
     <string name="files_sort_size">Kích thước</string>
+
+    <!-- Transfers + share (M6) -->
+    <string name="tr_pause">Tạm dừng</string>
+    <string name="tr_resume">Tiếp tục</string>
+    <string name="tr_cancel">Huỷ</string>
+    <string name="tr_retry">Thử lại</string>
+    <string name="tr_state_queued">Chờ</string>
+    <string name="tr_state_running">Đang chạy</string>
+    <string name="tr_state_paused">Tạm dừng</string>
+    <string name="tr_state_failed">Lỗi</string>
+    <string name="tr_state_done">Xong</string>
+    <string name="tr_state_cancelled">Đã huỷ</string>
+    <string name="files_download">Tải về</string>
+    <string name="files_share">Chia sẻ</string>
+    <string name="share_received">Đang thêm vào hàng đợi tải lên…</string>
+    <string name="notif_permission_title">Thông báo truyền tải</string>
+    <string name="notif_permission_message">Cho phép thông báo để theo dõi tiến trình tải lên/xuống.</string>
 </resources>

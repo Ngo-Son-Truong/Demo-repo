@@ -83,4 +83,21 @@
     <string name="files_sort_name">Name</string>
     <string name="files_sort_date">Date</string>
     <string name="files_sort_size">Size</string>
+
+    <!-- Transfers + share (M6) -->
+    <string name="tr_pause">Pause</string>
+    <string name="tr_resume">Resume</string>
+    <string name="tr_cancel">Cancel</string>
+    <string name="tr_retry">Retry</string>
+    <string name="tr_state_queued">Queued</string>
+    <string name="tr_state_running">Running</string>
+    <string name="tr_state_paused">Paused</string>
+    <string name="tr_state_failed">Failed</string>
+    <string name="tr_state_done">Done</string>
+    <string name="tr_state_cancelled">Cancelled</string>
+    <string name="files_download">Download</string>
+    <string name="files_share">Share</string>
+    <string name="share_received">Adding to upload queue…</string>
+    <string name="notif_permission_title">Transfer notifications</string>
+    <string name="notif_permission_message">Allow notifications to follow upload/download progress.</string>
 </resources>

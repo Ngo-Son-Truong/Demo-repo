@@ -31,6 +31,12 @@ interface TransferRepository {
     /** Worker bị hệ thống dừng → đưa về QUEUED (WorkManager tự chạy lại khi đủ constraint). */
     suspend fun requeue(id: String)
 
+    /** Tạo Transfer DOWNLOAD QUEUED cho node (id = "dl-<nodeId>") — M6. */
+    suspend fun createDownload(
+        nodeId: String,
+        bytesTotal: Long,
+    ): Transfer
+
     /** M3-5: RUNNING mồ côi (app bị kill) → QUEUED. Trả về số tác vụ đã đưa về hàng đợi. */
     suspend fun requeueOrphanedRunning(): Int
 
