@@ -3,7 +3,7 @@ name: CI
 on: [push, pull_request]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   issues: write
 
@@ -37,66 +37,56 @@ jobs:
       - name: assembleDebug
         run: ./gradlew --stacktrace assembleDebug 2>&1 | tee /tmp/step-output.log
 
-      # Khi thất bại: comment phần đuôi log vào PR (đọc được qua API)
-      - name: Comment failure excerpt vào PR
-        if: failure()
+      # Gói APK + báo cáo để publish ra release (link tải ổn định, không cần Android Studio)
+      - name: Gói kết quả build
+        if: success()
+        run: |
+          mkdir -p /tmp/dist
+          find app/build/outputs -name "*.apk" -exec cp {} /tmp/dist/ \;
+          if [ -d app/build/reports ]; then
+            (cd app/build && zip -qr /tmp/dist/build-reports.zip reports test-results) || true
+          fi
+          ls -la /tmp/dist | tee /tmp/dist-list.txt
+
+      - name: Publish release ci-debug
+        if: success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: ${{ github.ref_name }}
         run: |
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          if [ -z "$PR_NUMBER" ]; then
-            PR_NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
-          fi
-          {
-            echo "## ❌ CI thất bại — trích đoạn log bước lỗi"
-            echo ""
-            echo '<details><summary>Chi tiết (tail log)</summary>'
-            echo ""
-            echo '```text'
-            tail -c 55000 /tmp/step-output.log 2>/dev/null || echo "(không đọc được log)"
-            echo '```'
-            echo "</details>"
-          } > /tmp/ci-report.md
-          [ -n "$PR_NUMBER" ] && gh pr comment "$PR_NUMBER" --body-file /tmp/ci-report.md || true
+          gh release view ci-debug >/dev/null 2>&1 || \
+            gh release create ci-debug --prerelease \
+              --title "CI debug build" \
+              --notes "APK debug + báo cáo test mới nhất từ CI (tự động ghi đè mỗi lần build xanh)."
+          gh release upload ci-debug /tmp/dist/* --clobber
 
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: build-reports
-          path: |
-            app/build/reports/
-            app/build/test-results/
-          if-no-files-found: ignore
-
-      - name: Liệt kê APK
-        if: success()
-        run: find app/build/outputs -name "*.apk" -exec ls -la {} + | tee /tmp/apk-list.txt
-
-      - uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: app-debug-apk
-          path: app/build/outputs/apk/
-          if-no-files-found: warn
-
-      # Tóm tắt kết quả vào PR để theo dõi không cần mở log
+      # Tóm tắt kết quả vào PR (thành công hoặc thất bại) — đọc được qua API
       - name: Tóm tắt CI vào PR
         if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+          HEAD_REF: ${{ github.head_ref }}
+          REF_NAME: ${{ github.ref_name }}
+          JOB_STATUS: ${{ job.status }}
         run: |
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          if [ -z "$PR_NUMBER" ]; then
-            PR_NUMBER=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
-          fi
+          BRANCH="${HEAD_REF:-$REF_NAME}"
+          PR_NUMBER=$(gh api "repos/${REPO}/pulls?head=${REPO%/*}:${BRANCH}&state=open" --jq '.[0].number' 2>/dev/null || true)
           {
-            echo "## Kết quả CI (${{ job.status }})"
-            echo ""
-            echo "- APK tìm thấy:"
-            echo '```'
-            cat /tmp/apk-list.txt 2>/dev/null || echo "(không có)"
-            echo '```'
+            if [ "$JOB_STATUS" = "success" ]; then
+              echo "## ✅ CI xanh — ktlint · detekt · unit test · lint · assembleDebug"
+              echo ""
+              echo "- APK: https://github.com/${REPO}/releases/download/ci-debug/app-debug.apk"
+              echo "- Báo cáo test/lint: https://github.com/${REPO}/releases/download/ci-debug/build-reports.zip"
+            else
+              echo "## ❌ CI thất bại — trích đoạn log bước lỗi"
+              echo ""
+              echo '<details><summary>Chi tiết (tail log)</summary>'
+              echo ""
+              echo '```text'
+              tail -c 50000 /tmp/step-output.log 2>/dev/null || echo "(không đọc được log)"
+              echo '```'
+              echo "</details>"
+            fi
           } > /tmp/ci-summary.md
-          [ -n "$PR_NUMBER" ] && gh pr comment "$PR_NUMBER" --body-file /tmp/ci-summary.md || true
+          [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ] && \
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file /tmp/ci-summary.md || true
