@@ -188,7 +188,14 @@ class OnboardingViewModel
             _uiState.update { it.copy(step = OnboardingStep.VERIFY_RIGHTS, checkingRights = true, error = null) }
             viewModelScope.launch {
                 try {
-                    val rights = connectionManager.previewGateway(token).getBotRights(chatId)
+                    val gateway = connectionManager.previewGateway(token)
+                    var rights = gateway.getBotRights(chatId)
+                    // Cờ can_pin_messages hay bị Telegram cache trễ — nếu chỉ thiếu ghim,
+                    // thử ghim THẬT (gửi tin tự xoá) trước khi báo thiếu quyền.
+                    if (!rights.hasAll && rights.canPost && rights.canDelete && !rights.canPin) {
+                        val pinOk = runCatching { gateway.probePin(chatId) }.getOrDefault(false)
+                        if (pinOk) rights = rights.copy(canPin = true)
+                    }
                     _uiState.update { it.copy(rights = rights, checkingRights = false) }
                     if (rights.hasAll) {
                         finish(chatId)

@@ -116,6 +116,19 @@ class BotApiGateway(
         )
     }
 
+    override suspend fun probePin(chatId: Long): Boolean {
+        val probe = sendText(chatId, "🔧 TgVault kiểm tra quyền ghim (tự xoá)")
+        return try {
+            pinMessage(chatId, probe.messageId)
+            true
+        } catch (e: AppError) {
+            false
+        } finally {
+            runCatching { unpinMessage(chatId, probe.messageId) }
+            runCatching { deleteMessage(chatId, probe.messageId) }
+        }
+    }
+
     override suspend fun sendDocument(
         chatId: Long,
         part: ChunkSource,

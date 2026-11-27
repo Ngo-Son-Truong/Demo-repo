@@ -63,7 +63,7 @@
     <string name="onb_right_post">Post messages</string>
     <string name="onb_right_delete">Delete messages</string>
     <string name="onb_right_pin">Pin messages</string>
-    <string name="onb_rights_fix_hint">Missing permissions: open channel settings → Administrators → your bot → enable the missing ones.</string>
+    <string name="onb_rights_fix_hint">Missing permissions: open channel settings → Administrators → your bot → enable the missing ones. Already enabled? Wait a few seconds and tap Check again (Telegram can be slow to update).</string>
     <string name="onb_rights_recheck">Check again</string>
     <string name="onb_done_title">All set!</string>
     <string name="onb_done_message">Your Telegram vault is connected. Start uploading your first file.</string>

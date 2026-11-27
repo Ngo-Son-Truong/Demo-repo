@@ -63,6 +63,14 @@ interface TelegramGateway {
     suspend fun getBotRights(chatId: Long): BotRights
 
     /**
+     * Kiểm tra quyền ghim BẰNG HÀNH ĐỘNG THẬT (gửi tin → ghim → gỡ → xoá).
+     * Cờ can_pin_messages của getChatMember đôi khi bị Telegram cache/trễ sau khi
+     * đổi quyền admin (đặc biệt UI mới gom nhóm "Manage Messages") — probe này
+     * phản ánh đúng khả năng thực tế.
+     */
+    suspend fun probePin(chatId: Long): Boolean
+
+    /**
      * sendDocument multipart STREAMING từ [part] (tối đa 19 MiB), có báo tiến độ byte.
      * Luôn gửi disable_notification=true.
      */

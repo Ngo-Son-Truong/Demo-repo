@@ -63,7 +63,7 @@
     <string name="onb_right_post">Đăng tin</string>
     <string name="onb_right_delete">Xoá tin</string>
     <string name="onb_right_pin">Ghim tin</string>
-    <string name="onb_rights_fix_hint">Thiếu quyền: mở cài đặt channel → Quản trị viên → bot của bạn → bật các quyền còn thiếu.</string>
+    <string name="onb_rights_fix_hint">Thiếu quyền: mở cài đặt channel → Quản trị viên → bot của bạn → bật các quyền còn thiếu. Nếu đã bật đủ, chờ vài giây rồi bấm Kiểm tra lại (Telegram đôi khi cập nhật chậm).</string>
     <string name="onb_rights_recheck">Kiểm tra lại</string>
     <string name="onb_done_title">Xong rồi!</string>
     <string name="onb_done_message">Ổ Telegram của bạn đã kết nối. Bắt đầu tải tệp đầu tiên lên nào.</string>
