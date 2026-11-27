@@ -32,7 +32,8 @@ class TransferSchedulerTest {
 
     @Before
     fun setUp() {
-        androidx.work.testing.WorkManagerTestInitHelper.initTestWorkManager(context)
+        androidx.work.testing.WorkManagerTestInitHelper
+            .initializeTestWorkManager(context)
         workManager = WorkManager.getInstance(context)
         transfers = FakeTransferRepository()
         scheduler = TransferScheduler(context, transfers, FakeConfigRepository())
