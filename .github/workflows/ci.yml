@@ -126,21 +126,25 @@ jobs:
           fi
           exit 0
 
+      # Chỉ push event: 2 run push+PR chạy song song, cùng upload --clobber vào 1 release
+      # sẽ đá nhau (409/422). Release chỉ là kênh phụ — lỗi upload không được làm đỏ job.
       - name: Publish release ci-debug
-        if: always()
+        if: always() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release view ci-debug >/dev/null 2>&1 || \
             gh release create ci-debug --prerelease --target "${{ github.sha }}" \
               --title "CI debug build" \
-              --notes "Kết quả CI mới nhất (tự động ghi đè mỗi lần chạy)."
+              --notes "Kết quả CI mới nhất (tự động ghi đè mỗi lần chạy)." || true
           shopt -s nullglob
           files=(/tmp/dist/*)
           if [ ${#files[@]} -gt 0 ]; then
-            gh release upload ci-debug "${files[@]}" --clobber
+            gh release upload ci-debug "${files[@]}" --clobber \
+              || echo "::warning:: upload release asset lỗi — không chặn job"
           fi
-          gh release edit ci-debug --notes-file /tmp/diag.txt || true
+          gh release edit ci-debug --notes-file /tmp/diag.txt \
+            || echo "::warning:: edit release notes lỗi — không chặn job"
 
       # Tóm tắt vào PR nếu có PR đang mở cho branch này
       - name: Tóm tắt CI vào PR
