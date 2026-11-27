@@ -133,7 +133,7 @@ fun FilesScreen(viewModel: FilesViewModel = hiltViewModel()) {
         shareTarget = null
     }
 
-    fun shareNode(node: Node) {
+    val shareNode: (Node) -> Unit = { node ->
         shareTarget = node
         viewModel.download(node)
     }
