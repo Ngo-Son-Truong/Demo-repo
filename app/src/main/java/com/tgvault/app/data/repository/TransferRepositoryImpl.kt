@@ -2,7 +2,9 @@ package com.tgvault.app.data.repository
 
 import com.tgvault.app.core.common.TimeProvider
 import com.tgvault.app.data.local.dao.TransferDao
+import com.tgvault.app.data.local.entity.TransferEntity
 import com.tgvault.app.domain.model.Transfer
+import com.tgvault.app.domain.model.TransferDirection
 import com.tgvault.app.domain.model.TransferState
 import com.tgvault.app.domain.repository.TransferRepository
 import kotlinx.coroutines.flow.Flow
