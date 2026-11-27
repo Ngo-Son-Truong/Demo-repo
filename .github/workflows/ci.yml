@@ -5,6 +5,7 @@ on: [push, pull_request]
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 
 jobs:
   verify:
