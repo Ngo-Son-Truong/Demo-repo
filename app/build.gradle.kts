@@ -89,8 +89,8 @@ ktlint {
 
 detekt {
     config.setFrom("${rootProject.projectDir}/config/detekt/detekt.yml")
-    buildUponDefaultConfig.set(true)
-    parallel.set(true)
+    buildUponDefaultConfig = true
+    parallel = true
 }
 
 tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
