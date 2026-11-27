@@ -21,9 +21,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.AudioFile
-import androidx.compose.material.icons.rounded.CloudDownload
-import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.CloudUpload
 import androidx.compose.material.icons.rounded.CreateNewFolder
 import androidx.compose.material.icons.rounded.Description
@@ -33,6 +32,7 @@ import androidx.compose.material.icons.rounded.InsertDriveFile
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.Slideshow
 import androidx.compose.material.icons.rounded.Sort
 import androidx.compose.material.icons.rounded.TableChart
