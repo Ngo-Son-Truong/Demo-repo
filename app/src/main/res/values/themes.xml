@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme gốc tối giản; màu sắc do Compose MaterialTheme quản lý -->
+    <style name="Theme.TgVault" parent="android:Theme.Material.NoActionBar" />
+
+    <!-- SplashScreen API (androidx.core.splashscreen) — SPEC §15.3 màn 1 -->
+    <style name="Theme.TgVault.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/ic_launcher_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.TgVault</item>
+    </style>
+</resources>

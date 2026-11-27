@@ -1,0 +1,26 @@
+# Gradle / Android
+.gradle/
+build/
+**/build/
+local.properties
+*.iml
+.idea/
+.cxx/
+.externalNativeBuild/
+.kotlin/
+
+# Keystore & secrets — KHÔNG commit (SPEC §14)
+*.keystore
+*.jks
+local.properties
+secrets.properties
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test outputs
+**/test-results/
+**/reports/
+
+# Room schemas được commit có chủ đích (SPEC §16: exportSchema) — KHÔNG ignore app/schemas/
