@@ -12,6 +12,8 @@ complexity:
     threshold: 20
   TooManyFunctions:
     thresholdInFiles: 20
+    thresholdInClasses: 25
+    thresholdInInterfaces: 25 # interface API/gateway/DAO định nghĩa đủ surface của domain
     ignorePrivate: true # thống kê file; interface API/gateway/DAO nhiều hàm là bản chất
   NestedBlockDepth:
     threshold: 5 # engine có try/catch + retry loop + if lồng nhau là bản chất
