@@ -32,7 +32,7 @@ sealed class AppError(message: String? = null, cause: Throwable? = null) : Excep
         AppError("sha256 mismatch: expected=$expected actual=$actual")
 
     /** Tệp nguồn đổi kích thước/mtime giữa chừng upload (SPEC §10.2.5) */
-    class SourceChanged : AppError("source file changed during upload")
+    class SourceChanged(detail: String? = null) : AppError(detail ?: "source file changed during upload")
 
     /** Chưa kết nối bot/channel (gateway chưa sẵn sàng) */
     class NotConnected(detail: String? = null) : AppError(detail)

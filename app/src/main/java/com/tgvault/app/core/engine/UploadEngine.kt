@@ -200,7 +200,7 @@ class UploadEngine
         ) : ChunkSource {
             override val length: Long get() = delegate.length
 
-            override suspend fun writeTo(
+            override fun writeTo(
                 out: java.io.OutputStream,
                 onProgress: (bytesWritten: Long) -> Unit,
             ) {

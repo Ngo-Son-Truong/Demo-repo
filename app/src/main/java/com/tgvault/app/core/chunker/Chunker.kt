@@ -1,10 +1,8 @@
 package com.tgvault.app.core.chunker
 
 import com.tgvault.app.domain.model.ChunkSource
-import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.io.OutputStream
-import kotlinx.coroutines.Dispatchers as KtDispatchers
 
 /**
  * Chunker — nguồn streaming duy nhất cho upload; KHÔNG BAO GIỜ đưa nguyên chunk vào RAM (D7).
@@ -60,10 +58,11 @@ class Chunker(
         private val input: InputStream,
         override val length: Long,
     ) : ChunkSource {
-        override suspend fun writeTo(
+        override fun writeTo(
             out: OutputStream,
             onProgress: (bytesWritten: Long) -> Unit,
-        ) = withContext(KtDispatchers.IO) {
+        ) {
+            // Blocking theo thiết kế: OkHttp gọi writeTo trên thread IO của nó (SPEC §9.1)
             val buffer = ByteArray(BUFFER_SIZE)
             var remaining = length
             var written = 0L

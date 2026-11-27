@@ -3,7 +3,7 @@ package com.tgvault.app.core.designsystem
 import android.provider.Settings
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.EmphasizedDecelerateEasing
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.spring
@@ -39,7 +39,7 @@ fun currentMotionConfig(): MotionConfig = MotionConfig(LocalReduceMotion.current
  * không gây chuyển động dư thừa khi duration = 0 được ưu tiên dùng).
  */
 object MotionSpecs {
-    val emphasizedDecelerate = EmphasizedDecelerateEasing
+    val emphasizedDecelerate = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1.0f)
 
     fun <T> tween(
         config: MotionConfig,

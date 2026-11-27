@@ -229,7 +229,7 @@ class BotApiGateway(
             if ("message to delete not found" in detail) {
                 DeleteResult.AlreadyGone
             } else {
-                DeleteResult.Failed(TokenRedactor.redact(e.message))
+                DeleteResult.Failed(TokenRedactor.redact(e))
             }
         }
 

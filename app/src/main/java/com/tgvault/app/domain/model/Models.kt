@@ -97,6 +97,10 @@ fun AppError.toTransferErrorCode(): String =
         else -> TransferErrorCodes.UNKNOWN
     }
 
+/** Throwable bất kỳ (IOException, SQLite...) → errorCode; AppError thì map đúng loại. */
+fun Throwable.toTransferErrorCode(): String =
+    (this as? AppError)?.toTransferErrorCode() ?: TransferErrorCodes.UNKNOWN
+
 /** Quy tắc chunk (SPEC §10.1). */
 object ChunkRules {
     /** 19 MiB = 19.922.944 byte — nhỏ hơn giới hạn getFile 20 MB theo cả hai cách hiểu */
