@@ -64,9 +64,7 @@ import com.tgvault.app.core.designsystem.components.TgTextField
  * Chuyển bước: slide + fade theo MotionConfig.DURATION_NAV (§15.4).
  */
 @Composable
-fun OnboardingScreen(
-    viewModel: OnboardingViewModel = hiltViewModel(),
-) {
+fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize().padding(Spacing.x6)) {
@@ -90,7 +88,7 @@ fun OnboardingScreen(
                     slideOutHorizontally(
                         animationSpec = tween(MotionConfig.DURATION_NAV),
                         targetOffsetX = { if (forward) -it / 3 else it / 3 },
-                    ) + fadeOut(tween(MotionConfig.DURATION_NAV))
+                    ) + fadeOut(tween(MotionConfig.DURATION_NAV)),
                 )
             },
             label = "onboardingStep",

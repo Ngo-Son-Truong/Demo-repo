@@ -25,10 +25,9 @@ class TgVaultApp : Application() {
         fun transferScheduler(): TransferScheduler
 
         fun transferNotifier(): TransferNotifier
-    
+
         fun connectionManager(): ConnectionManager
     }
-
 
     /** Scope sống cùng process — cho notifier và tác vụ nền nhỏ lúc khởi động. */
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
