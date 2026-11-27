@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- SPEC §6: quyền tối thiểu. KHÔNG xin READ_EXTERNAL_STORAGE/MANAGE_EXTERNAL_STORAGE (dùng SAF) -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -10,6 +11,7 @@
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
+        tools:targetApi="s"
         android:name=".TgVaultApp"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"

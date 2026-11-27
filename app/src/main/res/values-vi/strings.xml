@@ -19,9 +19,4 @@
     <!-- Màn hình Cài đặt -->
     <string name="settings_placeholder_title">Cài đặt</string>
     <string name="settings_placeholder_message">Tài khoản Telegram, truyền tải, lưu trữ và giao diện sẽ nằm ở đây.</string>
-
-    <!-- Chung -->
-    <string name="common_retry">Thử lại</string>
-    <string name="common_cancel">Huỷ</string>
-    <string name="common_ok">Đồng ý</string>
 </resources>
