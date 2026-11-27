@@ -1,0 +1,25 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # Repo không commit gradle-wrapper.jar (xem docs/DECISIONS.md) — sinh wrapper rồi build
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.14.3"
+
+      - name: Generate Gradle wrapper
+        run: gradle wrapper --gradle-version 8.14.3 --distribution-type bin
+
+      - name: ktlint + detekt + lint + unit tests + assembleDebug
+        run: ./gradlew --stacktrace ktlintCheck detekt lintDebug testDebugUnitTest assembleDebug

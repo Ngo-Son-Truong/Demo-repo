@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- values/ = tiếng Anh (SPEC §15.2); bản dịch tiếng Việt ở values-vi/ -->
+<resources>
+    <string name="app_name">TgVault</string>
+
+    <!-- Điều hướng -->
+    <string name="tab_files">Files</string>
+    <string name="tab_transfers">Transfers</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Màn hình Tệp (placeholder M0; đầy đủ ở M5) -->
+    <string name="files_empty_title">No files yet</string>
+    <string name="files_empty_message">Upload your first file to your Telegram drive.</string>
+
+    <!-- Màn hình Truyền tải (placeholder M0; đầy đủ ở M6) -->
+    <string name="transfers_empty_title">No transfers</string>
+    <string name="transfers_empty_message">Your uploads and downloads will show up here.</string>
+
+    <!-- Màn hình Cài đặt (placeholder) -->
+    <string name="settings_placeholder_title">Settings</string>
+    <string name="settings_placeholder_message">Telegram account, transfers, storage and appearance options will live here.</string>
+
+    <!-- Chung -->
+    <string name="common_retry">Retry</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_ok">OK</string>
+</resources>

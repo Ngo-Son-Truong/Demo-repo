@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bản dịch tiếng Việt (values-vi/) — gốc tiếng Anh ở values/ -->
+<resources>
+    <string name="app_name">TgVault</string>
+
+    <!-- Điều hướng -->
+    <string name="tab_files">Tệp</string>
+    <string name="tab_transfers">Truyền tải</string>
+    <string name="tab_settings">Cài đặt</string>
+
+    <!-- Màn hình Tệp -->
+    <string name="files_empty_title">Chưa có tệp nào</string>
+    <string name="files_empty_message">Tải tệp đầu tiên lên ổ đĩa Telegram của bạn.</string>
+
+    <!-- Màn hình Truyền tải -->
+    <string name="transfers_empty_title">Chưa có truyền tải</string>
+    <string name="transfers_empty_message">Các tác vụ tải lên/tải về sẽ hiện ở đây.</string>
+
+    <!-- Màn hình Cài đặt -->
+    <string name="settings_placeholder_title">Cài đặt</string>
+    <string name="settings_placeholder_message">Tài khoản Telegram, truyền tải, lưu trữ và giao diện sẽ nằm ở đây.</string>
+
+    <!-- Chung -->
+    <string name="common_retry">Thử lại</string>
+    <string name="common_cancel">Huỷ</string>
+    <string name="common_ok">Đồng ý</string>
+</resources>
