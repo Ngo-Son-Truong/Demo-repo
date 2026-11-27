@@ -1,7 +1,6 @@
 package com.tgvault.app.data.remote
 
 import com.tgvault.app.core.common.AppError
-import java.io.IOException
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
@@ -10,13 +9,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import retrofit2.HttpException
 import retrofit2.Response
+import java.io.IOException
 
 /** Ánh xạ lỗi theo bảng SPEC §9.2. */
 class TelegramErrorMapperTest {
-
     private val mapper = TelegramErrorMapper(Json { ignoreUnknownKeys = true })
 
-    private fun httpError(code: Int, body: String): HttpException {
+    private fun httpError(
+        code: Int,
+        body: String,
+    ): HttpException {
         val response = Response.error<Any>(code, body.toResponseBody("application/json".toMediaType()))
         return HttpException(response)
     }
@@ -29,7 +31,11 @@ class TelegramErrorMapperTest {
 
     @Test
     fun `403 kicked thanh BotNoAccess`() {
-        val e = httpError(403, """{"ok":false,"error_code":403,"description":"Forbidden: bot was kicked from the channel"}""")
+        val e =
+            httpError(
+                403,
+                """{"ok":false,"error_code":403,"description":"Forbidden: bot was kicked from the channel"}""",
+            )
         assertTrue(mapper.map(e) is AppError.BotNoAccess)
     }
 
@@ -47,10 +53,11 @@ class TelegramErrorMapperTest {
 
     @Test
     fun `429 co retry_after thanh RateLimited voi so giay`() {
-        val e = httpError(
-            429,
-            """{"ok":false,"error_code":429,"description":"Too Many Requests","parameters":{"retry_after":7}}"""
-        )
+        val e =
+            httpError(
+                429,
+                """{"ok":false,"error_code":429,"description":"Too Many Requests","parameters":{"retry_after":7}}""",
+            )
         val error = mapper.map(e)
         assertTrue(error is AppError.RateLimited)
         assertEquals(7L, (error as AppError.RateLimited).retryAfterSeconds)
@@ -76,10 +83,11 @@ class TelegramErrorMapperTest {
 
     @Test
     fun `mo ta loi duoc che token`() {
-        val e = httpError(
-            400,
-            """{"ok":false,"error_code":400,"description":"Bad Request: chat not found for bot123456789:AAEhBOweik6ad9r_QXMENQjcrGbq7C1bxptz8"}"""
-        )
+        val e =
+            httpError(
+                400,
+                """{"ok":false,"error_code":400,"description":"Bad Request: chat not found for bot123456789:AAEhBOweik6ad9r_QXMENQjcrGbq7C1bxptz8"}""",
+            )
         val error = mapper.map(e)
         assertTrue(error.message.orEmpty().contains("bot***"))
     }

@@ -5,8 +5,6 @@ import com.tgvault.app.core.common.TokenRedactor
 import com.tgvault.app.data.remote.api.TelegramBotApi
 import com.tgvault.app.data.remote.dto.ApiResponse
 import com.tgvault.app.domain.model.ChunkSource
-import java.io.IOException
-import java.io.OutputStream
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +26,8 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.BufferedSink
 import retrofit2.HttpException
+import java.io.IOException
+import java.io.OutputStream
 
 /**
  * Telegram Bot API (HTTPS) — SPEC §9. Upload multipart STREAMING từ ChunkSource,
@@ -42,9 +42,10 @@ class BotApiGateway(
     json: Json,
     private val tokenProvider: BotTokenProvider,
     private val rateLimiter: TelegramRateLimiter,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    /** Prefix URL tải file — inject được để test trỏ về MockWebServer; mặc định Telegram thật */
+    private val downloadUrlPrefix: String = DOWNLOAD_URL_PREFIX,
 ) : TelegramGateway {
-
     private val errorMapper = TelegramErrorMapper(json)
 
     /** SPEC §9.3: tối đa 3 kết nối download đồng thời toàn app */
@@ -57,30 +58,33 @@ class BotApiGateway(
         return BotInfo(id = user.id, username = user.username.orEmpty(), firstName = user.firstName)
     }
 
-    override fun watchForChannel(): Flow<ChannelCandidate> = flow {
-        call { api.deleteWebhook(token()) }
-        var offset: Long? = null
-        while (currentCoroutineContext().isActive) {
-            val updates = try {
-                call { api.getUpdates(token(), offset, LONG_POLL_TIMEOUT_SECONDS, ALLOWED_UPDATES) }
-            } catch (e: AppError.Transient) {
-                // mất mạng/timeout khi long polling — chờ rồi tiếp tục (SPEC §9.2)
-                delay(RECONNECT_DELAY_MS)
-                continue
-            }
-            for (update in updates) {
-                offset = update.updateId + 1
-                val candidate = update.myChatMember?.let { memberUpdated ->
-                    memberUpdated.chat.takeIf {
-                        memberUpdated.newChatMember?.status == STATUS_ADMINISTRATOR
+    override fun watchForChannel(): Flow<ChannelCandidate> =
+        flow {
+            call { api.deleteWebhook(token()) }
+            var offset: Long? = null
+            while (currentCoroutineContext().isActive) {
+                val updates =
+                    try {
+                        call { api.getUpdates(token(), offset, LONG_POLL_TIMEOUT_SECONDS, ALLOWED_UPDATES) }
+                    } catch (e: AppError.Transient) {
+                        // mất mạng/timeout khi long polling — chờ rồi tiếp tục (SPEC §9.2)
+                        delay(RECONNECT_DELAY_MS)
+                        continue
                     }
-                } ?: update.channelPost?.chat
-                if (candidate != null) {
-                    emit(ChannelCandidate(candidate.id, candidate.title, candidate.username))
+                for (update in updates) {
+                    offset = update.updateId + 1
+                    val candidate =
+                        update.myChatMember?.let { memberUpdated ->
+                            memberUpdated.chat.takeIf {
+                                memberUpdated.newChatMember?.status == STATUS_ADMINISTRATOR
+                            }
+                        } ?: update.channelPost?.chat
+                    if (candidate != null) {
+                        emit(ChannelCandidate(candidate.id, candidate.title, candidate.username))
+                    }
                 }
             }
         }
-    }
 
     override suspend fun getChat(chatId: Long): ChatInfo {
         val chat = call { api.getChat(token(), chatId) }
@@ -88,7 +92,7 @@ class BotApiGateway(
             chatId = chat.id,
             title = chat.title,
             username = chat.username,
-            pinnedMessageText = chat.pinnedMessage?.text
+            pinnedMessageText = chat.pinnedMessage?.text,
         )
     }
 
@@ -98,7 +102,7 @@ class BotApiGateway(
         return BotRights(
             canPost = member.canPostMessages == true,
             canDelete = member.canDeleteMessages == true,
-            canPin = member.canPinMessages == true
+            canPin = member.canPinMessages == true,
         )
     }
 
@@ -107,40 +111,53 @@ class BotApiGateway(
         part: ChunkSource,
         fileName: String,
         caption: String?,
-        onProgress: (bytesWritten: Long) -> Unit
+        onProgress: (bytesWritten: Long) -> Unit,
     ): SentDocument {
         val token = token()
-        val documentPart = MultipartBody.Part.createFormData(
-            PART_DOCUMENT,
-            fileName,
-            ChunkRequestBody(part, onProgress)
-        )
+        val documentPart =
+            MultipartBody.Part.createFormData(
+                PART_DOCUMENT,
+                fileName,
+                ChunkRequestBody(part, onProgress),
+            )
         val chatIdBody = chatId.toString().toRequestBody(PlainTextMediaType)
         val captionBody = caption?.toRequestBody(PlainTextMediaType)
         val disableBody = "true".toRequestBody(PlainTextMediaType)
-        val message = sendWithRateLimit(chatId) {
-            call { api.sendDocument(token, chatIdBody, documentPart, captionBody, disableBody) }
-        }
-        val document = message.document
-            ?: throw AppError.Unknown(detail = "sendDocument response thiếu document")
+        val message =
+            sendWithRateLimit(chatId) {
+                call { api.sendDocument(token, chatIdBody, documentPart, captionBody, disableBody) }
+            }
+        val document =
+            message.document
+                ?: throw AppError.Unknown(detail = "sendDocument response thiếu document")
         return SentDocument(
             messageId = message.messageId,
             fileId = document.fileId,
-            fileUniqueId = document.fileUniqueId
+            fileUniqueId = document.fileUniqueId,
         )
     }
 
-    override suspend fun sendText(chatId: Long, text: String): SentMessage = sendWithRateLimit(chatId) {
-        SentMessage(call { api.sendMessage(token(), chatId, text) }.messageId)
-    }
+    override suspend fun sendText(
+        chatId: Long,
+        text: String,
+    ): SentMessage =
+        sendWithRateLimit(chatId) {
+            SentMessage(call { api.sendMessage(token(), chatId, text) }.messageId)
+        }
 
-    override suspend fun pinMessage(chatId: Long, messageId: Long) {
+    override suspend fun pinMessage(
+        chatId: Long,
+        messageId: Long,
+    ) {
         sendWithRateLimit(chatId) {
             call { api.pinChatMessage(token(), chatId, messageId, disableNotification = true) }
         }
     }
 
-    override suspend fun unpinMessage(chatId: Long, messageId: Long) {
+    override suspend fun unpinMessage(
+        chatId: Long,
+        messageId: Long,
+    ) {
         sendWithRateLimit(chatId) {
             call { api.unpinChatMessage(token(), chatId, messageId) }
         }
@@ -155,11 +172,11 @@ class BotApiGateway(
         filePath: String,
         sink: OutputStream,
         range: LongRange?,
-        onProgress: (bytesWritten: Long) -> Unit
+        onProgress: (bytesWritten: Long) -> Unit,
     ) {
         downloadPermits.withPermit {
             withContext(ioDispatcher) {
-                val url = "$DOWNLOAD_URL_PREFIX${token()}/$filePath"
+                val url = "$downloadUrlPrefix${token()}/$filePath"
                 val requestBuilder = Request.Builder().url(url).get()
                 if (range != null) {
                     requestBuilder.header(HEADER_RANGE, "bytes=${range.first}-${range.last}")
@@ -196,23 +213,27 @@ class BotApiGateway(
         }
     }
 
-    override suspend fun deleteMessage(chatId: Long, messageId: Long): DeleteResult = try {
-        sendWithRateLimit(chatId) {
-            call { api.deleteMessage(token(), chatId, messageId) }
+    override suspend fun deleteMessage(
+        chatId: Long,
+        messageId: Long,
+    ): DeleteResult =
+        try {
+            sendWithRateLimit(chatId) {
+                call { api.deleteMessage(token(), chatId, messageId) }
+            }
+            DeleteResult.Deleted
+        } catch (e: AppError.InvalidToken) {
+            throw e
+        } catch (e: AppError.RateLimited) {
+            throw e
+        } catch (e: AppError) {
+            val detail = e.message.orEmpty().lowercase()
+            if ("message to delete not found" in detail) {
+                DeleteResult.AlreadyGone
+            } else {
+                DeleteResult.Failed(TokenRedactor.redact(e))
+            }
         }
-        DeleteResult.Deleted
-    } catch (e: AppError.InvalidToken) {
-        throw e
-    } catch (e: AppError.RateLimited) {
-        throw e
-    } catch (e: AppError) {
-        val detail = e.message.orEmpty().lowercase()
-        if ("message to delete not found" in detail) {
-            DeleteResult.AlreadyGone
-        } else {
-            DeleteResult.Failed(TokenRedactor.redact(e.message))
-        }
-    }
 
     // --- helpers ---
 
@@ -226,7 +247,7 @@ class BotApiGateway(
                 throw errorMapper.mapStatus(
                     code = response.errorCode ?: 0,
                     description = response.description.orEmpty(),
-                    retryAfter = response.parameters?.retryAfter
+                    retryAfter = response.parameters?.retryAfter,
                 )
             }
             return response.result ?: throw AppError.Unknown(detail = "API response thiếu result")
@@ -245,7 +266,10 @@ class BotApiGateway(
      * Lệnh gửi qua rate limiter; khi bị 429 thì retry — vòng lặp sau sẽ chờ pauseUntil
      * (SPEC §9.2: tạm dừng toàn bộ hàng gửi, chờ retry_after + 1s).
      */
-    private suspend fun <T> sendWithRateLimit(chatId: Long, block: suspend () -> T): T {
+    private suspend fun <T> sendWithRateLimit(
+        chatId: Long,
+        block: suspend () -> T,
+    ): T {
         var rateLimitRetries = 0
         while (true) {
             try {
@@ -259,11 +283,14 @@ class BotApiGateway(
         }
     }
 
-    private fun mapDownloadError(code: Int, retryAfterHeader: String?) {
+    private fun mapDownloadError(
+        code: Int,
+        retryAfterHeader: String?,
+    ) {
         when {
             code == HTTP_UNAUTHORIZED -> throw AppError.InvalidToken()
             code == HTTP_TOO_MANY_REQUESTS -> throw AppError.RateLimited(
-                retryAfterHeader?.toLongOrNull() ?: TelegramErrorMapper.DEFAULT_RETRY_AFTER_SECONDS
+                retryAfterHeader?.toLongOrNull() ?: TelegramErrorMapper.DEFAULT_RETRY_AFTER_SECONDS,
             )
             code in 500..599 -> throw AppError.Transient(detail = "HTTP $code khi tải file")
             code == HTTP_OK || code == HTTP_PARTIAL_CONTENT -> Unit
@@ -274,9 +301,8 @@ class BotApiGateway(
     /** RequestBody streaming từ ChunkSource (multipart sendDocument). Không buffer vào RAM. */
     private class ChunkRequestBody(
         private val source: ChunkSource,
-        private val onProgress: (Long) -> Unit
+        private val onProgress: (Long) -> Unit,
     ) : RequestBody() {
-
         override fun contentType(): MediaType = OctetStreamMediaType
 
         override fun contentLength(): Long = source.length

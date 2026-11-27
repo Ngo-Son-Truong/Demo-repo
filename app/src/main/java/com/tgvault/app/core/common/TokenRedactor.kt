@@ -6,7 +6,6 @@ package com.tgvault.app.core.common
  * Dùng trong HttpLoggingInterceptor.Logger và mọi chỗ log Throwable/HTTP.
  */
 object TokenRedactor {
-
     private val TOKEN_PATTERN = Regex("""(?:bot)?\d{6,}:[A-Za-z0-9_-]{20,}""")
 
     const val PLACEHOLDER = "bot***"
@@ -14,5 +13,6 @@ object TokenRedactor {
     fun redact(text: String): String = TOKEN_PATTERN.replace(text, PLACEHOLDER)
 
     /** Dùng khi log Throwable: message của exception có thể chứa URL kèm token. */
-    fun redact(throwable: Throwable?): String = redact(throwable?.message ?: throwable?.javaClass?.simpleName ?: "unknown")
+    fun redact(throwable: Throwable?): String =
+        redact(throwable?.message ?: throwable?.javaClass?.simpleName ?: "unknown")
 }

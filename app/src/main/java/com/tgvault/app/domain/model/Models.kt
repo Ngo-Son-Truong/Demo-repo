@@ -23,7 +23,7 @@ data class Node(
     val createdAt: Long,
     val modifiedAt: Long,
     val trashedAt: Long?,
-    val trashRootId: String?
+    val trashRootId: String?,
 ) {
     val isFolder: Boolean get() = type == NodeType.FOLDER
     val isTrashed: Boolean get() = trashedAt != null
@@ -41,7 +41,7 @@ data class Chunk(
     val tgFileId: String?,
     val tgFileUniqueId: String?,
     /** SHA-256 hex của byte ĐÃ LƯU trên Telegram (bản mã nếu mã hoá) */
-    val sha256: String?
+    val sha256: String?,
 ) {
     val isUploaded: Boolean get() = tgFileId != null
 }
@@ -66,7 +66,7 @@ data class Transfer(
     val errorMessage: String?,
     val retryCount: Int,
     val createdAt: Long,
-    val updatedAt: Long
+    val updatedAt: Long,
 ) {
     val progress: Float
         get() = if (bytesTotal <= 0L) 0f else (bytesDone.toFloat() / bytesTotal).coerceIn(0f, 1f)
@@ -84,16 +84,21 @@ object TransferErrorCodes {
 }
 
 /** Map AppError → errorCode (redact token trong message — SPEC §14). */
-fun AppError.toTransferErrorCode(): String = when (this) {
-    is AppError.InvalidToken, is AppError.BotNoAccess, is AppError.ChannelNotFound,
-    is AppError.NotConnected -> TransferErrorCodes.AUTH
-    is AppError.RateLimited -> TransferErrorCodes.RATE_LIMITED
-    is AppError.Transient -> TransferErrorCodes.NETWORK
-    is AppError.IntegrityMismatch -> TransferErrorCodes.INTEGRITY
-    is AppError.SourceChanged -> TransferErrorCodes.SOURCE_CHANGED
-    is AppError.ChunkTooLarge -> TransferErrorCodes.CHUNK_TOO_LARGE
-    else -> TransferErrorCodes.UNKNOWN
-}
+fun AppError.toTransferErrorCode(): String =
+    when (this) {
+        is AppError.InvalidToken, is AppError.BotNoAccess, is AppError.ChannelNotFound,
+        is AppError.NotConnected,
+        -> TransferErrorCodes.AUTH
+        is AppError.RateLimited -> TransferErrorCodes.RATE_LIMITED
+        is AppError.Transient -> TransferErrorCodes.NETWORK
+        is AppError.IntegrityMismatch -> TransferErrorCodes.INTEGRITY
+        is AppError.SourceChanged -> TransferErrorCodes.SOURCE_CHANGED
+        is AppError.ChunkTooLarge -> TransferErrorCodes.CHUNK_TOO_LARGE
+        else -> TransferErrorCodes.UNKNOWN
+    }
+
+/** Throwable bất kỳ (IOException, SQLite...) → errorCode; AppError thì map đúng loại. */
+fun Throwable.toTransferErrorCode(): String = (this as? AppError)?.toTransferErrorCode() ?: TransferErrorCodes.UNKNOWN
 
 /** Quy tắc chunk (SPEC §10.1). */
 object ChunkRules {
@@ -108,7 +113,7 @@ enum class NodeSortField { NAME, DATE, SIZE }
 
 data class NodeSort(
     val field: NodeSortField = NodeSortField.NAME,
-    val ascending: Boolean = true
+    val ascending: Boolean = true,
 )
 
 data class StorageStats(val fileCount: Long, val totalBytes: Long, val chunkCount: Long)

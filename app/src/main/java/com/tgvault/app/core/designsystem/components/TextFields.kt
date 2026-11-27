@@ -1,12 +1,12 @@
 package com.tgvault.app.core.designsystem.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardOptions
 
 /** Ô nhập chuẩn (M0-4). */
 @Composable
@@ -19,7 +19,7 @@ fun TgTextField(
     supportingText: String? = null,
     isError: Boolean = false,
     singleLine: Boolean = true,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ) {
     OutlinedTextField(
         value = value,
@@ -31,6 +31,6 @@ fun TgTextField(
         isError = isError,
         singleLine = singleLine,
         keyboardOptions = keyboardOptions,
-        shape = MaterialTheme.shapes.small
+        shape = MaterialTheme.shapes.small,
     )
 }

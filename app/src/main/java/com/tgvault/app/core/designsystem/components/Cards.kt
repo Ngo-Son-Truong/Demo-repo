@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 fun TgCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     if (onClick != null) {
         Card(onClick = onClick, modifier = modifier, shape = MaterialTheme.shapes.medium, content = content)

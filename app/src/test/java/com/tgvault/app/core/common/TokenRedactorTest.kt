@@ -6,7 +6,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TokenRedactorTest {
-
     @Test
     fun `che token trong URL api telegram`() {
         val url = "https://api.telegram.org/bot123456789:AAEhBOweik6ad9r_QXMENQjcrGbq7C1bxptz8/sendDocument"

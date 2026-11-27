@@ -3,24 +3,24 @@ package com.tgvault.app.data.remote
 import com.tgvault.app.core.common.AppError
 import com.tgvault.app.core.common.TokenRedactor
 import com.tgvault.app.data.remote.dto.ApiResponse
-import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.Json
 import retrofit2.HttpException
+import java.io.IOException
 
 /**
  * Ánh xạ lỗi Telegram/HTTP → AppError (SPEC §9.2).
  * Mọi message đều qua TokenRedactor trước khi ghi vào AppError.
  */
 class TelegramErrorMapper(private val json: Json) {
-
-    fun map(t: Throwable): AppError = when (t) {
-        is CancellationException -> throw t
-        is AppError -> t
-        is HttpException -> mapHttp(t)
-        is IOException -> AppError.Transient(cause = t)
-        else -> AppError.Unknown(detail = TokenRedactor.redact(t.message ?: t.javaClass.simpleName), cause = t)
-    }
+    fun map(t: Throwable): AppError =
+        when (t) {
+            is CancellationException -> throw t
+            is AppError -> t
+            is HttpException -> mapHttp(t)
+            is IOException -> AppError.Transient(cause = t)
+            else -> AppError.Unknown(detail = TokenRedactor.redact(t.message ?: t.javaClass.simpleName), cause = t)
+        }
 
     fun mapHttp(e: HttpException): AppError {
         val body = e.response()?.errorBody()?.string()
@@ -31,7 +31,11 @@ class TelegramErrorMapper(private val json: Json) {
     }
 
     /** Ánh xạ theo bảng SPEC §9.2. [description] được redact token ở đây. */
-    fun mapStatus(code: Int, description: String, retryAfter: Long? = null): AppError {
+    fun mapStatus(
+        code: Int,
+        description: String,
+        retryAfter: Long? = null,
+    ): AppError {
         val d = description.lowercase()
         val safeDescription = TokenRedactor.redact(description)
         return when {

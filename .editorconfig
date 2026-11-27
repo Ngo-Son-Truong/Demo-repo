@@ -10,7 +10,12 @@ max_line_length = 120
 trim_trailing_whitespace = true
 
 [*.{kt,kts}]
-ktlint_code_style = intellij_idea
+# ktlint 1.5.x: intellij_idea không còn — dùng ktlint_official (mặc định, import java/javax/kotlin cuối)
+ktlint_code_style = ktlint_official
 ktlint_function_naming_ignore_when_annotated_with = Composable
 ktlint_standard_property-naming = disabled
 ktlint_standard_filename = disabled
+
+# Test chứa fixture JSON một dòng (không tách được) — nới max-line-length cho test (xem DECISIONS)
+[app/src/test/**.{kt,kts}]
+ktlint_standard_max-line-length = disabled

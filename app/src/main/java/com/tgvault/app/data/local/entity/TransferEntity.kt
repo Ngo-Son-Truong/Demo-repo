@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 /** SPEC §8 TransferEntity — trạng thái truyền tải bền (sống sót khi app bị kill, SPEC §13). */
 @Entity(
     tableName = "transfers",
-    indices = [Index("nodeId"), Index("state")]
+    indices = [Index("nodeId"), Index("state")],
 )
 data class TransferEntity(
     @PrimaryKey val id: String,
@@ -29,5 +29,5 @@ data class TransferEntity(
     val errorMessage: String?,
     val retryCount: Int,
     val createdAt: Long,
-    val updatedAt: Long
+    val updatedAt: Long,
 )

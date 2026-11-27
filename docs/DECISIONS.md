@@ -65,7 +65,9 @@ và **đồng bộ với Kotlin 2.2.21** (tránh lỗi metadata Kotlin khi dùng
   Hỗ trợ Range thực tế của Telegram cần test live (TELEGRAM_FINDINGS câu 6).
 
 ## 2026-11-26 · ktlint/detekt nới một số rule
-- ktlint: `ktlint_code_style = intellij_idea` (không bắt buộc trailing comma), tắt `property-naming`
+- ktlint: ban đầu định dùng `intellij_idea`, nhưng ktlint 1.5.x không còn hỗ trợ style này (rơi về mặc định)
+  → chốt `ktlint_official`: BẮT BUỘC trailing comma, import theo layout `*,java.**,javax.**,kotlin.**,^`;
+  tắt `property-naming`
   (CompositionLocal đặt tên PascalCase), tắt `filename`, cho phép Composable đặt tên PascalCase; `max_line_length = 120`.
 - detekt: `buildUponDefaultConfig`; tắt `MagicNumber` (số dp/ms trong UI), `MatchingDeclarationName`
   (file nhiều khai báo), `ForbiddenComment` (cho phép TODO(Mx) có chủ đích), `TopLevelPropertyNaming`;
@@ -83,3 +85,45 @@ và **đồng bộ với Kotlin 2.2.21** (tránh lỗi metadata Kotlin khi dùng
   có thể xảy ra); resume download theo byte trong file staging `.part` tại cacheDir.
 - `NodeDao.subtreeIds` dùng `WITH RECURSIVE` — nếu Room query verifier kêu khi build, chuyển
   sang `@RawQuery` (đã ghi ở PROGRESS).
+
+## 2026-11-27 · CI thật sự xanh (PR #6) — bài học & sửa sai
+- **gradle-wrapper.jar ĐƯỢC commit** trong repo (entry cũ ghi "không commit" là sai). CI dùng luôn wrapper;
+  `gradle/actions/setup-gradle@v4` chỉ để cache.
+- **CI tự format**: bước `ktlintFormat` chạy trước `ktlintCheck`; nếu có thay đổi (push event) thì
+  github-actions[bot] commit "style: ktlintFormat tự động" và push lại. ktlintFormat idempotent nên không loop.
+  → Không bao giờ sửa style bằng tay nữa; kéo `git pull --rebase` trước khi push tiếp.
+- **Kênh chẩn đoán đáng tin: comment PR** (`gh pr comment`, đọc bằng `gh api .../issues/<PR>/comments` —
+  NHỚ `per_page=100 --paginate` vì mặc định chỉ trả trang 1 = comment cũ). Release `ci-debug` chỉ là kênh phụ:
+  upload/edit đều `|| true` và chỉ chạy ở push event (2 run push+PR upload --clobber đồng thời sẽ đá nhau).
+- **`.editorconfig` `[app/src/test/**]` tắt max_line_length**: test chứa JSON fixture Telegram dài;
+  detekt `MaxLineLength` cũng tắt (ktlint đã kiểm).
+- **detekt config đợt 2** (config/detekt/detekt.yml): section name phải khớp default-detekt-config.yml của
+  1.23.8 — `MatchingDeclarationName` thuộc `naming` (không phải `style`), `ForbiddenComment` thuộc `style`
+  (không phải `comments`), `TooGenericExceptionCaught`/`SwallowedException` thuộc `exceptions`
+  (không phải `potential-bugs`). Thêm: `TooManyFunctions` threshold class/interface = 25 (API/gateway/DAO
+  nhiều hàm là bản chất), `NestedBlockDepth` = 5, `ThrowsCount`/`SwallowedException`/`EmptyFunctionBlock` tắt
+  (engine map lỗi theo nhánh, fake test no-op là hợp lệ), `LongParameterList.ignoreDefaultParameters`.
+- **Bắt được bug thật nhờ CI** (code chưa từng compile trước đó):
+  1. Retrofit path `"bot{token}/..."` — token có `:` khiến HttpUrl.parse nhầm thành scheme → Malformed URL.
+     Fix: leading slash `"/bot{token}/..."`. Test MockWebServer phát hiện.
+  2. `ChunkSource.writeTo` interface non-suspend (OkHttp gọi blocking trên thread IO) nhưng 2 impl khai
+     `suspend` + `withContext(IO)` — thừa và lỗi override. Fix: impl non-suspend.
+  3. `TelegramRateLimiter`: `Long.MIN_VALUE + interval - now` TRÀN sang số dương khổng lồ → lệnh gửi đầu
+     tiên chờ vô hạn (4 test timeout 1 phút). Fix: kiểm tra `lastCallAt == Long.MIN_VALUE` trước khi cộng.
+  4. `NameNormalizer` không gộp khoảng trắng trong → test "  Hello   World " mong "hello world". Fix:
+     `replace(Regex("\\s+"), " ")` trước trim.
+  5. Test từng gọi API Telegram THẬT (gateway hardcode `https://api.telegram.org/file/bot`): thêm param
+     `downloadUrlPrefix` để test trỏ về MockWebServer. Bài học: không bao giờ hardcode URL thật trong lớp
+     được unit test.
+  6. `RoomDatabaseTest` factory set `nameNormalized = name.lowercase()` (giữ dấu) trong khi production dùng
+     `NameNormalizer.normalize` → search test fail. Factory PHẢI gọi đúng normalizer production.
+- **Robolectric**: tải `android-all-instrumented` từ Maven LÚC CHẠY test → flake mạng. Task
+  `primeRobolectricJars` kéo trước bằng Gradle (được cache) + `robolectric.dependency.dir` trỏ tới.
+- **lint**: tắt 4 check "đã có bản mới" (GradleDependency/NewerVersionAvailable/OldTargetApi/
+  AndroidGradlePluginVersion) vì version pin có chủ đích; bật `textReport` để CI đọc được.
+  Sửa thật: dataExtractionRules (vault không backup gì — SPEC §14), monochrome icon, `String.toUri()`,
+  `StorageManager.getAllocatableBytes`, bỏ `mipmap-anydpi-v26` (minSdk 29).
+- **Telegram live test trên CI**: bước riêng sau testDebugUnitTest, chỉ chạy khi repo có secrets
+  `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHANNEL_ID` (bot là admin channel test). Token ở secrets, KHÔNG commit;
+  `local.properties` đã gitignore. Secrets do maintainer tự thêm qua Settings → Secrets and variables → Actions
+  (bot/token CI không có quyền ghi secrets).

@@ -9,8 +9,10 @@ import kotlinx.coroutines.flow.Flow
 
 /** Danh mục tệp — Room là nguồn sự thật (SPEC D6). */
 interface NodeRepository {
-
-    fun observeChildren(parentId: String?, sort: NodeSort): Flow<List<Node>>
+    fun observeChildren(
+        parentId: String?,
+        sort: NodeSort,
+    ): Flow<List<Node>>
 
     fun observeNode(id: String): Flow<Node?>
 
@@ -25,12 +27,21 @@ interface NodeRepository {
     /** nameNormalized của các con trực tiếp (phục vụ kiểm tra trùng tên). */
     suspend fun childNamesNormalized(parentId: String?): Set<String>
 
-    suspend fun createFolder(parentId: String?, name: String): Node
+    suspend fun createFolder(
+        parentId: String?,
+        name: String,
+    ): Node
 
-    suspend fun renameNode(id: String, newName: String)
+    suspend fun renameNode(
+        id: String,
+        newName: String,
+    )
 
     /** Chặn di chuyển thư mục vào chính hậu duệ của nó (PLAN M2-7). */
-    suspend fun moveNode(id: String, newParentId: String?)
+    suspend fun moveNode(
+        id: String,
+        newParentId: String?,
+    )
 
     /** Tạo Node(PENDING) + Transfer(QUEUED) trong một transaction (SPEC §10.2.1). */
     suspend fun createPendingUpload(
@@ -39,7 +50,7 @@ interface NodeRepository {
         mimeType: String?,
         sizeBytes: Long,
         sourceUri: String?,
-        stagingPath: String?
+        stagingPath: String?,
     ): Pair<Node, Transfer>
 
     /** Xoá mềm (đặt trashedAt/trashRootId cho cả cây con) — M5 dùng, thùng rác đầy đủ ở M9. */

@@ -1,8 +1,6 @@
 package com.tgvault.app.core.chunker
 
 import com.tgvault.app.domain.model.ChunkSource
-import kotlinx.coroutines.Dispatchers as KtDispatchers
-import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -15,7 +13,7 @@ import java.io.OutputStream
 class Chunker(
     private val input: InputStream,
     private val chunkSize: Int,
-    private val totalBytes: Long
+    private val totalBytes: Long,
 ) {
     init {
         require(chunkSize > 0) { "chunkSize phải > 0" }
@@ -58,12 +56,13 @@ class Chunker(
 
     private class StreamChunkSource(
         private val input: InputStream,
-        override val length: Long
+        override val length: Long,
     ) : ChunkSource {
-        override suspend fun writeTo(
+        override fun writeTo(
             out: OutputStream,
-            onProgress: (bytesWritten: Long) -> Unit
-        ) = withContext(KtDispatchers.IO) {
+            onProgress: (bytesWritten: Long) -> Unit,
+        ) {
+            // Blocking theo thiết kế: OkHttp gọi writeTo trên thread IO của nó (SPEC §9.1)
             val buffer = ByteArray(BUFFER_SIZE)
             var remaining = length
             var written = 0L
@@ -78,7 +77,7 @@ class Chunker(
             }
             if (written != length) {
                 throw java.io.IOException(
-                    "nguồn kết thúc sớm: đọc được $written/$length byte (SOURCE_CHANGED?)"
+                    "nguồn kết thúc sớm: đọc được $written/$length byte (SOURCE_CHANGED?)",
                 )
             }
         }

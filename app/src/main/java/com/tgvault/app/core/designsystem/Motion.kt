@@ -3,7 +3,7 @@ package com.tgvault.app.core.designsystem
 import android.provider.Settings
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.EmphasizedDecelerateEasing
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.spring
@@ -25,7 +25,7 @@ fun rememberReduceMotion(): Boolean {
         Settings.Global.getFloat(
             context.contentResolver,
             Settings.Global.ANIMATOR_DURATION_SCALE,
-            1f
+            1f,
         ) == 0f
     }
 }
@@ -39,25 +39,33 @@ fun currentMotionConfig(): MotionConfig = MotionConfig(LocalReduceMotion.current
  * không gây chuyển động dư thừa khi duration = 0 được ưu tiên dùng).
  */
 object MotionSpecs {
+    val emphasizedDecelerate = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1.0f)
 
-    val emphasizedDecelerate = EmphasizedDecelerateEasing
-
-    fun <T> tween(config: MotionConfig, durationMs: Int, delayMs: Int = 0): TweenSpec<T> =
+    fun <T> tween(
+        config: MotionConfig,
+        durationMs: Int,
+        delayMs: Int = 0,
+    ): TweenSpec<T> =
         androidx.compose.animation.core.tween(
             durationMillis = config.durationMs(durationMs),
             delayMillis = delayMs,
-            easing = emphasizedDecelerate
+            easing = emphasizedDecelerate,
         )
 
     /** Spring mềm (FAB mở rộng/thu gọn: dampingRatio 0.8, stiffness Medium — SPEC §15.4). */
-    fun <T> spring(config: MotionConfig) = spring<T>(
-        dampingRatio = if (config.reduceMotion) Spring.DampingRatioNoBouncy else 0.8f,
-        stiffness = Spring.StiffnessMedium
-    )
+    fun <T> spring(config: MotionConfig) =
+        spring<T>(
+            dampingRatio = if (config.reduceMotion) Spring.DampingRatioNoBouncy else 0.8f,
+            stiffness = Spring.StiffnessMedium,
+        )
 
-    fun fadeIn(config: MotionConfig, durationMs: Int = MotionConfig.DURATION_MEDIUM): EnterTransition =
-        androidx.compose.animation.fadeIn(animationSpec = tween(config, durationMs))
+    fun fadeIn(
+        config: MotionConfig,
+        durationMs: Int = MotionConfig.DURATION_MEDIUM,
+    ): EnterTransition = androidx.compose.animation.fadeIn(animationSpec = tween(config, durationMs))
 
-    fun fadeOut(config: MotionConfig, durationMs: Int = MotionConfig.DURATION_MEDIUM): ExitTransition =
-        androidx.compose.animation.fadeOut(animationSpec = tween(config, durationMs))
+    fun fadeOut(
+        config: MotionConfig,
+        durationMs: Int = MotionConfig.DURATION_MEDIUM,
+    ): ExitTransition = androidx.compose.animation.fadeOut(animationSpec = tween(config, durationMs))
 }

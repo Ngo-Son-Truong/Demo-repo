@@ -8,12 +8,13 @@ import androidx.compose.ui.unit.dp
  * Hình dạng bo góc (SPEC §15.2):
  * 12 dp thẻ nhỏ · 16 dp thẻ · 28 dp bottom sheet/dialog/FAB lớn.
  */
-val TgShapes = Shapes(
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(20.dp),
-    extraLarge = RoundedCornerShape(28.dp)
-)
+val TgShapes =
+    Shapes(
+        small = RoundedCornerShape(12.dp),
+        medium = RoundedCornerShape(16.dp),
+        large = RoundedCornerShape(20.dp),
+        extraLarge = RoundedCornerShape(28.dp),
+    )
 
 /** Lưới khoảng cách 4 dp (SPEC §15.2): 4/8/12/16/24/32 */
 object Spacing {

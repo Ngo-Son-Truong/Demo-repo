@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 /** Tệp và thư mục dùng chung một bảng (SPEC §8). Enum lưu dạng String, map ở EntityMappers. */
 @Entity(
     tableName = "nodes",
-    indices = [Index("parentId"), Index("nameNormalized"), Index("trashRootId")]
+    indices = [Index("parentId"), Index("nameNormalized"), Index("trashRootId")],
 )
 data class NodeEntity(
     @PrimaryKey val id: String,
@@ -34,5 +34,5 @@ data class NodeEntity(
     /** null = không ở thùng rác */
     val trashedAt: Long?,
     /** khi xoá thư mục: mọi hậu duệ nhận trashRootId = id thư mục gốc bị xoá */
-    val trashRootId: String?
+    val trashRootId: String?,
 )

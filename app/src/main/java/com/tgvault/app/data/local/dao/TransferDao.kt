@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransferDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(transfer: TransferEntity)
 
@@ -30,7 +29,7 @@ interface TransferDao {
             WHEN 'FAILED' THEN 3
             ELSE 4 END,
         updatedAt DESC
-        """
+        """,
     )
     fun observeAll(): Flow<List<TransferEntity>>
 
@@ -38,23 +37,39 @@ interface TransferDao {
     fun observeActive(): Flow<List<TransferEntity>>
 
     @Query("UPDATE transfers SET state = :state, updatedAt = :updatedAt WHERE id = :id")
-    suspend fun updateState(id: String, state: String, updatedAt: Long)
+    suspend fun updateState(
+        id: String,
+        state: String,
+        updatedAt: Long,
+    )
 
     @Query(
         """
         UPDATE transfers SET bytesDone = :bytesDone, bytesTotal = :bytesTotal,
         currentChunk = :currentChunk, updatedAt = :updatedAt WHERE id = :id
-        """
+        """,
     )
-    suspend fun updateProgress(id: String, bytesDone: Long, bytesTotal: Long, currentChunk: Int, updatedAt: Long)
+    suspend fun updateProgress(
+        id: String,
+        bytesDone: Long,
+        bytesTotal: Long,
+        currentChunk: Int,
+        updatedAt: Long,
+    )
 
     @Query(
         """
         UPDATE transfers SET state = :state, errorCode = :errorCode, errorMessage = :errorMessage,
         updatedAt = :updatedAt WHERE id = :id
-        """
+        """,
     )
-    suspend fun updateError(id: String, state: String, errorCode: String?, errorMessage: String?, updatedAt: Long)
+    suspend fun updateError(
+        id: String,
+        state: String,
+        errorCode: String?,
+        errorMessage: String?,
+        updatedAt: Long,
+    )
 
     /** M3-5: RUNNING mồ côi sau khi app bị kill → QUEUED */
     @Query("UPDATE transfers SET state = 'QUEUED', updatedAt = :now WHERE state = 'RUNNING'")
@@ -64,9 +79,12 @@ interface TransferDao {
         """
         UPDATE transfers SET retryCount = retryCount + 1, state = 'QUEUED',
         errorCode = NULL, errorMessage = NULL, updatedAt = :now WHERE id = :id
-        """
+        """,
     )
-    suspend fun markRetry(id: String, now: Long)
+    suspend fun markRetry(
+        id: String,
+        now: Long,
+    )
 
     @Query("DELETE FROM transfers WHERE id = :id")
     suspend fun deleteById(id: String)

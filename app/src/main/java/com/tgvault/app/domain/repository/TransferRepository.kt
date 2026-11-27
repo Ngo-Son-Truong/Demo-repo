@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 /** Hàng đợi truyền tải (SPEC §8/§13). */
 interface TransferRepository {
-
     /** Tất cả, sắp xếp: RUNNING/QUEUED/PAUSED trước, lỗi và hoàn tất sau. */
     fun observeAll(): Flow<List<Transfer>>
 
@@ -16,7 +15,10 @@ interface TransferRepository {
 
     suspend fun getById(id: String): Transfer?
 
-    suspend fun setPaused(id: String, paused: Boolean)
+    suspend fun setPaused(
+        id: String,
+        paused: Boolean,
+    )
 
     suspend fun cancel(id: String)
 

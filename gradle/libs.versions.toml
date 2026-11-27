@@ -35,7 +35,7 @@ argon2kt = "1.6.1"
 
 # Chất lượng code
 ktlint-plugin = "12.2.0"
-ktlint = "1.5.0"
+ktlint-core = "1.5.0"
 detekt = "1.23.8"
 
 # Test
@@ -103,6 +103,8 @@ junit = { module = "junit:junit", version.ref = "junit" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+# Jar môi trường Android Robolectric tải lúc chạy test — kéo trước bằng Gradle để khỏi flake mạng CI
+robolectric-android-all = { module = "org.robolectric:android-all-instrumented", version = "14-robolectric-10818077-i7" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
 androidx-test-junit-ext = { module = "androidx.test.ext:junit", version.ref = "androidx-test-junit" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }

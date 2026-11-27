@@ -13,10 +13,10 @@ import androidx.room.PrimaryKey
             entity = NodeEntity::class,
             parentColumns = ["id"],
             childColumns = ["nodeId"],
-            onDelete = ForeignKey.CASCADE
-        )
+            onDelete = ForeignKey.CASCADE,
+        ),
     ],
-    indices = [Index(value = ["nodeId", "idx"], unique = true)]
+    indices = [Index(value = ["nodeId", "idx"], unique = true)],
 )
 data class ChunkEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -29,5 +29,5 @@ data class ChunkEntity(
     val tgFileId: String?,
     val tgFileUniqueId: String?,
     /** SHA-256 hex của byte đã lưu trên Telegram */
-    val sha256: String?
+    val sha256: String?,
 )

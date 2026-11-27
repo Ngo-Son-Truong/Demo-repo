@@ -4,7 +4,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class UniqueNameResolverTest {
-
     @Test
     fun `không trùng thì giữ nguyên`() {
         assertEquals("photo.jpg", UniqueNameResolver.resolve("photo.jpg", setOf("other.jpg")))
@@ -14,7 +13,7 @@ class UniqueNameResolverTest {
     fun `trùng thì thêm hậu tố trước phần mở rộng`() {
         assertEquals(
             "photo (1).jpg",
-            UniqueNameResolver.resolve("photo.jpg", setOf("photo.jpg"))
+            UniqueNameResolver.resolve("photo.jpg", setOf("photo.jpg")),
         )
     }
 
@@ -29,7 +28,7 @@ class UniqueNameResolverTest {
         val existing = setOf(NameNormalizer.normalize("Báo cáo.pdf"))
         assertEquals(
             "Báo cáo (1).pdf",
-            UniqueNameResolver.resolve("báo cáo.pdf", existing)
+            UniqueNameResolver.resolve("Báo cáo.pdf", existing),
         )
     }
 
@@ -43,7 +42,7 @@ class UniqueNameResolverTest {
         // ext > 6 ký tự → không tách
         assertEquals(
             "a.verylongext (1)",
-            UniqueNameResolver.resolve("a.verylongext", setOf("a.verylongext"))
+            UniqueNameResolver.resolve("a.verylongext", setOf("a.verylongext")),
         )
     }
 }

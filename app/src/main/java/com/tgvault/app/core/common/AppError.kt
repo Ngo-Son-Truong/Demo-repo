@@ -6,7 +6,6 @@ package com.tgvault.app.core.common
  * tầng feature map AppError -> strings.xml (SPEC §15.1.3).
  */
 sealed class AppError(message: String? = null, cause: Throwable? = null) : Exception(message, cause) {
-
     /** HTTP 401 — token sai/thu hồi */
     class InvalidToken(detail: String? = null) : AppError(detail)
 
@@ -33,7 +32,7 @@ sealed class AppError(message: String? = null, cause: Throwable? = null) : Excep
         AppError("sha256 mismatch: expected=$expected actual=$actual")
 
     /** Tệp nguồn đổi kích thước/mtime giữa chừng upload (SPEC §10.2.5) */
-    class SourceChanged : AppError("source file changed during upload")
+    class SourceChanged(detail: String? = null) : AppError(detail ?: "source file changed during upload")
 
     /** Chưa kết nối bot/channel (gateway chưa sẵn sàng) */
     class NotConnected(detail: String? = null) : AppError(detail)

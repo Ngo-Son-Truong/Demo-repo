@@ -6,12 +6,14 @@ import kotlinx.coroutines.flow.Flow
 
 /** Cấu hình (SPEC §8 — DataStore). Bot token KHÔNG nằm ở đây (M4 lưu riêng bằng Tink AEAD). */
 interface ConfigRepository {
-
     val config: Flow<DriveConfig>
 
     suspend fun current(): DriveConfig
 
-    suspend fun setConnection(botUsername: String, chatId: Long)
+    suspend fun setConnection(
+        botUsername: String,
+        chatId: Long,
+    )
 
     suspend fun clearConnection()
 
@@ -29,7 +31,10 @@ interface ConfigRepository {
 
     suspend fun setEncryptionEnabled(value: Boolean)
 
-    suspend fun setAppLock(enabled: Boolean, timeoutSec: Int)
+    suspend fun setAppLock(
+        enabled: Boolean,
+        timeoutSec: Int,
+    )
 
     /** localRevision tăng ở MỌI thay đổi index (FR-IDX-3/4, SPEC §11). */
     suspend fun incrementLocalRevision(): Long

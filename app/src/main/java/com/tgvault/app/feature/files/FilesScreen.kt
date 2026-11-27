@@ -13,6 +13,6 @@ fun FilesScreen() {
     EmptyState(
         icon = Icons.Rounded.CloudUpload,
         title = stringResource(R.string.files_empty_title),
-        message = stringResource(R.string.files_empty_message)
+        message = stringResource(R.string.files_empty_message),
     )
 }

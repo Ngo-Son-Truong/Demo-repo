@@ -2,11 +2,11 @@ package com.tgvault.app.data.remote
 
 import com.tgvault.app.core.common.AppError
 import com.tgvault.app.core.common.TimeProvider
-import java.util.ArrayDeque
-import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.ArrayDeque
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Rate limiter cho lệnh gửi/pin/xoá (SPEC §9.3), theo từng chatId:
@@ -20,9 +20,8 @@ import kotlinx.coroutines.sync.withLock
  */
 class TelegramRateLimiter(
     private val timeProvider: TimeProvider,
-    private val config: Config = Config()
+    private val config: Config = Config(),
 ) {
-
     data class Config(
         val minIntervalMs: Long = 1_100,
         val maxIntervalMs: Long = 5_000,
@@ -30,11 +29,12 @@ class TelegramRateLimiter(
         val windowMaxCalls: Int = 18,
         val rateLimitExtraDelayMs: Long = 1_000,
         /** Số lần thành công liên tiếp trước khi nới nhịp gửi về gần mặc định */
-        val successStreakToRelax: Int = 5
+        val successStreakToRelax: Int = 5,
     )
 
     private inner class ChatState {
         val mutex = Mutex()
+
         // MIN_VALUE = chưa gửi lệnh nào (tránh chờ oan ở lệnh đầu tiên, kể cả với đồng hồ ảo bắt đầu từ 0)
         var lastCallAt = Long.MIN_VALUE
         var pauseUntil = 0L
@@ -49,7 +49,10 @@ class TelegramRateLimiter(
      * Chạy [block] (MỘT lệnh gửi) sau khi chờ đủ nhịp. Giữ mutex trong suốt lệnh gọi
      * nên các lệnh gửi cùng chatId luôn nối tiếp nhau (SPEC §9.3: hàng đợi dùng chung).
      */
-    suspend fun <T> withPermit(chatId: Long, block: suspend () -> T): T {
+    suspend fun <T> withPermit(
+        chatId: Long,
+        block: suspend () -> T,
+    ): T {
         val state = states.getOrPut(chatId) { ChatState() }
         return state.mutex.withLock {
             awaitTurn(state)
@@ -72,11 +75,16 @@ class TelegramRateLimiter(
                 state.window.removeFirst()
             }
 
-            var waitMs = maxOf(
-                state.pauseUntil - now,
-                state.lastCallAt + state.currentIntervalMs - now,
-                0L
-            )
+            // lastCallAt = MIN_VALUE nghĩa là chưa gửi lệnh nào — phải loại ra khỏi
+            // phép cộng, nếu không MIN_VALUE + interval - now tràn sang số dương khổng lồ
+            val sinceLastCall =
+                if (state.lastCallAt == Long.MIN_VALUE) 0L else state.lastCallAt + state.currentIntervalMs - now
+            var waitMs =
+                maxOf(
+                    state.pauseUntil - now,
+                    sinceLastCall,
+                    0L,
+                )
             if (state.window.size >= config.windowMaxCalls) {
                 val oldest = state.window.first()
                 waitMs = maxOf(waitMs, oldest + config.windowSizeMs - now + 1)
@@ -97,7 +105,10 @@ class TelegramRateLimiter(
         }
     }
 
-    private fun onRateLimited(state: ChatState, retryAfterSeconds: Long) {
+    private fun onRateLimited(
+        state: ChatState,
+        retryAfterSeconds: Long,
+    ) {
         val now = timeProvider.nowMillis()
         state.pauseUntil = now + retryAfterSeconds * 1_000 + config.rateLimitExtraDelayMs
         state.currentIntervalMs =

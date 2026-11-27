@@ -12,9 +12,9 @@ import com.tgvault.app.R
 enum class TopLevelDestination(
     val route: String,
     @StringRes val labelRes: Int,
-    val icon: ImageVector
+    val icon: ImageVector,
 ) {
     FILES("files", R.string.tab_files, Icons.Rounded.Folder),
     TRANSFERS("transfers", R.string.tab_transfers, Icons.Rounded.SwapVert),
-    SETTINGS("settings", R.string.tab_settings, Icons.Rounded.Settings)
+    SETTINGS("settings", R.string.tab_settings, Icons.Rounded.Settings),
 }

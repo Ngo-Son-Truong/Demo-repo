@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NodeDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(node: NodeEntity)
 
@@ -36,7 +35,7 @@ interface NodeDao {
         SELECT * FROM nodes
         WHERE nameNormalized LIKE '%' || :normalizedQuery || '%' AND trashedAt IS NULL
         ORDER BY nameNormalized ASC
-        """
+        """,
     )
     fun searchByName(normalizedQuery: String): Flow<List<NodeEntity>>
 
@@ -49,12 +48,16 @@ interface NodeDao {
             SELECT n.id FROM nodes n JOIN subtree s ON n.parentId = s.id
         )
         SELECT id FROM subtree
-        """
+        """,
     )
     suspend fun subtreeIds(rootId: String): List<String>
 
     @Query("UPDATE nodes SET trashedAt = :trashedAt, trashRootId = :trashRootId WHERE id IN (:ids)")
-    suspend fun markTrashed(ids: List<String>, trashedAt: Long?, trashRootId: String?)
+    suspend fun markTrashed(
+        ids: List<String>,
+        trashedAt: Long?,
+        trashRootId: String?,
+    )
 
     @Query("UPDATE nodes SET trashedAt = NULL, trashRootId = NULL WHERE trashRootId = :trashRootId")
     suspend fun restoreTrash(trashRootId: String)
@@ -68,24 +71,38 @@ interface NodeDao {
     suspend fun expiredTrashRootIds(cutoff: Long): List<String>
 
     @Query("UPDATE nodes SET name = :name, nameNormalized = :nameNormalized, modifiedAt = :modifiedAt WHERE id = :id")
-    suspend fun rename(id: String, name: String, nameNormalized: String, modifiedAt: Long)
+    suspend fun rename(
+        id: String,
+        name: String,
+        nameNormalized: String,
+        modifiedAt: Long,
+    )
 
     @Query(
         """
         UPDATE nodes SET parentId = :newParentId, name = :name, nameNormalized = :nameNormalized,
         modifiedAt = :modifiedAt WHERE id = :id
-        """
+        """,
     )
-    suspend fun move(id: String, newParentId: String?, name: String, nameNormalized: String, modifiedAt: Long)
+    suspend fun move(
+        id: String,
+        newParentId: String?,
+        name: String,
+        nameNormalized: String,
+        modifiedAt: Long,
+    )
 
     @Query("UPDATE nodes SET status = :status WHERE id = :id")
-    suspend fun updateStatus(id: String, status: String)
+    suspend fun updateStatus(
+        id: String,
+        status: String,
+    )
 
     @Query(
         """
         UPDATE nodes SET sha256 = :sha256, chunkCount = :chunkCount, chunkSize = :chunkSize,
         status = :status, modifiedAt = :modifiedAt WHERE id = :id
-        """
+        """,
     )
     suspend fun updateUploadMeta(
         id: String,
@@ -93,7 +110,7 @@ interface NodeDao {
         chunkCount: Int,
         chunkSize: Int,
         status: String,
-        modifiedAt: Long
+        modifiedAt: Long,
     )
 
     @Query("DELETE FROM nodes WHERE id = :id")
@@ -105,7 +122,7 @@ interface NodeDao {
         """
         SELECT COUNT(*) AS fileCount, COALESCE(SUM(sizeBytes), 0) AS totalBytes
         FROM nodes WHERE type = 'FILE' AND trashedAt IS NULL
-        """
+        """,
     )
     fun observeFileStats(): Flow<FileStatsTuple>
 

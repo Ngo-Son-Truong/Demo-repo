@@ -1,9 +1,9 @@
 package com.tgvault.app.core.common
 
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /** Nguồn thời gian inject được để test bằng đồng hồ ảo (PLAN M1-4). */
 fun interface TimeProvider {
@@ -16,8 +16,10 @@ object SystemTimeProvider : TimeProvider {
 
 /** Dispatchers inject được để test. */
 @Singleton
-class DispatcherProvider @Inject constructor() {
-    val io: CoroutineDispatcher = Dispatchers.IO
-    val default: CoroutineDispatcher = Dispatchers.Default
-    val main: CoroutineDispatcher = Dispatchers.Main
-}
+class DispatcherProvider
+    @Inject
+    constructor() {
+        val io: CoroutineDispatcher = Dispatchers.IO
+        val default: CoroutineDispatcher = Dispatchers.Default
+        val main: CoroutineDispatcher = Dispatchers.Main
+    }

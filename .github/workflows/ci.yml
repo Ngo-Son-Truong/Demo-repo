@@ -2,24 +2,196 @@ name: CI
 
 on: [push, pull_request]
 
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
 
-      # Repo không commit gradle-wrapper.jar (xem docs/DECISIONS.md) — sinh wrapper rồi build
+      # gradle-wrapper.jar đã commit sẵn trong repo — setup-gradle chỉ để cache
       - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.14.3"
 
-      - name: Generate Gradle wrapper
-        run: gradle wrapper --gradle-version 8.14.3 --distribution-type bin
+      # Tự format bằng ktlintFormat rồi push lại (chỉ push event) — môi trường
+      # không có IDE vẫn giữ style chuẩn; ktlintFormat idempotent nên không loop
+      - name: ktlintFormat (auto-fix)
+        run: ./gradlew ktlintFormat > /tmp/format.log 2>&1 || true
 
-      - name: ktlint + detekt + lint + unit tests + assembleDebug
-        run: ./gradlew --stacktrace ktlintCheck detekt lintDebug testDebugUnitTest assembleDebug
+      - name: Push format nếu có thay đổi
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "style: ktlintFormat tự động"
+            git push origin "HEAD:${{ github.ref_name }}"
+          else
+            echo "không có gì cần format"
+          fi
+
+      # Redirect thẳng vào file (KHÔNG pipe qua tee — pipefail che mất exit code).
+      # Tách từng bước để biết chính xác bước nào hỏng.
+      - name: ktlintCheck
+        run: ./gradlew --stacktrace ktlintCheck > /tmp/step-output.log 2>&1
+
+      - name: detekt
+        run: ./gradlew --stacktrace detekt > /tmp/step-output.log 2>&1
+
+      - name: testDebugUnitTest
+        run: ./gradlew --stacktrace testDebugUnitTest > /tmp/step-output.log 2>&1
+
+      # Live test Telegram thật (PLAN M1-7): chỉ chạy khi repo có secrets
+      # TELEGRAM_BOT_TOKEN + TELEGRAM_CHANNEL_ID (bot phải là admin của channel đó).
+      # Token nằm trong GitHub secrets — KHÔNG commit vào repo; local.properties đã gitignore.
+      - name: Chuẩn bị local.properties cho live test
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+        run: |
+          if [ -n "$TG_BOT_TOKEN" ] && [ -n "$TG_CHANNEL_ID" ]; then
+            printf 'tgvault.botToken=%s\ntgvault.chatId=%s\n' "$TG_BOT_TOKEN" "$TG_CHANNEL_ID" > local.properties
+            echo "TELEGRAM_LIVE=1" >> "$GITHUB_ENV"
+          else
+            echo "thiếu secrets TELEGRAM_BOT_TOKEN/TELEGRAM_CHANNEL_ID — bỏ qua live test"
+          fi
+
+      - name: Telegram live test (khi có secrets)
+        if: env.TELEGRAM_LIVE == '1'
+        run: ./gradlew --stacktrace testDebugUnitTest -PrunTelegramLive=true --tests "com.tgvault.app.data.remote.TelegramLiveTest" > /tmp/step-output.log 2>&1
+
+      - name: lintDebug
+        run: ./gradlew --stacktrace lintDebug > /tmp/step-output.log 2>&1
+
+      - name: assembleDebug
+        run: ./gradlew --stacktrace assembleDebug > /tmp/step-output.log 2>&1
+
+      # Chạy DÙ THÀNH CÔNG HAY THẤT BẠI: gói log + APK + báo cáo
+      - name: Gói kết quả build
+        if: always()
+        run: |
+          mkdir -p /tmp/dist
+          strip_ansi() { sed -e 's/\x1b\[[0-9;]*m//g'; }
+          {
+            echo "## Chẩn đoán CI (job status: ${{ job.status }})"
+            echo ""
+            echo "### Phần 'What went wrong' (nếu có):"
+            grep -B2 -A 25 "What went wrong" /tmp/step-output.log 2>/dev/null | strip_ansi || echo "(không có — build không lỗi ở bước cuối)"
+            echo ""
+            echo "### Lỗi biên dịch Kotlin (dòng 'e:') — nếu có:"
+            grep -E "^e: " /tmp/step-output.log 2>/dev/null | strip_ansi | head -100 || echo "(không có)"
+            echo ""
+            echo "### Ktlint violations (txt reports):"
+            find /home/runner/work -path "*reports/ktlint*" -name "*.txt" 2>/dev/null | while read -r f; do
+              echo "--- $f"
+              strip_ansi < "$f"
+            done || true
+            echo ""
+            echo "### Detekt report (nếu có):"
+            find /home/runner/work -path "*reports/detekt*" -name "*.txt" 2>/dev/null | while read -r f; do
+              echo "--- $f"
+              head -60 "$f"
+            done || true
+            echo ""
+            echo "### Lint report (nếu có):"
+            find /home/runner/work -path "*reports*" -name "lint-results-*.txt" 2>/dev/null | while read -r f; do
+              echo "--- $f"
+              head -120 "$f"
+            done || true
+            echo ""
+            echo "### Test thất bại (nếu có):"
+            python3 tools/extract_failed_tests.py || true
+            echo ""
+            echo "### Tail log bước cuối:"
+            tail -40 /tmp/step-output.log 2>&1 | strip_ansi || true
+            echo ""
+            echo "### APK tìm thấy:"
+            find /home/runner/work -name "*.apk" 2>/dev/null | head -10 || true
+          } > /tmp/diag.txt || true
+          find /home/runner/work -name "*.apk" -exec cp {} /tmp/dist/ \; 2>>/tmp/diag.txt || true
+          REPORTS_DIR=$(find /home/runner/work -maxdepth 7 -type d -path "*app/build" 2>/dev/null | head -1)
+          if [ -n "$REPORTS_DIR" ] && [ -d "$REPORTS_DIR/reports" ]; then
+            (cd "$REPORTS_DIR" && zip -qr /tmp/dist/build-reports.zip reports test-results) || true
+          fi
+          exit 0
+
+      # Chỉ push event: 2 run push+PR chạy song song, cùng upload --clobber vào 1 release
+      # sẽ đá nhau (409/422). Release chỉ là kênh phụ — lỗi upload không được làm đỏ job.
+      - name: Publish release ci-debug
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view ci-debug >/dev/null 2>&1 || \
+            gh release create ci-debug --prerelease --target "${{ github.sha }}" \
+              --title "CI debug build" \
+              --notes "Kết quả CI mới nhất (tự động ghi đè mỗi lần chạy)." || true
+          shopt -s nullglob
+          files=(/tmp/dist/*)
+          if [ ${#files[@]} -gt 0 ]; then
+            gh release upload ci-debug "${files[@]}" --clobber \
+              || echo "::warning:: upload release asset lỗi — không chặn job"
+          fi
+          gh release edit ci-debug --notes-file /tmp/diag.txt \
+            || echo "::warning:: edit release notes lỗi — không chặn job"
+
+      # Tóm tắt vào PR nếu có PR đang mở cho branch này
+      - name: Tóm tắt CI vào PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_REF: ${{ github.head_ref }}
+          REF_NAME: ${{ github.ref_name }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          BRANCH="${HEAD_REF:-$REF_NAME}"
+          PR_NUMBER=$(gh api "repos/${REPO}/pulls?head=${REPO%/*}:${BRANCH}&state=open" --jq '.[0].number' 2>/dev/null || true)
+          {
+            if [ "$JOB_STATUS" = "success" ]; then
+              echo "## ✅ CI xanh — ktlint · detekt · unit test · lint · assembleDebug"
+              echo ""
+              echo "- APK: https://github.com/${REPO}/releases/download/ci-debug/app-debug.apk"
+              echo "- Báo cáo test/lint: https://github.com/${REPO}/releases/download/ci-debug/build-reports.zip"
+            else
+              echo "## ❌ CI thất bại — xem chẩn đoán trong release notes:"
+              echo "https://github.com/${REPO}/releases/tag/ci-debug"
+            fi
+          } > /tmp/ci-summary.md
+          [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ] && \
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file /tmp/ci-summary.md || true
+
+      # Kênh dự phòng đáng tin cậy: comment chẩn đoán ĐẦY ĐỦ vào PR (đọc được qua API)
+      - name: Comment chẩn đoán chi tiết vào PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_REF: ${{ github.head_ref }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          BRANCH="${HEAD_REF:-$REF_NAME}"
+          PR_NUMBER=$(gh api "repos/${REPO}/pulls?head=${REPO%/*}:${BRANCH}&state=open" --jq '.[0].number' 2>/dev/null || true)
+          {
+            echo "### Chẩn đoán chi tiết (run ${{ github.run_number }})"
+            echo ""
+            echo '<details><summary>Mở rộng</summary>'
+            echo ""
+            echo '```text'
+            head -c 55000 /tmp/diag.txt 2>/dev/null || echo "(không có diag)"
+            echo '```'
+            echo "</details>"
+          } > /tmp/ci-diag-comment.md
+          [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ] && \
+            gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file /tmp/ci-diag-comment.md || true

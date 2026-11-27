@@ -5,8 +5,10 @@ package com.tgvault.app.core.common
  * So sánh theo tên đã chuẩn hoá (không phân biệt hoa thường/dấu).
  */
 object UniqueNameResolver {
-
-    fun resolve(desired: String, existingNormalized: Set<String>): String {
+    fun resolve(
+        desired: String,
+        existingNormalized: Set<String>,
+    ): String {
         if (NameNormalizer.normalize(desired) !in existingNormalized) return desired
 
         val dot = desired.lastIndexOf('.')
