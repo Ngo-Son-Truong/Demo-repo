@@ -192,7 +192,8 @@ class OnboardingViewModel
                     var rights = gateway.getBotRights(chatId)
                     // Cờ can_pin_messages hay bị Telegram cache trễ — nếu chỉ thiếu ghim,
                     // thử ghim THẬT (gửi tin tự xoá) trước khi báo thiếu quyền.
-                    if (!rights.hasAll && rights.canPost && rights.canDelete && !rights.canPin) {
+                    val onlyPinMissing = !rights.hasAll && rights.canPost && rights.canDelete
+                    if (onlyPinMissing) {
                         val pinOk = runCatching { gateway.probePin(chatId) }.getOrDefault(false)
                         if (pinOk) rights = rights.copy(canPin = true)
                     }
