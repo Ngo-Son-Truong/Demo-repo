@@ -1,9 +1,9 @@
 package com.tgvault.app.core.thumb
 
 import android.content.Context
-import android.os.Build
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.util.LruCache
 import com.tgvault.app.core.crypto.CryptoManager
 import com.tgvault.app.core.crypto.CryptoScheme
