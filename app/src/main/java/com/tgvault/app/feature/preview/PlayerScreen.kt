@@ -39,9 +39,8 @@ import com.tgvault.app.core.designsystem.Spacing
  * Màn phát (M9+ mở rộng): video toàn màn hình; audio = icon + thanh điều khiển.
  * Stream trực tiếp từ Telegram qua NodeStreamDataSource (Range request + cache đĩa LRU).
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, UnstableApi::class)
 @Composable
-@OptIn(UnstableApi::class)
 fun PlayerScreen(
     onBack: () -> Unit,
     viewModel: PlayerViewModel = hiltViewModel(),
