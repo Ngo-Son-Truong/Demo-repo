@@ -24,6 +24,7 @@ import com.tgvault.app.feature.preview.PlayerScreen
 import com.tgvault.app.feature.preview.PreviewScreen
 import com.tgvault.app.feature.settings.SettingsScreen
 import com.tgvault.app.feature.transfers.TransfersScreen
+import com.tgvault.app.feature.trash.TrashScreen
 
 /**
  * Điều hướng chính (SPEC §15.3): 3 tab; NavigationSuiteScaffold tự thích ứng
@@ -90,6 +91,7 @@ fun TgVaultNavHost() {
             ) {
                 PreviewScreen(onBack = { navController.popBackStack() })
             }
+            composable(TopLevelDestination.TRASH.route) { TrashScreen() }
             composable(TopLevelDestination.TRANSFERS.route) { TransfersScreen() }
             composable(TopLevelDestination.SETTINGS.route) { SettingsScreen() }
         }

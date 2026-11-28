@@ -5,6 +5,7 @@ import android.util.Log
 import com.tgvault.app.core.common.TokenRedactor
 import com.tgvault.app.data.remote.ConnectionManager
 import com.tgvault.app.data.transfer.TransferNotifier
+import com.tgvault.app.data.transfer.TrashCleanupScheduler
 import com.tgvault.app.data.transfer.TransferScheduler
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -34,6 +35,8 @@ class TgVaultApp : Application() {
 
         fun indexBackupManager(): com.tgvault.app.core.indexbackup.IndexBackupManager
 
+        fun trashCleanupScheduler(): TrashCleanupScheduler
+
         fun configRepository(): com.tgvault.app.domain.repository.ConfigRepository
     }
 
@@ -52,6 +55,8 @@ class TgVaultApp : Application() {
         val entryPoint = EntryPointAccessors.fromApplication(this, BootstrapEntryPoint::class.java)
         // M3-3: thông báo tiến trình gộp theo dõi hàng đợi
         entryPoint.transferNotifier().start(appScope)
+        // M9-3: dọn thùng rác định kỳ (6h)
+        entryPoint.trashCleanupScheduler().schedule()
         // M3-5: phục hồi transfer RUNNING mồ côi + enqueue lại hàng đợi
         appScope.launch {
             // M4-3: khôi phục gateway từ token đã mã hoá (nếu đã onboarding)

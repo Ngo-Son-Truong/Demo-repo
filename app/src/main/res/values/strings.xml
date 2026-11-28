@@ -173,4 +173,12 @@
     <string name="onb_restore_working">Restoring…</string>
     <string name="preview_error">Không xem trước được tệp này</string>
     <string name="preview_text_truncated">… (chỉ hiển thị 1 MiB đầu)</string>
+    <string name="tab_trash">Trash</string>
+    <string name="trash_title">Trash</string>
+    <string name="trash_empty">Trash is empty</string>
+    <string name="trash_restore">Restore</string>
+    <string name="trash_delete_forever">Delete forever</string>
+    <string name="trash_delete_confirm_title">Delete permanently?</string>
+    <string name="trash_delete_confirm_body">This item and its contents will be permanently removed from Telegram storage.</string>
+    <string name="trash_banner">Items in Trash are automatically deleted after 30 days.</string>
 </resources>

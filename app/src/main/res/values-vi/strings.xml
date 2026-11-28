@@ -173,4 +173,12 @@
     <string name="onb_restore_working">Đang khôi phục…</string>
     <string name="preview_error">Không xem trước được tệp này</string>
     <string name="preview_text_truncated">… (chỉ hiển thị 1 MiB đầu)</string>
+    <string name="tab_trash">Thùng rác</string>
+    <string name="trash_title">Thùng rác</string>
+    <string name="trash_empty">Thùng rác trống</string>
+    <string name="trash_restore">Khôi phục</string>
+    <string name="trash_delete_forever">Xoá vĩnh viễn</string>
+    <string name="trash_delete_confirm_title">Xoá vĩnh viễn?</string>
+    <string name="trash_delete_confirm_body">Mục này và nội dung bên trong sẽ bị xoá vĩnh viễn khỏi kho Telegram.</string>
+    <string name="trash_banner">Mục trong thùng rác tự động xoá sau 30 ngày.</string>
 </resources>
