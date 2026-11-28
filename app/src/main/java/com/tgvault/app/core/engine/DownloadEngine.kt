@@ -66,15 +66,7 @@ class DownloadEngine
             val staging = File(stagingDir(), "${transfer.nodeId}.part")
             // M7-2: node mã hoá → mở khoá + cipher dùng chung; ciphertext tải về tệp tạm
             // trong cacheDir rồi giải mã streaming (không đưa nguyên chunk vào RAM — D7)
-            val cipher =
-                if (node.encrypted) {
-                    if (!cryptoManager.unlock()) {
-                        throw AppError.Transient("mã hoá đã bật nhưng không mở được khoá — mở lại app")
-                    }
-                    com.tgvault.app.core.crypto.NodeCipher(cryptoManager.requireKey())
-                } else {
-                    null
-                }
+            val cipher = cipherForNode(node.encrypted)
             val cipherTmpDir = File(context.cacheDir, "dec").apply { mkdirs() }
             try {
                 val chunks = chunkDao.forNode(node.id).sortedBy { it.idx }
@@ -107,15 +99,18 @@ class DownloadEngine
                         val freshPath = gateway.resolveFilePath(requireNotNull(chunk.tgFileId))
                         bytesDone =
                             fetchChunk(
-                                cipher = cipher,
-                                gateway = gateway,
+                                ctx =
+                                    ChunkFetchContext(
+                                        cipher = cipher,
+                                        gateway = gateway,
+                                        nodeId = node.id,
+                                        nodeChunkCount = node.chunkCount,
+                                        cipherTmpDir = cipherTmpDir,
+                                    ),
                                 freshPath = freshPath,
-                                nodeId = node.id,
-                                nodeChunkCount = node.chunkCount,
                                 chunk = chunk,
                                 chunkStart = chunkStart,
                                 raf = raf,
-                                cipherTmpDir = cipherTmpDir,
                             )
                         transferDao.updateProgress(
                             transferId,
@@ -206,25 +201,39 @@ class DownloadEngine
                 stagingDir().usableSpace
             }
 
+        /** Ngữ cảnh dùng chung cho việc tải một chunk (gom để tránh parameter list dài). */
+        private class ChunkFetchContext(
+            val cipher: com.tgvault.app.core.crypto.NodeCipher?,
+            val gateway: com.tgvault.app.data.remote.TelegramGateway,
+            val nodeId: String,
+            val nodeChunkCount: Int,
+            val cipherTmpDir: File,
+        )
+
+        /** M7-2: cipher cho node mã hoá; null nếu node plaintext. Ném Transient nếu không mở được khoá. */
+        private fun cipherForNode(encrypted: Boolean): com.tgvault.app.core.crypto.NodeCipher? {
+            if (!encrypted) return null
+            if (!cryptoManager.unlock()) {
+                throw AppError.Transient("mã hoá đã bật nhưng không mở được khoá — mở lại app")
+            }
+            return com.tgvault.app.core.crypto.NodeCipher(cryptoManager.requireKey())
+        }
+
         /**
          * Tải một chunk và ghi vào [raf] tại vị trí hiện tại; trả bytesDone mới (chunkStart + bytes).
          * Chunk mã hoá: tải nguyên ciphertext (AesGcmHkdfStreaming giải tuần tự, không Range)
          * vào tệp tạm, giải mã streaming; AEAD tag sai → Transient (SPEC §12).
          */
         private suspend fun fetchChunk(
-            cipher: com.tgvault.app.core.crypto.NodeCipher?,
-            gateway: com.tgvault.app.data.remote.TelegramGateway,
+            ctx: ChunkFetchContext,
             freshPath: String,
-            nodeId: String,
-            nodeChunkCount: Int,
             chunk: com.tgvault.app.data.local.entity.ChunkEntity,
             chunkStart: Long,
             raf: RandomAccessFile,
-            cipherTmpDir: File,
         ): Long {
-            if (cipher == null) {
+            if (ctx.cipher == null) {
                 var chunkBytes = 0L
-                gateway.download(freshPath, raf.toOutputStream(), null) { written -> chunkBytes = written }
+                ctx.gateway.download(freshPath, raf.toOutputStream(), null) { written -> chunkBytes = written }
                 if (chunkBytes != chunk.storedSizeBytes) {
                     throw AppError.Transient(
                         "chunk ${chunk.idx} tải thiếu: $chunkBytes/${chunk.storedSizeBytes}",
@@ -232,32 +241,18 @@ class DownloadEngine
                 }
                 return chunkStart + chunkBytes
             }
-            val tmp = File(cipherTmpDir, "$nodeId-${chunk.idx}.enc")
+            val tmp = File(ctx.cipherTmpDir, "${ctx.nodeId}-${chunk.idx}.enc")
             try {
                 var cipherBytes = 0L
                 tmp.outputStream().use { out ->
-                    gateway.download(freshPath, out, null) { written -> cipherBytes = written }
+                    ctx.gateway.download(freshPath, out, null) { written -> cipherBytes = written }
                 }
                 if (cipherBytes != chunk.storedSizeBytes) {
                     throw AppError.Transient(
                         "chunk ${chunk.idx} tải thiếu: $cipherBytes/${chunk.storedSizeBytes}",
                     )
                 }
-                val aad = com.tgvault.app.core.crypto.CryptoScheme.chunkAad(nodeId, chunk.idx, nodeChunkCount)
-                var plainBytes = 0L
-                try {
-                    cipher.newDecryptingStream(tmp.inputStream(), aad).use { dec ->
-                        val buf = ByteArray(DECRYPT_BUFFER_SIZE)
-                        while (true) {
-                            val n = dec.read(buf)
-                            if (n < 0) break
-                            raf.write(buf, 0, n)
-                            plainBytes += n
-                        }
-                    }
-                } catch (e: java.io.IOException) {
-                    throw AppError.Transient("chunk ${chunk.idx} không giải mã được (bị sửa?): ${e.message}")
-                }
+                val plainBytes = decryptInto(ctx.cipher, tmp, ctx.nodeId, chunk, nodeChunkCount = ctx.nodeChunkCount, raf)
                 if (plainBytes != chunk.plainSizeBytes) {
                     throw AppError.Transient(
                         "chunk ${chunk.idx} giải mã thiếu: $plainBytes/${chunk.plainSizeBytes}",
@@ -267,6 +262,33 @@ class DownloadEngine
             } finally {
                 tmp.delete()
             }
+        }
+
+        /** Giải mã stream chunk vào [raf]; trả số byte plaintext. AEAD tag sai → Transient. */
+        private fun decryptInto(
+            cipher: com.tgvault.app.core.crypto.NodeCipher,
+            tmp: File,
+            nodeId: String,
+            chunk: com.tgvault.app.data.local.entity.ChunkEntity,
+            nodeChunkCount: Int,
+            raf: RandomAccessFile,
+        ): Long {
+            val aad = com.tgvault.app.core.crypto.CryptoScheme.chunkAad(nodeId, chunk.idx, nodeChunkCount)
+            var plainBytes = 0L
+            try {
+                cipher.newDecryptingStream(tmp.inputStream(), aad).use { dec ->
+                    val buf = ByteArray(DECRYPT_BUFFER_SIZE)
+                    while (true) {
+                        val n = dec.read(buf)
+                        if (n < 0) break
+                        raf.write(buf, 0, n)
+                        plainBytes += n
+                    }
+                }
+            } catch (e: java.io.IOException) {
+                throw AppError.Transient("chunk ${chunk.idx} không giải mã được (bị sửa?): ${e.message}")
+            }
+            return plainBytes
         }
 
         private fun stagingDir(): File = File(context.cacheDir, "staging").apply { mkdirs() }

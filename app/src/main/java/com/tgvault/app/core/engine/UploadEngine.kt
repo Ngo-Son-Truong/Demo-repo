@@ -58,15 +58,7 @@ class UploadEngine
             transferDao.updateState(transferId, TransferState.RUNNING.name, timeProvider.nowMillis())
 
             // M7-2: node mã hoá → mở khoá session và dựng cipher dùng chung cho mọi chunk
-            val cipher =
-                if (node.encrypted) {
-                    if (!cryptoManager.unlock()) {
-                        throw AppError.Transient("mã hoá đã bật nhưng không mở được khoá — mở lại app")
-                    }
-                    com.tgvault.app.core.crypto.NodeCipher(cryptoManager.requireKey())
-                } else {
-                    null
-                }
+            val cipher = cipherForNode(node.encrypted)
             val totalChunks = ((node.sizeBytes + node.chunkSize - 1) / node.chunkSize).toInt()
 
             val doneIdx =
@@ -234,6 +226,15 @@ class UploadEngine
                         ?: throw AppError.SourceChanged()
                 else -> throw AppError.SourceChanged()
             }
+
+        /** M7-2: cipher cho node mã hoá; null nếu node plaintext. Ném Transient nếu không mở được khoá. */
+        private fun cipherForNode(encrypted: Boolean): com.tgvault.app.core.crypto.NodeCipher? {
+            if (!encrypted) return null
+            if (!cryptoManager.unlock()) {
+                throw AppError.Transient("mã hoá đã bật nhưng không mở được khoá — mở lại app")
+            }
+            return com.tgvault.app.core.crypto.NodeCipher(cryptoManager.requireKey())
+        }
 
         /** Bọc source để tích luỹ SHA-256 toàn tệp trong khi streaming. */
         private class HashingChunkSource(

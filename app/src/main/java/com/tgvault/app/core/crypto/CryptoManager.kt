@@ -88,8 +88,7 @@ class CryptoManager
         }
 
         /** Master key đang mở — ném IllegalStateException nếu chưa unlock. */
-        fun requireKey(): ByteArray =
-            sessionKey ?: throw IllegalStateException("khoá mã hoá chưa mở — gọi unlock() trước")
+        fun requireKey(): ByteArray = checkNotNull(sessionKey) { "khoá mã hoá chưa mở — gọi unlock() trước" }
 
         /** Xác minh passphrase người dùng nhập có mở được blob không (đổi/tắt mã hoá, M8 restore). */
         fun verifyPassphrase(passphrase: CharArray): Boolean {
