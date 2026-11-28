@@ -150,12 +150,13 @@ object CryptoScheme {
 
     /**
      * Kích thước ciphertext Tink AesGcmHkdfStreaming cho [plainSize] byte:
-     * header(40) + plain + 16 byte tag × số segment (tối thiểu 1 segment).
+     * header(40) + plain + 16 byte tag × số segment. Tink LUÔN ghi thêm 1 segment cuối
+     * (kể cả rỗng) mang cờ "last" → số segment = floor(plain/segment) + 1.
      * PHẢI khớp implementation Tink — có unit test đo lại bằng Tink thật.
      */
     fun ciphertextSizeFor(plainSize: Long): Long {
         require(plainSize > 0) { "chunk rỗng — không hỗ trợ" }
-        val segments = (plainSize + STREAM_SEGMENT_SIZE - 1) / STREAM_SEGMENT_SIZE
+        val segments = plainSize / STREAM_SEGMENT_SIZE + 1
         return STREAM_HEADER_SIZE + plainSize + segments * GCM_TAG_SIZE
     }
 
