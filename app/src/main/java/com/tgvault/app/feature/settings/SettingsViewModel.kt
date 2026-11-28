@@ -26,6 +26,7 @@ class SettingsViewModel
     constructor(
         private val configRepository: ConfigRepository,
         private val cryptoManager: com.tgvault.app.core.crypto.CryptoManager,
+        private val appLockManager: com.tgvault.app.core.security.AppLockManager,
     ) : ViewModel() {
         val config: StateFlow<DriveConfig?> =
             configRepository.config
@@ -66,6 +67,55 @@ class SettingsViewModel
         fun disableEncryption() {
             viewModelScope.launch {
                 configRepository.setEncryptionEnabled(false)
+            }
+        }
+
+        // --- Khoá app (M7-5, FR-SEC-2) ---
+
+        private val _hasPin = MutableStateFlow(appLockManager.hasPin())
+        val hasPin: StateFlow<Boolean> = _hasPin.asStateFlow()
+
+        /** PIN cũ sai khi đổi PIN — UI báo lỗi. */
+        private val _wrongOldPin = MutableStateFlow(false)
+        val wrongOldPin: StateFlow<Boolean> = _wrongOldPin.asStateFlow()
+
+        /** Bật khoá app: đặt PIN mới (timeout giữ giá trị hiện có, mặc định 60s). */
+        fun enableAppLock(pin: CharArray) {
+            viewModelScope.launch {
+                runCatching { appLockManager.setPin(pin) }
+                    .onSuccess {
+                        val timeout = config.value?.appLockTimeoutSec ?: 60
+                        configRepository.setAppLock(true, timeout)
+                        _hasPin.value = true
+                    }
+                    .onFailure { Timber.w(it, "đặt PIN thất bại") }
+            }
+        }
+
+        /** Tắt khoá app: xoá PIN, mở khoá ngay. */
+        fun disableAppLock() {
+            viewModelScope.launch {
+                configRepository.setAppLock(false, config.value?.appLockTimeoutSec ?: 60)
+                appLockManager.clearPin()
+                _hasPin.value = false
+            }
+        }
+
+        /** Đổi PIN — yêu cầu PIN cũ đúng. */
+        fun changePin(
+            oldPin: CharArray,
+            newPin: CharArray,
+        ) {
+            viewModelScope.launch {
+                val ok = appLockManager.changePin(oldPin, newPin)
+                _wrongOldPin.value = !ok
+            }
+        }
+
+        /** Đặt timeout khoá (giây; coerce 5..600 ở repository). */
+        fun setLockTimeout(timeoutSec: Int) {
+            viewModelScope.launch {
+                configRepository.setAppLock(true, timeoutSec)
             }
         }
     }

@@ -121,4 +121,28 @@
     <string name="set_encryption_disable_body">Only files uploaded afterwards will be unencrypted. Files already encrypted stay encrypted and can still be opened.</string>
     <string name="set_encryption_wrong_pass">Incorrect passphrase</string>
     <string name="action_confirm">Confirm</string>
-    </resources>
+    
+    <!-- Khoá app (M7-5) -->
+    <string name="lock_title">TgVault is locked</string>
+    <string name="lock_pin_hint">PIN</string>
+    <string name="lock_unlock">Unlock</string>
+    <string name="lock_wrong_pin">Incorrect PIN</string>
+    <string name="lock_use_biometric">Use biometrics</string>
+    <string name="lock_biometric_title">Unlock TgVault</string>
+    <string name="lock_biometric_cancel">Use PIN</string>
+    <string name="set_applock">App lock</string>
+    <string name="set_applock_sub">Require PIN or biometrics after the app is in background</string>
+    <string name="set_applock_pin_title">Set PIN (4–8 digits)</string>
+    <string name="set_applock_pin_confirm">Re-enter PIN</string>
+    <string name="set_applock_pin_mismatch">PINs don’t match</string>
+    <string name="set_applock_change_pin">Change PIN</string>
+    <string name="set_applock_old_pin">Current PIN</string>
+    <string name="set_applock_wrong_old">Current PIN is incorrect</string>
+    <string name="set_applock_timeout">Lock after</string>
+    <string name="set_applock_timeout_immediately">Immediately in background</string>
+    <string name="set_applock_timeout_1m">1 minute</string>
+    <string name="set_applock_timeout_5m">5 minutes</string>
+    <string name="set_applock_timeout_10m">10 minutes</string>
+    <string name="set_applock_disable_title">Turn off app lock?</string>
+    <string name="set_applock_disable_body">The PIN will be deleted and the app won’t lock when backgrounded.</string>
+</resources>

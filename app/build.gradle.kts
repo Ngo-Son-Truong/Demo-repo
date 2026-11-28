@@ -194,6 +194,9 @@ dependencies {
     implementation(libs.media3.common)
     implementation(libs.tink.android)
     implementation(libs.bouncycastle.bcprov)
+    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.fragment)
+    implementation(libs.androidx.lifecycle.process)
 
     // Log (che token qua TokenRedactor — SPEC §14)
     implementation(libs.timber)

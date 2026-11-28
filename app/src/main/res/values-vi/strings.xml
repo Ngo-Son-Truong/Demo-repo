@@ -121,4 +121,28 @@
     <string name="set_encryption_disable_body">Chỉ các tệp upload sau đó không mã hoá. Tệp đã mã hoá vẫn mở được bình thường.</string>
     <string name="set_encryption_wrong_pass">Passphrase không đúng</string>
     <string name="action_confirm">Xác nhận</string>
-    </resources>
+    
+    <!-- Khoá app (M7-5) -->
+    <string name="lock_title">TgVault đang khoá</string>
+    <string name="lock_pin_hint">PIN</string>
+    <string name="lock_unlock">Mở khoá</string>
+    <string name="lock_wrong_pin">PIN không đúng</string>
+    <string name="lock_use_biometric">Dùng sinh trắc học</string>
+    <string name="lock_biometric_title">Mở khoá TgVault</string>
+    <string name="lock_biometric_cancel">Dùng PIN</string>
+    <string name="set_applock">Khoá app</string>
+    <string name="set_applock_sub">Yêu cầu PIN hoặc sinh trắc học sau khi app vào nền</string>
+    <string name="set_applock_pin_title">Đặt PIN (4–8 chữ số)</string>
+    <string name="set_applock_pin_confirm">Nhập lại PIN</string>
+    <string name="set_applock_pin_mismatch">PIN nhập lại không khớp</string>
+    <string name="set_applock_change_pin">Đổi PIN</string>
+    <string name="set_applock_old_pin">PIN hiện tại</string>
+    <string name="set_applock_wrong_old">PIN hiện tại không đúng</string>
+    <string name="set_applock_timeout">Khoá sau</string>
+    <string name="set_applock_timeout_immediately">Ngay khi vào nền</string>
+    <string name="set_applock_timeout_1m">1 phút</string>
+    <string name="set_applock_timeout_5m">5 phút</string>
+    <string name="set_applock_timeout_10m">10 phút</string>
+    <string name="set_applock_disable_title">Tắt khoá app?</string>
+    <string name="set_applock_disable_body">PIN sẽ bị xoá và app không khoá khi vào nền nữa.</string>
+</resources>

@@ -22,4 +22,10 @@ class RootViewModel
             configRepository.config
                 .map { it.onboardingDone }
                 .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+        /** FR-SEC-4: bật khoá app → FLAG_SECURE (chặn screenshot/recents). */
+        val appLockEnabled: StateFlow<Boolean> =
+            configRepository.config
+                .map { it.appLockEnabled }
+                .stateIn(viewModelScope, SharingStarted.Eagerly, false)
     }

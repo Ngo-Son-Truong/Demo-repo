@@ -55,7 +55,27 @@ object CryptoScheme {
             "passphrase tối thiểu $MIN_PASSPHRASE_CHARS ký tự"
         }
         require(salt.size == SALT_SIZE) { "salt phải $SALT_SIZE byte" }
-        val pwBytes = utf8Bytes(passphrase)
+        return scryptHash(passphrase, salt)
+    }
+
+    /**
+     * Hash PIN khoá app (M7-5, FR-SEC-2) — PIN 4–8 số nên KHÔNG áp min-length của passphrase.
+     * Cùng tham số scrypt; salt riêng mỗi lần đặt.
+     */
+    fun hashPin(
+        pin: CharArray,
+        salt: ByteArray,
+    ): ByteArray {
+        require(pin.isNotEmpty()) { "PIN rỗng" }
+        require(salt.size == SALT_SIZE) { "salt phải $SALT_SIZE byte" }
+        return scryptHash(pin, salt)
+    }
+
+    private fun scryptHash(
+        chars: CharArray,
+        salt: ByteArray,
+    ): ByteArray {
+        val pwBytes = utf8Bytes(chars)
         try {
             return SCrypt.generate(pwBytes, salt, SCRYPT_N, SCRYPT_R, SCRYPT_P, MASTER_KEY_SIZE)
         } finally {
