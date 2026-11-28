@@ -92,8 +92,19 @@ class ThumbnailCache
             fileId: String,
         ): ByteArray? {
             val gateway = runCatching { gatewayHolder.current() }.getOrNull() ?: return null
-            val cipher = cipherForNode(node)
-            if (cipher === CipherResult.FAIL) return null
+            return when (val cipher = cipherForNode(node)) {
+                CipherResult.FAIL -> null
+                else -> downloadAndMaybeDecrypt(gateway, node, chunk, fileId, cipher)
+            }
+        }
+
+        private suspend fun downloadAndMaybeDecrypt(
+            gateway: com.tgvault.app.data.remote.TelegramGateway,
+            node: Node,
+            chunk: ChunkEntity,
+            fileId: String,
+            cipher: CipherResult,
+        ): ByteArray? {
             val path = gateway.resolveFilePath(fileId)
             val raw = ByteArrayOutputStream(chunk.storedSizeBytes.toInt().coerceAtLeast(MIN_BUFFER))
             gateway.download(path, raw, null)
