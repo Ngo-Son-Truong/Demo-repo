@@ -37,7 +37,8 @@ class IndexSnapshotCodecTest {
             )
         val chunk =
             ChunkEntity(
-                id = 5, // id autoGenerate — KHÔNG được đưa vào snapshot
+                // id autoGenerate — KHÔNG được đưa vào snapshot
+                id = 5,
                 nodeId = "n1",
                 idx = 0,
                 plainSizeBytes = 12345,
