@@ -48,6 +48,9 @@ android {
                 "GradleDependency",
                 "NewerVersionAvailable",
                 "OldTargetApi",
+                // Media3 đánh dấu phần lớn API là UnstableApi; lint androidx không nhận
+                // Kotlin @OptIn — tắt check này (chuẩn trong media3 samples chính chủ).
+                "UnsafeOptInUsageError",
                 "AndroidGradlePluginVersion",
             )
     }
