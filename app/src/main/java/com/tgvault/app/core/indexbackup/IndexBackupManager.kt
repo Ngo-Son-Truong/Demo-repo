@@ -7,8 +7,8 @@ import com.tgvault.app.core.crypto.CryptoManager
 import com.tgvault.app.core.crypto.CryptoScheme
 import com.tgvault.app.core.crypto.NodeCipher
 import com.tgvault.app.core.indexbackup.IndexSnapshotCodec.IndexManifest
-import com.tgvault.app.core.indexbackup.IndexSnapshotCodec.ManifestPart
 import com.tgvault.app.core.indexbackup.IndexSnapshotCodec.KdfInfo
+import com.tgvault.app.core.indexbackup.IndexSnapshotCodec.ManifestPart
 import com.tgvault.app.core.indexbackup.IndexSnapshotCodec.SnapshotHeader
 import com.tgvault.app.core.indexbackup.IndexSnapshotCodec.SnapshotPayload
 import com.tgvault.app.core.indexbackup.IndexSnapshotCodec.toEntity
@@ -20,7 +20,6 @@ import com.tgvault.app.data.remote.GatewayHolder
 import com.tgvault.app.domain.model.ChunkSource
 import com.tgvault.app.domain.repository.ConfigRepository
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
@@ -129,7 +128,10 @@ class IndexBackupManager
                             },
                     )
                 val snapshotBytes = IndexSnapshotCodec.encode(payload, header, cipher)
-                val sha = MessageDigest.getInstance("SHA-256").digest(snapshotBytes).joinToString("") { "%02x".format(it) }
+                val sha =
+                    MessageDigest.getInstance(
+                        "SHA-256",
+                    ).digest(snapshotBytes).joinToString("") { "%02x".format(it) }
 
                 // Tách phần theo chunk size cấu hình (SPEC §11)
                 val partSize = cfg.chunkSizeBytes.coerceAtLeast(1)
@@ -176,8 +178,9 @@ class IndexBackupManager
                 if (prevManifestId != null) {
                     runCatching { gateway.unpinMessage(chatId, prevManifestId) }
                 }
-                val prevPrev = prevRaw?.let { IndexSnapshotCodec.parseManifest(it)?.prev }
-                    ?.let { IndexSnapshotCodec.parseManifest(it) }
+                val prevPrev =
+                    prevRaw?.let { IndexSnapshotCodec.parseManifest(it)?.prev }
+                        ?.let { IndexSnapshotCodec.parseManifest(it) }
                 if (prevPrev != null) {
                     prevPrev.parts.forEach { runCatching { gateway.deleteMessage(chatId, it.message_id) } }
                     val prevPrevManifestId =
