@@ -1,3 +1,5 @@
+@file:OptIn(UnstableApi::class)
+
 package com.tgvault.app.feature.preview
 
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +41,7 @@ import com.tgvault.app.core.designsystem.Spacing
  * Màn phát (M9+ mở rộng): video toàn màn hình; audio = icon + thanh điều khiển.
  * Stream trực tiếp từ Telegram qua NodeStreamDataSource (Range request + cache đĩa LRU).
  */
-@OptIn(ExperimentalMaterial3Api::class, UnstableApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlayerScreen(
     onBack: () -> Unit,

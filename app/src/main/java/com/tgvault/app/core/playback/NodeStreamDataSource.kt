@@ -1,6 +1,6 @@
 package com.tgvault.app.core.playback
 
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
@@ -155,7 +155,7 @@ class NodeStreamDataSource(
         // Không cần báo cáo băng thông — analytics ngoài phạm vi SPEC
     }
 
-    override fun getUri(): Uri = Uri.parse("tgvault://stream/${node.id}")
+    override fun getUri() = "tgvault://stream/${node.id}".toUri()
 
     override fun close() {
         opened = false

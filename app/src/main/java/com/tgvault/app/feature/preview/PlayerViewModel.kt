@@ -1,3 +1,5 @@
+@file:OptIn(UnstableApi::class)
+
 package com.tgvault.app.feature.preview
 
 import android.content.Context
@@ -34,7 +36,6 @@ data class PlayerUiState(
 
 /** Màn phát video/audio streaming từ Telegram (Range request qua NodeStreamDataSource). */
 @HiltViewModel
-@OptIn(UnstableApi::class)
 class PlayerViewModel
     @Inject
     constructor(
