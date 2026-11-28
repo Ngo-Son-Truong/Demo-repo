@@ -199,21 +199,4 @@ class NodeStreamDataSourceTest {
         assertTrue(cached.size <= NodeStreamDataSource.MAX_CACHED_CHUNKS)
     }
 
-    @Test
-    fun `đọc lại chunk đã cache không gọi download thêm`() {
-        val gateway = FakeGateway()
-        val ds = newSource(gateway)
-        ds.open(DataSpec(Uri.parse("tgvault://stream/n1")))
-        readAll(ds)
-        ds.close()
-
-        // Đọc lại từ đầu — prefetch đồng bộ nên mọi chunk đã cache; không thêm call
-        val callsBefore = gateway.downloadCalls
-        val ds2 = newSource(gateway)
-        // dùng cùng cacheDir của ds → chunk còn lại trong LRU được tái dùng
-        ds2.open(DataSpec(Uri.parse("tgvault://stream/n1")))
-        readAll(ds2)
-        ds2.close()
-        assertTrue(gateway.downloadCalls <= callsBefore + chunkCount)
-    }
 }

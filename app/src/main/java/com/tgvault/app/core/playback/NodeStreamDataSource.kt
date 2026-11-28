@@ -59,7 +59,7 @@ class NodeStreamDataSource(
             readInternal(buffer, offset, readLength)
         } catch (e: Exception) {
             Timber.w(e, "stream read lỗi tại %d", position)
-            throw IOException("đọc chunk stream thất bại tại $position", e)
+            throw IOException("đọc chunk stream thất bại tại $position: ${e.message}", e)
         }
     }
 
