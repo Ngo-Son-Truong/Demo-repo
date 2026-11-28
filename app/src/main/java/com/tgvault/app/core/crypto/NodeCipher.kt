@@ -64,7 +64,7 @@ class NodeCipher(
             val key =
                 AesGcmHkdfStreamingKey.create(
                     params,
-                    SecretBytes.copyFrom(masterKey, InsecureSecretKeyAccess.getInstance()),
+                    SecretBytes.copyFrom(masterKey, InsecureSecretKeyAccess.get()),
                 )
             return KeysetHandle
                 .newBuilder()
