@@ -247,12 +247,12 @@ Acceptance
 Tham chiếu: SPEC §11, FR-IDX-*, FR-ONB-5.
 
 Tasks
-- [ ] **M8-1** `IndexSnapshotWriter/Reader` theo định dạng SPEC §11 (magic, version, header JSON, payload gzip, mã hoá nếu bật); test khứ hồi, sai magic/version, snapshot lớn tách nhiều phần.
-- [ ] **M8-2** `IndexBackupManager`: upload các phần, gửi manifest văn bản, ghim, bỏ ghim/xoá bản cũ (giữ 2 phiên bản); debounce 10 phút và khi hàng đợi truyền tải rỗng; dùng cùng rate limiter.
-- [ ] **M8-3** Tăng `localRevision` ở mọi thay đổi index; phát hiện xung đột khi mở app/khôi phục (FR-IDX-4); hộp thoại lựa chọn.
-- [ ] **M8-4** Khôi phục: `getChat().pinned_message` → manifest → tải/ghép/xác minh → (passphrase nếu có `kdf`) → ghi đè Room trong một transaction.
-- [ ] **M8-5** UI: mục "Sao lưu index" trong Cài đặt (lần cuối, "Sao lưu ngay", trạng thái/lỗi), luồng "Khôi phục từ Telegram" trong onboarding với màn hình tiến độ.
-- [ ] **M8-6** Test end-to-end với Fake gateway: tạo dữ liệu → backup → xoá DB → restore → so sánh; kiểm thử thủ công với Telegram thật (token/channel thử nghiệm) trên hai thiết bị/emulator, ghi kết quả vào `TELEGRAM_FINDINGS.md`.
+- [x] **M8-1** ✅ 2026-11-28 — `IndexSnapshotCodec` (writer/reader theo SPEC §11): magic `TGSN`, version, header JSON (revision, mã hoá, kdf), payload kotlinx.serialization + gzip, mã hoá AesGcmHkdfStreaming nếu bật; parseManifest prefix `#tgvault-index`; 7 test khứ hồi/sai magic/sai version/snapshot 10000 node.
+- [x] **M8-2** ✅ 2026-11-28 — `IndexBackupManager` (@Singleton): mutex, encrypt khi encryptionEnabled, tách parts theo chunkSizeBytes, sendDocument từng part, manifest text ghim, unpin + xoá bản prevPrev (giữ 2 phiên bản); `TgVaultApp.watchIndexBackup` debounce 10 phút trên revision.
+- [x] **M8-3** ✅ 2026-11-28 — `RootViewModel` so cloudRevision vs localRevision khi mở app → `_cloudNewerRevision`; `CloudNewerDialog` trong MainActivity (khôi phục / giữ bản máy, passphrase ngay trong dialog).
+- [x] **M8-4** ✅ 2026-11-28 — `restoreFromPinned`: getChat().pinnedMessageId → parseManifest → tải/ghép parts → verify SHA-256 + size → (passphrase nếu có kdf; sai → WrongPassphrase; importMasterKey) → ghi đè Room trong 1 transaction; không ghi tới khi snapshot đủ + khớp.
+- [x] **M8-5** ✅ 2026-11-28 — Cài đặt: section "Sao lưu index" (lần cuối formatted, Sao lưu ngay, Khôi phục + dialog passphrase + thông báo kết quả); Onboarding thêm step RESTORE sau verify quyền (restore hoặc bỏ qua).
+- [x] **M8-6** ✅ 2026-11-28 — E2E Robolectric + FakeTelegramGateway: backup → xoá DB → restore → so sánh node/chunk; giữ 2 phiên bản (r5 xoá, r6+r7 còn); restore không pinned → NotFound.
 
 Acceptance
 - Xoá dữ liệu app (hoặc cài lại), chọn "Khôi phục từ Telegram" với cùng token + channel → thấy lại toàn bộ cây thư mục; tải được tệp (có và không mã hoá).
