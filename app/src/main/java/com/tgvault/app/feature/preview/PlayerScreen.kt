@@ -1,5 +1,6 @@
 package com.tgvault.app.feature.preview
 
+import androidx.media3.common.util.UnstableApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import com.tgvault.app.core.designsystem.Spacing
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+@OptIn(UnstableApi::class)
 fun PlayerScreen(
     onBack: () -> Unit,
     viewModel: PlayerViewModel = hiltViewModel(),

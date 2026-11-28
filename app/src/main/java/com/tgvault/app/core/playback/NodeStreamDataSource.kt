@@ -1,5 +1,6 @@
 package com.tgvault.app.core.playback
 
+import androidx.media3.common.util.UnstableApi
 import android.net.Uri
 import androidx.media3.common.C
 import androidx.media3.datasource.DataSource
@@ -25,6 +26,7 @@ import java.util.concurrent.Executors
  * Lưu ý: chỉ áp dụng khi node CHƯA mã hoá (M7 sẽ cần lớp giải mã xen giữa).
  * Mọi lỗi được gói thành IOException để ExoPlayer đưa về trạng thái lỗi chuẩn.
  */
+@OptIn(UnstableApi::class)
 class NodeStreamDataSource(
     private val node: Node,
     private val chunks: List<Chunk>,
