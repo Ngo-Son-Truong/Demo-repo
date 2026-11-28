@@ -134,7 +134,11 @@ private fun CloudNewerDialog(rootViewModel: RootViewModel) {
 
     androidx.compose.material3.AlertDialog(
         onDismissRequest = rootViewModel::dismissCloudNewer,
-        title = { androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.conflict_title, rev)) },
+        title = {
+            androidx.compose.material3.Text(
+                androidx.compose.ui.res.stringResource(R.string.conflict_title, rev),
+            )
+        },
         text = {
             androidx.compose.foundation.layout.Column {
                 androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.conflict_body))
@@ -147,7 +151,11 @@ private fun CloudNewerDialog(rootViewModel: RootViewModel) {
                         onValueChange = { pass = it },
                         visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
                         singleLine = true,
-                        label = { androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.onb_enc_passphrase)) },
+                        label = {
+                            androidx.compose.material3.Text(
+                                androidx.compose.ui.res.stringResource(R.string.onb_enc_passphrase),
+                            )
+                        },
                     )
                 }
                 errorMsg?.let {

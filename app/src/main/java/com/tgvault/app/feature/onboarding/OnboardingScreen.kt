@@ -451,8 +451,9 @@ private fun RestoreStep(
                             if (state.restoreNeedsPassphrase) pass.toCharArray() else null,
                         )
                     },
-                    enabled = !state.restoreNeedsPassphrase ||
-                        pass.length >= com.tgvault.app.core.crypto.CryptoScheme.MIN_PASSPHRASE_CHARS,
+                    enabled =
+                        !state.restoreNeedsPassphrase ||
+                            pass.length >= com.tgvault.app.core.crypto.CryptoScheme.MIN_PASSPHRASE_CHARS,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Text(stringResource(R.string.onb_restore_action))
