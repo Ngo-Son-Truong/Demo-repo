@@ -209,6 +209,7 @@ fun FilesScreen(
                     items(state.nodes, key = { it.id }) { node ->
                         NodeRow(
                             node = node,
+                            parentPath = state.searchPaths[node.id],
                             onClick = { onNodeTap(node, viewModel, onOpenFile) },
                             onDownload = { viewModel.download(node) },
                             onShare = { shareNode(node) },
@@ -317,6 +318,7 @@ private fun SortMenu(
 @Composable
 private fun NodeRow(
     node: Node,
+    parentPath: String?,
     onClick: () -> Unit,
     onDownload: () -> Unit,
     onShare: () -> Unit,
@@ -329,11 +331,21 @@ private fun NodeRow(
             Text(node.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
         },
         supportingContent = {
-            if (node.isFolder) {
-                Text(stringResource(R.string.files_folder))
-            } else {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(FileUtils.formatBytes(node.sizeBytes))
+            Column {
+                if (parentPath != null && parentPath.isNotEmpty()) {
+                    Text(
+                        parentPath,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                if (node.isFolder) {
+                    Text(stringResource(R.string.files_folder))
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(FileUtils.formatBytes(node.sizeBytes))
                     if (node.status == NodeStatus.PENDING || node.status == NodeStatus.UPLOADING) {
                         Spacer(Modifier.width(Spacing.x2))
                         Text(
@@ -343,6 +355,7 @@ private fun NodeRow(
                         )
                     }
                 }
+            }
             }
         },
         leadingContent = {

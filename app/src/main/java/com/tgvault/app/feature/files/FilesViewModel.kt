@@ -36,6 +36,8 @@ data class FilesUiState(
     val query: String = "",
     val searching: Boolean = false,
     val nodes: List<Node> = emptyList(),
+    /** Khi đang tìm kiếm: nodeId → đường dẫn thư mục cha ("/a/b") — M9-4. */
+    val searchPaths: Map<String, String> = emptyMap(),
     val error: String? = null,
 )
 
@@ -65,6 +67,23 @@ class FilesViewModel
                 },
             ) { s, nodes -> s.copy(nodes = nodes) }
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FilesUiState())
+
+        /** Đường dẫn "/a/b" của các tổ tiên (không gồm chính node); kết quả chỉ có trong [byId] → chỉ hiện được phần trong kết quả. */
+        private fun buildPathString(
+            node: Node,
+            byId: Map<String, Node>,
+        ): String {
+            val parts = mutableListOf<String>()
+            var cur = node.parentId
+            var guard = 0
+            while (cur != null && guard < MAX_PATH_DEPTH) {
+                val parent = byId[cur] ?: break
+                parts.add(0, parent.name)
+                cur = parent.parentId
+                guard++
+            }
+            return if (parts.isEmpty()) "" else "/" + parts.joinToString("/")
+        }
 
         fun openFolder(node: Node) {
             if (!node.isFolder) return
@@ -207,4 +226,7 @@ class FilesViewModel
                     if (c.moveToFirst()) c.getString(0) else null
                 }
             }.getOrNull()
+        private companion object {
+            const val MAX_PATH_DEPTH = 20
+        }
     }
