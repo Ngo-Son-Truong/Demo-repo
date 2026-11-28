@@ -2,8 +2,6 @@ package com.tgvault.app.core.playback
 
 import android.net.Uri
 import androidx.media3.datasource.DataSpec
-import org.junit.Assert.assertArrayEquals
-import org.junit.Assert.assertTrue
 import com.tgvault.app.data.remote.BotInfo
 import com.tgvault.app.data.remote.BotRights
 import com.tgvault.app.data.remote.ChannelCandidate
@@ -19,6 +17,8 @@ import com.tgvault.app.domain.model.NodeStatus
 import com.tgvault.app.domain.model.NodeType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
