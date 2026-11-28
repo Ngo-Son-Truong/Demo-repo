@@ -1,6 +1,7 @@
 package com.tgvault.app.feature.preview
 
 import android.graphics.Bitmap
+import androidx.core.graphics.createBitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -215,7 +216,7 @@ private fun renderPdfPages(
                 renderer.openPage(i).use { page ->
                     val width = (page.width * PDF_RENDER_SCALE).toInt()
                     val height = (page.height * PDF_RENDER_SCALE).toInt()
-                    val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                    val bmp = createBitmap(width, height)
                     bmp.eraseColor(android.graphics.Color.WHITE)
                     page.render(bmp, null, null, android.graphics.pdf.PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
                     pages.add(bmp)
