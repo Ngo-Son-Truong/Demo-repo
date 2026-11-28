@@ -191,6 +191,8 @@ class NodeStreamDataSourceTest {
     fun `cache LRU giữ tối đa số chunk cho phép`() {
         val gateway = FakeGateway()
         val dir = sharedDir()
+        // Dọn chunk cũ từ test trước (dùng chung thư mục) — tránh LRU đếm lẫn
+        dir.listFiles()?.forEach { it.delete() }
         val ds = newSource(gateway)
         ds.open(DataSpec(Uri.parse("tgvault://stream/n1")))
         readAll(ds)
