@@ -112,6 +112,23 @@ class CryptoManager
         fun passphraseBlob(): ByteArray? =
             prefs.getString(KEY_PASSPHRASE_BLOB, null)?.let { Base64.decode(it, Base64.NO_WRAP) }
 
+        /**
+         * M8-4: nhập master key từ snapshot khi khôi phục trên máy mới — bọc lại bằng Keystore
+         * cục bộ + giữ nguyên blob passphrase gốc (để snapshot sau vẫn mở được bằng passphrase đó).
+         */
+        fun importMasterKey(
+            master: ByteArray,
+            passphraseBlob: ByteArray,
+        ) {
+            require(master.size == CryptoScheme.MASTER_KEY_SIZE) { "master key sai kích thước" }
+            val keystoreBlob = keystoreAead.encrypt(master, AD_KEYSTORE)
+            prefs.edit {
+                putString(KEY_KEYSTORE_WRAPPED, Base64.encodeToString(keystoreBlob, Base64.NO_WRAP))
+                putString(KEY_PASSPHRASE_BLOB, Base64.encodeToString(passphraseBlob, Base64.NO_WRAP))
+            }
+            setSession(master)
+        }
+
         /** Tắt mã hoá: xoá session + toàn bộ blob (tệp đã mã hoá vẫn cần master key cũ — caller cảnh báo). */
         fun disable() {
             lock()

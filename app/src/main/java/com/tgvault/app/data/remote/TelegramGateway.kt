@@ -16,6 +16,8 @@ data class ChatInfo(
     val username: String?,
     /** Nội dung tin ghim mới nhất (manifest index — SPEC §11) */
     val pinnedMessageText: String?,
+    /** messageId của tin ghim — cần để unpin/dọn snapshot cũ (M8-2) */
+    val pinnedMessageId: Long? = null,
 )
 
 /** Quyền cần của bot trong channel (FR-ONB-3). */

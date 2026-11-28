@@ -111,6 +111,8 @@ object IndexSnapshotCodec {
         val parts: List<ManifestPart>,
         /** manifest JSON nguyên văn của phiên bản trước (để xoá bản cũ hơn nữa) */
         val prev: String? = null,
+        /** messageId của tin manifest phiên bản trước (unpin/xoá khi dọn dẹp) */
+        val prevManifestMessageId: Long? = null,
     )
 
     // ---------- entity <-> DTO ----------

@@ -93,6 +93,7 @@ class BotApiGateway(
             title = chat.title,
             username = chat.username,
             pinnedMessageText = chat.pinnedMessage?.text,
+            pinnedMessageId = chat.pinnedMessage?.messageId,
         )
     }
 
@@ -103,6 +104,7 @@ class BotApiGateway(
             title = chat.title,
             username = chat.username,
             pinnedMessageText = chat.pinnedMessage?.text,
+            pinnedMessageId = chat.pinnedMessage?.messageId,
         )
     }
 
