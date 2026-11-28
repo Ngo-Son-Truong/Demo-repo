@@ -127,3 +127,13 @@ và **đồng bộ với Kotlin 2.2.21** (tránh lỗi metadata Kotlin khi dùng
   `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHANNEL_ID` (bot là admin channel test). Token ở secrets, KHÔNG commit;
   `local.properties` đã gitignore. Secrets do maintainer tự thêm qua Settings → Secrets and variables → Actions
   (bot/token CI không có quyền ghi secrets).
+
+## 2026-11-27 — Streaming video/audio trong app (mở rộng FR-PRV-4)
+
+**Bối cảnh**: SPEC gốc xếp phát video streaming vào backlog; người dùng yêu cầu xem video/nghe MP3 ngay trong app.
+
+**Quyết định**: ExoPlayer (Media3 1.5.1) + `NodeStreamDataSource` tự viết: vị trí đọc → (chunk, offset),
+tải nguyên chunk qua Range request (Telegram 206 — xác minh Q6), cache đĩa LRU tối đa 3 chunk
+(~57 MiB) trong `cacheDir/stream/<nodeId>/`, prefetch chunk kế. Không lưu file vĩnh viễn — khác
+với "Tải về" (Downloads). Fallback khi stream lỗi: màn lỗi + người dùng dùng "Tải về" + mở app ngoài.
+Chỉ áp dụng node chưa mã hoá (M7 sẽ cần lớp giải mã xen giữa).

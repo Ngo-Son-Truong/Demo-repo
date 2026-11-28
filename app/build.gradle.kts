@@ -186,6 +186,9 @@ dependencies {
 
     // Truyền tải nền (M3) + lưu token an toàn (M4)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
+    implementation(libs.media3.common)
     implementation(libs.tink.android)
 
     // Log (che token qua TokenRedactor — SPEC §14)

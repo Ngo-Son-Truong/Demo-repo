@@ -79,6 +79,9 @@ class NodeRepositoryImpl
 
         override suspend fun getNode(id: String): Node? = nodeDao.getById(id)?.toDomain()
 
+        override suspend fun getChunks(nodeId: String): List<com.tgvault.app.domain.model.Chunk> =
+            chunkDao.forNode(nodeId).sortedBy { it.idx }.map { it.toDomain() }
+
         override fun searchByName(normalizedQuery: String): Flow<List<Node>> =
             nodeDao.searchByName(normalizedQuery).map { list -> list.map { it.toDomain() } }
 

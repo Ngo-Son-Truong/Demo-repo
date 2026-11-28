@@ -87,7 +87,10 @@ import java.io.File
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilesScreen(viewModel: FilesViewModel = hiltViewModel()) {
+fun FilesScreen(
+    viewModel: FilesViewModel = hiltViewModel(),
+    onOpenFile: (Node) -> Unit = {},
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
@@ -214,7 +217,16 @@ fun FilesScreen(viewModel: FilesViewModel = hiltViewModel()) {
                     items(state.nodes, key = { it.id }) { node ->
                         NodeRow(
                             node = node,
-                            onClick = { viewModel.openFolder(node) },
+                            onClick = {
+                                when {
+                                    node.isFolder -> viewModel.openFolder(node)
+                                    node.status == NodeStatus.READY &&
+                                        FileUtils.mimeKind(node.mimeType) in
+                                            setOf(FileUtils.MimeKind.VIDEO, FileUtils.MimeKind.AUDIO) ->
+                                        onOpenFile(node)
+                                    else -> Unit
+                                }
+                            },
                             onDownload = { viewModel.download(node) },
                             onShare = { shareNode(node) },
                             onRename = { renameTarget = node },

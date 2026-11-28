@@ -98,4 +98,9 @@
     <string name="files_download">Download</string>
     <string name="files_share">Share</string>
     <string name="share_received">Adding to upload queue…</string>
+
+    <!-- Player (M9+ streaming) -->
+    <string name="player_title">Playing</string>
+    <string name="player_buffering">Loading stream…</string>
+    <string name="player_error">Can’t play this file. Check your connection and try again.</string>
 </resources>

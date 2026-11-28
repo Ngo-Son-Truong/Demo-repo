@@ -18,6 +18,9 @@ interface NodeRepository {
 
     suspend fun getNode(id: String): Node?
 
+    /** Danh sách chunk đã upload của node (theo thứ tự idx) — phục vụ streaming (M9+). */
+    suspend fun getChunks(nodeId: String): List<com.tgvault.app.domain.model.Chunk>
+
     /** Tìm theo tên đã chuẩn hoá (bỏ dấu), bỏ qua thùng rác (FR-FILE-6). */
     fun searchByName(normalizedQuery: String): Flow<List<Node>>
 

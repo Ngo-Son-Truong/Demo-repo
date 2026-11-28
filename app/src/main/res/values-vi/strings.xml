@@ -98,4 +98,9 @@
     <string name="files_download">Tải về</string>
     <string name="files_share">Chia sẻ</string>
     <string name="share_received">Đang thêm vào hàng đợi tải lên…</string>
+
+    <!-- Player (M9+ streaming) -->
+    <string name="player_title">Đang phát</string>
+    <string name="player_buffering">Đang tải stream…</string>
+    <string name="player_error">Không phát được tệp này. Kiểm tra kết nối rồi thử lại.</string>
 </resources>

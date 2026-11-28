@@ -16,7 +16,10 @@ import androidx.navigation.compose.rememberNavController
 import com.tgvault.app.core.designsystem.MotionConfig
 import com.tgvault.app.core.designsystem.MotionSpecs
 import com.tgvault.app.core.designsystem.currentMotionConfig
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.tgvault.app.feature.files.FilesScreen
+import com.tgvault.app.feature.preview.PlayerScreen
 import com.tgvault.app.feature.settings.SettingsScreen
 import com.tgvault.app.feature.transfers.TransfersScreen
 
@@ -62,7 +65,17 @@ fun TgVaultNavHost() {
             enterTransition = { MotionSpecs.fadeIn(motion, MotionConfig.DURATION_NAV) },
             exitTransition = { MotionSpecs.fadeOut(motion, MotionConfig.DURATION_NAV) },
         ) {
-            composable(TopLevelDestination.FILES.route) { FilesScreen() }
+            composable(TopLevelDestination.FILES.route) {
+                FilesScreen(
+                    onOpenFile = { node -> navController.navigate("player/${node.id}") },
+                )
+            }
+            composable(
+                route = "player/{nodeId}",
+                arguments = listOf(navArgument("nodeId") { type = NavType.StringType }),
+            ) {
+                PlayerScreen(onBack = { navController.popBackStack() })
+            }
             composable(TopLevelDestination.TRANSFERS.route) { TransfersScreen() }
             composable(TopLevelDestination.SETTINGS.route) { SettingsScreen() }
         }
