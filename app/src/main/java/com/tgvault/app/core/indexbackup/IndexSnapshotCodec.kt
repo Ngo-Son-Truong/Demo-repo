@@ -236,6 +236,5 @@ object IndexSnapshotCodec {
         return out.toByteArray()
     }
 
-    private fun gunzip(data: ByteArray): ByteArray =
-        GZIPInputStream(ByteArrayInputStream(data)).use { it.readBytes() }
+    private fun gunzip(data: ByteArray): ByteArray = GZIPInputStream(ByteArrayInputStream(data)).use { it.readBytes() }
 }

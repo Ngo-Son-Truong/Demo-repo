@@ -6,15 +6,12 @@ import com.tgvault.app.core.indexbackup.IndexSnapshotCodec.toEntity
 import com.tgvault.app.core.indexbackup.IndexSnapshotCodec.toSnapshot
 import com.tgvault.app.data.local.entity.ChunkEntity
 import com.tgvault.app.data.local.entity.NodeEntity
-import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.IOException
-import java.util.Random
 
 /** M8-1: khứ hồi, sai magic/version, mã hoá, manifest roundtrip. */
 class IndexSnapshotCodecTest {
@@ -171,7 +168,14 @@ class IndexSnapshotCodecTest {
     @Test
     fun `manifest nhúng prev giữ được phiên bản cũ`() {
         val old = IndexSnapshotCodec.IndexManifest(10, "aa", 1, listOf(IndexSnapshotCodec.ManifestPart("f0", 100, 10)))
-        val new = IndexSnapshotCodec.IndexManifest(11, "bb", 2, listOf(IndexSnapshotCodec.ManifestPart("f1", 200, 20)), prev = IndexSnapshotCodec.encodeManifest(old))
+        val new =
+            IndexSnapshotCodec.IndexManifest(
+                11,
+                "bb",
+                2,
+                listOf(IndexSnapshotCodec.ManifestPart("f1", 200, 20)),
+                prev = IndexSnapshotCodec.encodeManifest(old),
+            )
         val parsed = IndexSnapshotCodec.parseManifest(IndexSnapshotCodec.encodeManifest(new))!!
         val prevParsed = IndexSnapshotCodec.parseManifest(parsed.prev)
         assertEquals(old, prevParsed)
