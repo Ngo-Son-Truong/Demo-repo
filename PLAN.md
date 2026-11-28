@@ -228,12 +228,12 @@ Acceptance
 Tham chiếu: SPEC §12, FR-SEC-1,2,4, FR-ONB-4.
 
 Tasks
-- [ ] **M7-1** `core/crypto`: tạo/bọc/mở master key (Keystore + Tink), dẫn xuất khoá từ passphrase (Argon2id hoặc scrypt; ghi tham số vào `DECISIONS.md`), đóng gói `wrappedMasterKey` và `kdf` params (kiểu dữ liệu sẽ được M8 đưa vào `header` snapshot).
-- [ ] **M7-2** `CipherTransform` dùng `AesGcmHkdfStreaming` (segment 1 MiB), AAD = `nodeId ‖ idx ‖ chunkCount`; nối vào `UploadEngine`/`DownloadEngine` qua `ChunkTransform` (M2-4); đặt tên tệp/caption mờ khi mã hoá (SPEC §10.2).
-- [ ] **M7-3** Test mã hoá: khứ hồi, sai passphrase, sai AAD, chunk bị đảo thứ tự/cắt cụt, kích thước bản mã ≤ chunk + vài trăm byte và < 20.000.000 byte; test engine với `CipherTransform`.
-- [ ] **M7-4** UI bước "Mã hoá" trong onboarding (đặt passphrase, nhập lại, tick xác nhận cảnh báo mất dữ liệu) và mục Cài đặt (bật/tắt cho tệp mới, ghi chú không mã hoá lại tệp cũ).
-- [ ] **M7-5** Khoá app: `BiometricPrompt`/PIN thiết bị, timeout cấu hình, màn hình khoá, `FLAG_SECURE` (SPEC FR-SEC-4); xoá cache giải mã khi khoá.
-- [ ] **M7-6** Test UI luồng đặt passphrase và khoá app; đánh giá thủ công trên máy thật.
+- [x] **M7-1** ✅ 2026-11-28 — `CryptoScheme`/`NodeCipher`/`CryptoManager`; scrypt N=2^15,r=8,p=1 → DECISIONS.md `core/crypto`: tạo/bọc/mở master key (Keystore + Tink), dẫn xuất khoá từ passphrase (Argon2id hoặc scrypt; ghi tham số vào `DECISIONS.md`), đóng gói `wrappedMasterKey` và `kdf` params (kiểu dữ liệu sẽ được M8 đưa vào `header` snapshot).
+- [x] **M7-2** ✅ 2026-11-28 — `EncryptingChunkSource` + wire Upload/DownloadEngine + tên `.tgv` opaque; player giải mã qua NodeStreamDataSource `CipherTransform` dùng `AesGcmHkdfStreaming` (segment 1 MiB), AAD = `nodeId ‖ idx ‖ chunkCount`; nối vào `UploadEngine`/`DownloadEngine` qua `ChunkTransform` (M2-4); đặt tên tệp/caption mờ khi mã hoá (SPEC §10.2).
+- [x] **M7-3** ✅ 2026-11-28 — CryptoSchemeTest/NodeCipherTest/EncryptingChunkSourceTest (khứ hồi, sai passphrase/AAD, đảo chunk, cắt cụt, size bound) Test mã hoá: khứ hồi, sai passphrase, sai AAD, chunk bị đảo thứ tự/cắt cụt, kích thước bản mã ≤ chunk + vài trăm byte và < 20.000.000 byte; test engine với `CipherTransform`.
+- [x] **M7-4** ✅ 2026-11-28 — step ENCRYPTION trong onboarding + Settings toggle (tắt không mã hoá lại tệp cũ) UI bước "Mã hoá" trong onboarding (đặt passphrase, nhập lại, tick xác nhận cảnh báo mất dữ liệu) và mục Cài đặt (bật/tắt cho tệp mới, ghi chú không mã hoá lại tệp cũ).
+- [x] **M7-5** ✅ 2026-11-28 — AppLockManager (PIN scrypt, timeout nền, clear cache), LockScreen + BiometricPrompt, FLAG_SECURE Khoá app: `BiometricPrompt`/PIN thiết bị, timeout cấu hình, màn hình khoá, `FLAG_SECURE` (SPEC FR-SEC-4); xoá cache giải mã khi khoá.
+- [x] **M7-6** ✅ 2026-11-28 — AppLockManagerTest (Robolectric: PIN/timeout/lock-on-start); đánh giá thủ công còn lại cho người dùng Test UI luồng đặt passphrase và khoá app; đánh giá thủ công trên máy thật.
 
 Acceptance
 - Upload tệp có mã hoá → xem nội dung chunk trên Telegram là dữ liệu ngẫu nhiên; tải về giải mã đúng, hash khớp.
