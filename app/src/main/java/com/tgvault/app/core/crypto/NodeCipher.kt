@@ -57,7 +57,7 @@ class NodeCipher(
                 AesGcmHkdfStreamingParameters
                     .builder()
                     .setKeySizeBytes(CryptoScheme.MASTER_KEY_SIZE)
-                    .setDerivedKeySizeBytes(32)
+                    .setDerivedAesGcmKeySizeBytes(32)
                     .setHkdfHashType(AesGcmHkdfStreamingParameters.HashType.SHA256)
                     .setCiphertextSegmentSizeBytes(CryptoScheme.STREAM_SEGMENT_SIZE)
                     .build()
