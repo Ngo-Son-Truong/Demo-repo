@@ -116,7 +116,7 @@ class IndexSnapshotCodecTest {
     }
 
     @Test
-    fun `snapshot lớn (10.000 node) nén và khứ hồi đúng`() {
+    fun `snapshot lớn (10000 node) nén và khứ hồi đúng`() {
         val nodes =
             (1..10_000).map {
                 NodeEntity(
