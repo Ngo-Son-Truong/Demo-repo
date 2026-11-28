@@ -17,8 +17,6 @@
     <string name="transfers_empty_message">Your uploads and downloads will show up here.</string>
 
     <!-- Màn hình Cài đặt (placeholder) -->
-    <string name="settings_placeholder_title">Settings</string>
-    <string name="settings_placeholder_message">Telegram account, transfers, storage and appearance options will live here.</string>
 
     <!-- Thông báo truyền tải (M3) -->
     <string name="notif_channel_progress">Transfer progress</string>
