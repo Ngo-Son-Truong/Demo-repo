@@ -228,7 +228,6 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             },
         )
     }
-}
 
     if (showPassphraseDialog) {
         PassphraseDialog(
