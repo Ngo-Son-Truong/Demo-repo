@@ -36,8 +36,7 @@ class TrashCleanupWorkerTest {
         TrashCleanupWorker.depsOverride = null
     }
 
-    private fun buildWorker(): TrashCleanupWorker =
-        TrashCleanupWorker(context, mockk<WorkerParameters>(relaxed = true))
+    private fun buildWorker(): TrashCleanupWorker = TrashCleanupWorker(context, mockk<WorkerParameters>(relaxed = true))
 
     @Test
     fun `doWork gọi purgeExpiredTrash 30 ngày và success`() =
