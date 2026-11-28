@@ -4,8 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
-import androidx.core.graphics.scale
 import android.util.LruCache
+import androidx.core.graphics.scale
 import com.tgvault.app.core.crypto.CryptoManager
 import com.tgvault.app.core.crypto.CryptoScheme
 import com.tgvault.app.core.crypto.NodeCipher
