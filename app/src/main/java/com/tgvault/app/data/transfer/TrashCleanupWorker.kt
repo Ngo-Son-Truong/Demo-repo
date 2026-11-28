@@ -48,7 +48,7 @@ class TrashCleanupWorker(
     companion object {
         const val WORK_NAME = "trash_cleanup_periodic"
         const val TTL_MILLIS = 30L * 24 * 60 * 60 * 1000
-        private const val INTERVAL_HOURS = 6L
+        internal const val INTERVAL_HOURS = 6L
     }
 }
 
