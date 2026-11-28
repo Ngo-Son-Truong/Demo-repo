@@ -77,7 +77,7 @@ Giả định lớn nhất: yêu cầu "dùng Telegram làm nơi lưu trữ dữ
 - **FR-PRV-1**: Ảnh: xem toàn màn hình, zoom/pan, vuốt xuống để đóng.
 - **FR-PRV-2**: Văn bản thuần (`text/*`, tối đa 1 MiB hiển thị đầu tệp).
 - **FR-PRV-3**: PDF qua `PdfRenderer` (nền tảng).
-- **FR-PRV-4**: Loại khác (video, audio, zip…): tải về cache rồi mở bằng app ngoài (`ACTION_VIEW`). Streaming nằm trong backlog.
+- **FR-PRV-4**: Video/audio: **phát streaming trong app** (ExoPlayer + DataSource tuỳ biến đọc chunk qua Range request, cache đĩa LRU tự dọn — *sửa đổi 2026-11-27 theo yêu cầu người dùng, trước đây là backlog*). Loại còn lại (zip…): tải về cache rồi mở bằng app ngoài (`ACTION_VIEW`).
 - Thumbnail: tạo cục bộ cho ảnh (tối đa 320 px, WebP), lưu cache; tệp khác dùng icon theo loại.
 
 ### 4.5 Index

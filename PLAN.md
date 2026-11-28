@@ -265,7 +265,7 @@ Tham chiếu: FR-PRV-*, FR-FILE-5,6.
 
 Tasks
 - [ ] **M9-1** Thumbnail ảnh cục bộ (tối đa 320 px, WebP), cache trong `cacheDir`; tải bằng Coil với `Fetcher` riêng cho Node (tải chunk đầu nếu ảnh ≤ 1 chunk; tệp lớn hơn: dùng icon); sinh thumbnail khi upload để khỏi tải lại.
-- [ ] **M9-2** Xem trước ảnh (zoom/pan, shared element từ thumbnail, vuốt xuống để đóng), văn bản (≤ 1 MiB đầu tệp), PDF (`PdfRenderer`); loại khác → màn hình tải về + "Mở bằng…".
+- [ ] **M9-2** Xem trước ảnh (zoom/pan, shared element từ thumbnail, vuốt xuống để đóng), văn bản (≤ 1 MiB đầu tệp), PDF (`PdfRenderer`); loại khác → màn hình tải về + "Mở bằng…". **Cập nhật**: video/audio đã có player streaming trong app (xem mục backlog #4 đã thực hiện); "Mở bằng…" chỉ còn áp dụng cho zip/loại không xem trước được.
 - [ ] **M9-3** Thùng rác đầy đủ: liệt kê theo `trashRootId`, khôi phục (khôi phục cả cây con), xoá vĩnh viễn (qua M2-7), dọn tự động > 30 ngày (một Worker định kỳ), banner thông tin.
 - [ ] **M9-4** Hoàn thiện tìm kiếm (toàn drive, hiển thị đường dẫn thư mục cha, bỏ dấu tiếng Việt, kết quả không gồm mục trong thùng rác).
 - [ ] **M9-5** Test: thumbnail pipeline, khôi phục/xoá cây thư mục, Worker dọn thùng rác, UI xem trước.
@@ -300,7 +300,7 @@ Acceptance
 1. **Local Bot API server** (tuỳ chọn, người dùng tự host): bỏ giới hạn 20 MB khi tải, chunk lớn hơn, nhanh hơn rất nhiều.
 2. **Backend TDLib** (đăng nhập bằng tài khoản người dùng): khôi phục danh mục bằng cách quét lịch sử channel, tệp lớn hơn trên mỗi tin nhắn; đổi lại cần thư viện native, `api_id/api_hash`, và rủi ro điều khoản khi tự động hoá tài khoản người dùng.
 3. Tự động sao lưu ảnh/thư mục (lịch, Wi-Fi/sạc, mẫu loại trừ).
-4. Phát video/audio streaming từ chunk (ExoPlayer + `DataSource` tuỳ biến, Range theo chunk).
+4. ~~Phát video/audio streaming từ chunk (ExoPlayer + `DataSource` tuỳ biến, Range theo chunk)~~ **ĐÃ LÀM SỚM (2026-11-27, theo yêu cầu người dùng)**: `NodeStreamDataSource` + PlayerScreen; xem DECISIONS 2026-11-27. Tương tác duy nhất với các mốc còn lại: **M7 mã hoá** sẽ cần lớp giải mã xen giữa trước khi đưa bytes cho ExoPlayer.
 5. Nhiều drive/nhiều channel; widget; chia sẻ giữa nhiều người (kênh/nhóm chung).
 6. Layout máy tính bảng nâng cao, drag & drop, kéo thả giữa thư mục.
 7. Tìm kiếm toàn văn (FTS5), thẻ (tag), mục yêu thích.
