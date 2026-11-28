@@ -111,12 +111,13 @@ class AppLockManagerTest {
             assertTrue(appLock.locked.value)
 
             appLockEnabled = false
-            val appLock2 = AppLockManager(
-                ApplicationProvider.getApplicationContext(),
-                configRepository,
-                cryptoManager,
-                timeProvider,
-            )
+            val appLock2 =
+                AppLockManager(
+                    ApplicationProvider.getApplicationContext(),
+                    configRepository,
+                    cryptoManager,
+                    timeProvider,
+                )
             appLock2.lockOnStartIfEnabled()
             assertFalse(appLock2.locked.value)
         }
