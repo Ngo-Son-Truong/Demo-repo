@@ -80,7 +80,12 @@ class CryptoSchemeTest {
     fun `ciphertextSizeFor khớp kích thước Tink thật`() {
         val cipher = NodeCipher(CryptoScheme.generateMasterKey())
         val aad = CryptoScheme.chunkAad("n", 0, 1)
-        for (plainSize in listOf(1L, 1_000L, CryptoScheme.STREAM_SEGMENT_SIZE.toLong(), 2L * CryptoScheme.STREAM_SEGMENT_SIZE + 7)) {
+        for (plainSize in listOf(
+            1L,
+            1_000L,
+            CryptoScheme.STREAM_SEGMENT_SIZE.toLong(),
+            2L * CryptoScheme.STREAM_SEGMENT_SIZE + 7,
+        )) {
             val sink = java.io.ByteArrayOutputStream()
             cipher.newEncryptingStream(sink, aad).use { out ->
                 var left = plainSize

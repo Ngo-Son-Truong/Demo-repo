@@ -29,7 +29,12 @@ class EncryptingChunkSourceTest {
     @Test
     fun `length báo kích thước ciphertext (Content-Length)`() {
         val plain = ByteArray(100_000).also { Random(1).nextBytes(it) }
-        val src = EncryptingChunkSource(NodeCipher(CryptoScheme.generateMasterKey()), CryptoScheme.chunkAad("n", 0, 1), BytesChunkSource(plain))
+        val src =
+            EncryptingChunkSource(
+                NodeCipher(CryptoScheme.generateMasterKey()),
+                CryptoScheme.chunkAad("n", 0, 1),
+                BytesChunkSource(plain),
+            )
         assertEquals(CryptoScheme.ciphertextSizeFor(plain.size.toLong()), src.length)
     }
 
@@ -58,7 +63,8 @@ class EncryptingChunkSourceTest {
     @Test
     fun `writeTo không đóng sink của caller`() {
         val aad = CryptoScheme.chunkAad("n", 0, 1)
-        val src = EncryptingChunkSource(NodeCipher(CryptoScheme.generateMasterKey()), aad, BytesChunkSource(ByteArray(1000)))
+        val src =
+            EncryptingChunkSource(NodeCipher(CryptoScheme.generateMasterKey()), aad, BytesChunkSource(ByteArray(1000)))
         var closed = false
         val sink =
             object : ByteArrayOutputStream() {

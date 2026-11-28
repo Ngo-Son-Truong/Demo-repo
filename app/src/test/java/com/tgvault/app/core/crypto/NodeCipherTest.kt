@@ -25,8 +25,7 @@ class NodeCipherTest {
     private fun decrypt(
         ciphertext: ByteArray,
         aad: ByteArray,
-    ): ByteArray =
-        cipher.newDecryptingStream(ByteArrayInputStream(ciphertext), aad).use { it.readBytes() }
+    ): ByteArray = cipher.newDecryptingStream(ByteArrayInputStream(ciphertext), aad).use { it.readBytes() }
 
     @Test
     fun `roundtrip dữ liệu lớn hơn 1 segment (2,5 MiB)`() {

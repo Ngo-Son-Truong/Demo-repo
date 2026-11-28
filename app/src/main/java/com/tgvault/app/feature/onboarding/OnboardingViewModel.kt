@@ -37,9 +37,9 @@ data class OnboardingUiState(
     val error: OnboardingError? = null,
 ) {
     val canGoBack: Boolean get() =
-            step != OnboardingStep.WELCOME &&
-                step != OnboardingStep.ENCRYPTION &&
-                step != OnboardingStep.DONE
+        step != OnboardingStep.WELCOME &&
+            step != OnboardingStep.ENCRYPTION &&
+            step != OnboardingStep.DONE
 }
 
 @HiltViewModel
