@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
+import androidx.core.graphics.scale
 import android.util.LruCache
 import com.tgvault.app.core.crypto.CryptoManager
 import com.tgvault.app.core.crypto.CryptoScheme
@@ -164,7 +165,7 @@ class ThumbnailCache
             val scale = MAX_DIM.toFloat() / maxSide
             val w = (src.width * scale).toInt().coerceAtLeast(1)
             val h = (src.height * scale).toInt().coerceAtLeast(1)
-            val scaled = Bitmap.createScaledBitmap(src, w, h, true)
+            val scaled = src.scale(w, h)
             if (scaled != src) src.recycle()
             return scaled
         }
