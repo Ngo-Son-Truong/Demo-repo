@@ -4,7 +4,6 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.tgvault.app.core.common.TimeProvider
 import com.tgvault.app.core.crypto.CryptoManager
-import com.tgvault.app.core.indexbackup.IndexSnapshotCodec.toEntity
 import com.tgvault.app.data.local.TgVaultDatabase
 import com.tgvault.app.data.local.entity.NodeEntity
 import com.tgvault.app.data.remote.BotInfo
@@ -30,7 +29,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -52,8 +50,7 @@ private class FakeGateway : TelegramGateway {
 
     override fun watchForChannel(): Flow<ChannelCandidate> = emptyFlow()
 
-    override suspend fun getChat(chatId: Long) =
-        ChatInfo(chatId, "ch", null, pinnedText, pinnedId)
+    override suspend fun getChat(chatId: Long) = ChatInfo(chatId, "ch", null, pinnedText, pinnedId)
 
     override suspend fun getChatByUsername(username: String) = getChat(-100)
 
