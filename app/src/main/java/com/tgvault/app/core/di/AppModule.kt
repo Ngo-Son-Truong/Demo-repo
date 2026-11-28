@@ -7,10 +7,10 @@ import com.tgvault.app.core.common.SystemTimeProvider
 import com.tgvault.app.core.common.TimeProvider
 import com.tgvault.app.core.thumb.NodeThumbnailFetcher
 import com.tgvault.app.core.thumb.ThumbnailCache
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import javax.inject.Singleton

@@ -66,12 +66,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -79,10 +79,10 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.tgvault.app.R
-import com.tgvault.app.core.thumb.ThumbnailCache
 import com.tgvault.app.core.designsystem.Spacing
 import com.tgvault.app.core.designsystem.components.EmptyState
 import com.tgvault.app.core.designsystem.components.TgTextField
+import com.tgvault.app.core.thumb.ThumbnailCache
 import com.tgvault.app.core.util.FileUtils
 import com.tgvault.app.domain.model.Node
 import com.tgvault.app.domain.model.NodeSortField
