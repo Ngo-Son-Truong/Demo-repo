@@ -171,4 +171,6 @@
     <string name="onb_restore_action">Restore</string>
     <string name="onb_restore_skip">Start fresh</string>
     <string name="onb_restore_working">Restoring…</string>
+    <string name="preview_error">Không xem trước được tệp này</string>
+    <string name="preview_text_truncated">… (chỉ hiển thị 1 MiB đầu)</string>
 </resources>

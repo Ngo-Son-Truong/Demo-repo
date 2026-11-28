@@ -482,10 +482,13 @@ private fun onNodeTap(
         viewModel.openFolder(node)
         return
     }
-    val streamable =
-        FileUtils.mimeKind(node.mimeType) in
-            setOf(FileUtils.MimeKind.VIDEO, FileUtils.MimeKind.AUDIO)
-    if (node.status == NodeStatus.READY && streamable) onOpenFile(node)
+    val previewable =
+        when (FileUtils.mimeKind(node.mimeType)) {
+            FileUtils.MimeKind.VIDEO, FileUtils.MimeKind.AUDIO -> true
+            FileUtils.MimeKind.IMAGE, FileUtils.MimeKind.TEXT, FileUtils.MimeKind.PDF -> true
+            else -> false
+        }
+    if (node.status == NodeStatus.READY && previewable) onOpenFile(node)
 }
 
 /** Chờ download xong rồi mở share chooser qua FileProvider. */

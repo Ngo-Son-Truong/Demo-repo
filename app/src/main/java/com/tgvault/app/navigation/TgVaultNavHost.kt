@@ -19,7 +19,9 @@ import com.tgvault.app.core.designsystem.MotionConfig
 import com.tgvault.app.core.designsystem.MotionSpecs
 import com.tgvault.app.core.designsystem.currentMotionConfig
 import com.tgvault.app.feature.files.FilesScreen
+import com.tgvault.app.core.util.FileUtils
 import com.tgvault.app.feature.preview.PlayerScreen
+import com.tgvault.app.feature.preview.PreviewScreen
 import com.tgvault.app.feature.settings.SettingsScreen
 import com.tgvault.app.feature.transfers.TransfersScreen
 
@@ -67,7 +69,13 @@ fun TgVaultNavHost() {
         ) {
             composable(TopLevelDestination.FILES.route) {
                 FilesScreen(
-                    onOpenFile = { node -> navController.navigate("player/${node.id}") },
+                    onOpenFile = { node ->
+                        when (FileUtils.mimeKind(node.mimeType)) {
+                            FileUtils.MimeKind.VIDEO, FileUtils.MimeKind.AUDIO ->
+                                navController.navigate("player/${node.id}")
+                            else -> navController.navigate("preview/${node.id}")
+                        }
+                    },
                 )
             }
             composable(
@@ -75,6 +83,12 @@ fun TgVaultNavHost() {
                 arguments = listOf(navArgument("nodeId") { type = NavType.StringType }),
             ) {
                 PlayerScreen(onBack = { navController.popBackStack() })
+            }
+            composable(
+                route = "preview/{nodeId}",
+                arguments = listOf(navArgument("nodeId") { type = NavType.StringType }),
+            ) {
+                PreviewScreen(onBack = { navController.popBackStack() })
             }
             composable(TopLevelDestination.TRANSFERS.route) { TransfersScreen() }
             composable(TopLevelDestination.SETTINGS.route) { SettingsScreen() }
