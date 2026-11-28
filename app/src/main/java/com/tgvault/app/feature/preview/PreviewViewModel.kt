@@ -180,12 +180,14 @@ class PreviewViewModel
             BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
             if (bounds.outWidth <= 0) return null
             var sample = 1
-            while (bounds.outWidth / (sample * 2) >= MAX_IMAGE_DIM && bounds.outHeight / (sample * 2) >= MAX_IMAGE_DIM) {
+            while (
+                bounds.outWidth / (sample * 2) >= MAX_IMAGE_DIM &&
+                bounds.outHeight / (sample * 2) >= MAX_IMAGE_DIM
+            ) {
                 sample *= 2
             }
-            val decoded =
-                BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply { inSampleSize = sample })
-                    ?: return null
+            val opts = BitmapFactory.Options().apply { inSampleSize = sample }
+            val decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, opts) ?: return null
             return PreviewContent.Image(scaleDown(decoded))
         }
 
