@@ -31,8 +31,9 @@ timber = "5.0.1"
 coil = "3.2.0"
 tink = "1.18.0"
 biometric = "1.1.0"
-# TODO(M7): xác nhận argon2kt tồn tại ở phiên bản này; fallback scrypt (BouncyCastle) — xem DECISIONS.md
-argon2kt = "1.6.1"
+# M7: chọn scrypt (BouncyCastle) thay argon2kt — argon2kt cần native lib, không chạy được JVM unit test.
+scrypt của BouncyCastle là pure-Java: test JVM được, minSdk 29 đã bundle runtime BC tương thích.
+bouncycastle = "1.78.1"
 
 # Chất lượng code
 ktlint-plugin = "12.2.0"
@@ -101,7 +102,7 @@ coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" 
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tink" }
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
-argon2kt = { module = "com.lambdapioneer.argon2kt:argon2kt", version.ref = "argon2kt" }
+bouncycastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 
 # Test
 junit = { module = "junit:junit", version.ref = "junit" }

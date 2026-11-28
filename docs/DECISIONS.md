@@ -137,3 +137,18 @@ tải nguyên chunk qua Range request (Telegram 206 — xác minh Q6), cache đ�
 (~57 MiB) trong `cacheDir/stream/<nodeId>/`, prefetch chunk kế. Không lưu file vĩnh viễn — khác
 với "Tải về" (Downloads). Fallback khi stream lỗi: màn lỗi + người dùng dùng "Tải về" + mở app ngoài.
 Chỉ áp dụng node chưa mã hoá (M7 sẽ cần lớp giải mã xen giữa).
+
+## 2026-11-27 — M7: tham số mã hoá đầu-cuối (SPEC §12)
+
+- **KDF passphrase = scrypt của BouncyCastle** (`bcprov-jdk18on:1.78.1`), N=2^15, r=8, p=1, salt 16 byte
+  ngẫu nhiên → KEK 32 byte; bọc master key bằng AES-256-GCM (nonce 12 byte ngẫu nhiên).
+  Blob = `version(1)‖salt‖nonce‖ct` = 77 byte. Hằng số duy nhất tại `core/crypto/CryptoScheme.kt`.
+  Lý do chọn scrypt thay argon2kt: argon2kt cần native lib → JVM unit test (M7-3) không chạy được;
+  scrypt BouncyCastle pure-Java, minSdk 29 đã bundle runtime tương thích.
+- **Master key**: 32 byte `SecureRandom`; bọc Keystore (Tink `AndroidKeysetManager`, alias
+  `tgvault_crypto_master_key`) cho mở khoá cục bộ + bọc passphrase (blob 77 byte) để M8 nhúng snapshot.
+  Session key chỉ trong RAM, `lock()` xoá trắng (`CryptoManager`).
+- **Chunk cipher**: Tink `AesGcmHkdfStreaming`, segment 1 MiB, derived key 32B, HKDF-SHA256.
+  KeysetHandle dựng trực tiếp từ master key qua proto + `TinkProtoKeysetFormat.parseKeyset`
+  (`NodeCipher`) — không qua file keyset. AAD = `"tgv1-chunk"‖nodeId‖idx(BE)‖chunkCount(BE)`.
+  Overhead/chunk = 40B header + 16B/segment (~344B cho chunk 19 MiB → 19.890.176B < 20.000.000).

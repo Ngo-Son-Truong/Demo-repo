@@ -193,6 +193,7 @@ dependencies {
     implementation(libs.media3.ui)
     implementation(libs.media3.common)
     implementation(libs.tink.android)
+    implementation(libs.bouncycastle.bcprov)
 
     // Log (che token qua TokenRedactor — SPEC §14)
     implementation(libs.timber)
