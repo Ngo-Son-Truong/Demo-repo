@@ -31,6 +31,14 @@ interface ChunkDao {
     @Query("SELECT COUNT(*) FROM chunks")
     fun observeTotalCount(): Flow<Long>
 
+    /** Toàn bộ bảng — snapshot index (M8-1). */
+    @Query("SELECT * FROM chunks")
+    suspend fun getAll(): List<ChunkEntity>
+
+    /** Xoá sạch bảng — restore ghi đè trong 1 transaction (M8-4). */
+    @Query("DELETE FROM chunks")
+    suspend fun deleteAll()
+
     @Query("DELETE FROM chunks WHERE nodeId = :nodeId")
     suspend fun deleteForNode(nodeId: String)
 }

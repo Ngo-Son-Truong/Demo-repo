@@ -17,6 +17,14 @@ interface NodeDao {
     @Query("SELECT * FROM nodes WHERE id = :id")
     suspend fun getById(id: String): NodeEntity?
 
+    /** Toàn bộ bảng — snapshot index (M8-1). */
+    @Query("SELECT * FROM nodes")
+    suspend fun getAll(): List<NodeEntity>
+
+    /** Xoá sạch bảng — restore ghi đè trong 1 transaction (M8-4). */
+    @Query("DELETE FROM nodes")
+    suspend fun deleteAll()
+
     @Query("SELECT * FROM nodes WHERE id = :id")
     fun observeById(id: String): Flow<NodeEntity?>
 

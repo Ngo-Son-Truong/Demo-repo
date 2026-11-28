@@ -148,6 +148,14 @@ object CryptoScheme {
             .array()
     }
 
+    /** AAD cho snapshot index (SPEC §12): "tgv1-index" ‖ revision(BE u64). */
+    fun indexAad(revision: Long): ByteArray =
+        ByteBuffer.allocate(10 + 8)
+            .order(ByteOrder.BIG_ENDIAN)
+            .put("tgv1-index".toByteArray(Charsets.UTF_8))
+            .putLong(revision)
+            .array()
+
     /**
      * Kích thước ciphertext Tink AesGcmHkdfStreaming cho [plainSize] byte:
      * header(40) + plain + 16 byte tag × số segment. Tink LUÔN ghi thêm 1 segment cuối
