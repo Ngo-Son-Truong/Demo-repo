@@ -103,4 +103,22 @@
     <string name="player_title">Playing</string>
     <string name="player_buffering">Loading stream…</string>
     <string name="player_error">Can’t play this file. Check your connection and try again.</string>
-</resources>
+
+    <!-- Mã hoá đầu-cuối (M7) -->
+    <string name="onb_enc_title">End-to-end encryption</string>
+    <string name="onb_enc_body">Encrypt files before they leave this device — only you can read them, not even Telegram. You can enable it later in Settings.</string>
+    <string name="onb_enc_warning">Losing your passphrase means losing ALL encrypted files — we cannot recover them.</string>
+    <string name="onb_enc_passphrase">Passphrase (min. 8 characters)</string>
+    <string name="onb_enc_passphrase_confirm">Re-enter passphrase</string>
+    <string name="onb_enc_mismatch">Passphrases don’t match</string>
+    <string name="onb_enc_ack">I understand and have memorised my passphrase</string>
+    <string name="onb_enc_enable">Enable encryption</string>
+    <string name="onb_enc_skip">Later</string>
+    <string name="set_security">Security</string>
+    <string name="set_encryption">End-to-end encryption</string>
+    <string name="set_encryption_sub">Encrypts files uploaded after it’s turned on; existing files are unchanged</string>
+    <string name="set_encryption_disable_title">Turn off encryption?</string>
+    <string name="set_encryption_disable_body">Only files uploaded afterwards will be unencrypted. Files already encrypted stay encrypted and can still be opened.</string>
+    <string name="set_encryption_wrong_pass">Incorrect passphrase</string>
+    <string name="action_confirm">Confirm</string>
+    </resources>

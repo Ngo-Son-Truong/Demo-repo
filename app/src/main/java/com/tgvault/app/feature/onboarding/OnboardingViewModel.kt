@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
-/** Các bước onboarding (SPEC §15.3 màn 2). Mã hoá nối ở M7 (FR-ONB-4). */
-enum class OnboardingStep { WELCOME, CREATE_BOT, ENTER_TOKEN, CONNECT_CHANNEL, VERIFY_RIGHTS, DONE }
+/** Các bước onboarding (SPEC §15.3 màn 2). ENCRYPTION = bước đặt passphrase (M7-4, FR-ONB-4). */
+enum class OnboardingStep { WELCOME, CREATE_BOT, ENTER_TOKEN, CONNECT_CHANNEL, VERIFY_RIGHTS, ENCRYPTION, DONE }
 
 /** Lỗi onboarding thân thiện (M4-6) — UI map sang chuỗi + hành động gợi ý. */
 enum class OnboardingError { INVALID_TOKEN, NETWORK, CHANNEL_NOT_FOUND, UNKNOWN }
@@ -36,7 +36,10 @@ data class OnboardingUiState(
     val checkingRights: Boolean = false,
     val error: OnboardingError? = null,
 ) {
-    val canGoBack: Boolean get() = step != OnboardingStep.WELCOME && step != OnboardingStep.DONE
+    val canGoBack: Boolean get() =
+            step != OnboardingStep.WELCOME &&
+                step != OnboardingStep.ENCRYPTION &&
+                step != OnboardingStep.DONE
 }
 
 @HiltViewModel
@@ -45,6 +48,7 @@ class OnboardingViewModel
     constructor(
         private val connectionManager: ConnectionManager,
         private val configRepository: ConfigRepository,
+        private val cryptoManager: com.tgvault.app.core.crypto.CryptoManager,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(OnboardingUiState())
         val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
@@ -221,7 +225,32 @@ class OnboardingViewModel
                 botUsername = state.botUsername.orEmpty(),
                 chatId = chatId,
             )
-            configRepository.setOnboardingDone(true)
-            _uiState.update { it.copy(step = OnboardingStep.DONE, error = null) }
+            // M7-4 (FR-ONB-4): sau khi kết nối → bước đặt passphrase mã hoá (có thể bỏ qua);
+            // setOnboardingDone chỉ gọi khi rời bước đó (enable hoặc skip).
+            _uiState.update { it.copy(step = OnboardingStep.ENCRYPTION, error = null) }
+        }
+
+        /** Bật mã hoá đầu-cuối với passphrase người dùng (M7-4). Trả false nếu lỗi. */
+        fun enableEncryption(passphrase: CharArray) {
+            viewModelScope.launch {
+                runCatching { cryptoManager.enable(passphrase) }
+                    .onSuccess {
+                        configRepository.setEncryptionEnabled(true)
+                        configRepository.setOnboardingDone(true)
+                        _uiState.update { it.copy(step = OnboardingStep.DONE, error = null) }
+                    }
+                    .onFailure { e ->
+                        timber.log.Timber.w(e, "bật mã hoá thất bại")
+                        _uiState.update { it.copy(error = OnboardingError.UNKNOWN) }
+                    }
+            }
+        }
+
+        /** Bỏ qua mã hoá — có thể bật sau trong Cài đặt (chỉ áp dụng tệp upload sau đó). */
+        fun skipEncryption() {
+            viewModelScope.launch {
+                configRepository.setOnboardingDone(true)
+                _uiState.update { it.copy(step = OnboardingStep.DONE, error = null) }
+            }
         }
     }

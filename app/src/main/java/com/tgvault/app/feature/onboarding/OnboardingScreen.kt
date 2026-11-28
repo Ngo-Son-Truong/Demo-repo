@@ -30,21 +30,28 @@ import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.CloudUpload
 import androidx.compose.material.icons.rounded.ContentPaste
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.SmartToy
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
@@ -100,6 +107,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
                 OnboardingStep.ENTER_TOKEN -> EnterTokenStep(state, viewModel)
                 OnboardingStep.CONNECT_CHANNEL -> ConnectChannelStep(state, viewModel)
                 OnboardingStep.VERIFY_RIGHTS -> VerifyRightsStep(state, viewModel)
+                OnboardingStep.ENCRYPTION -> EncryptionStep(viewModel)
                 OnboardingStep.DONE -> DoneStep()
             }
         }
@@ -381,6 +389,87 @@ private fun RightItem(
         )
         Spacer(Modifier.size(Spacing.x2))
         Text(label)
+    }
+}
+
+/**
+ * Bước đặt passphrase mã hoá đầu-cuối (M7-4, FR-ONB-4, SPEC §12):
+ * cảnh báo rõ "mất passphrase = mất dữ liệu", nhập 2 lần + tick xác nhận. Có thể bỏ qua.
+ */
+@Composable
+private fun EncryptionStep(viewModel: OnboardingViewModel) {
+    var passphrase by remember { mutableStateOf("") }
+    var confirm by remember { mutableStateOf("") }
+    var acknowledged by remember { mutableStateOf(false) }
+    val mismatch = confirm.isNotEmpty() && confirm != passphrase
+    val canEnable =
+        passphrase.length >= com.tgvault.app.core.crypto.CryptoScheme.MIN_PASSPHRASE_CHARS &&
+            passphrase == confirm &&
+            acknowledged
+
+    StepScaffold(title = stringResource(R.string.onb_enc_title)) {
+        Text(stringResource(R.string.onb_enc_body), style = MaterialTheme.typography.bodyLarge)
+        Spacer(Modifier.height(Spacing.x4))
+        TgCard(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(Spacing.x4),
+            ) {
+                Icon(
+                    Icons.Rounded.Lock,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                )
+                Spacer(Modifier.size(Spacing.x3))
+                Text(
+                    stringResource(R.string.onb_enc_warning),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+        }
+        Spacer(Modifier.height(Spacing.x4))
+        OutlinedTextField(
+            value = passphrase,
+            onValueChange = { passphrase = it },
+            label = { Text(stringResource(R.string.onb_enc_passphrase)) },
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(Spacing.x3))
+        OutlinedTextField(
+            value = confirm,
+            onValueChange = { confirm = it },
+            label = { Text(stringResource(R.string.onb_enc_passphrase_confirm)) },
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            isError = mismatch,
+            supportingText = {
+                if (mismatch) Text(stringResource(R.string.onb_enc_mismatch))
+            },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(Modifier.height(Spacing.x2))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(checked = acknowledged, onCheckedChange = { acknowledged = it })
+            Text(
+                stringResource(R.string.onb_enc_ack),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        Spacer(Modifier.height(Spacing.x6))
+        TgPrimaryButton(
+            onClick = { viewModel.enableEncryption(passphrase.toCharArray()) },
+            enabled = canEnable,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(stringResource(R.string.onb_enc_enable))
+        }
+        Spacer(Modifier.height(Spacing.x2))
+        TgSecondaryButton(onClick = viewModel::skipEncryption, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.onb_enc_skip))
+        }
     }
 }
 

@@ -103,4 +103,22 @@
     <string name="player_title">Đang phát</string>
     <string name="player_buffering">Đang tải stream…</string>
     <string name="player_error">Không phát được tệp này. Kiểm tra kết nối rồi thử lại.</string>
-</resources>
+
+    <!-- Mã hoá đầu-cuối (M7) -->
+    <string name="onb_enc_title">Mã hoá đầu-cuối</string>
+    <string name="onb_enc_body">Mã hoá tệp ngay trên máy trước khi tải lên — chỉ bạn đọc được, kể cả Telegram cũng không. Có thể bật sau trong Cài đặt.</string>
+    <string name="onb_enc_warning">Mất passphrase = mất toàn bộ tệp đã mã hoá, chúng tôi không thể khôi phục.</string>
+    <string name="onb_enc_passphrase">Passphrase (tối thiểu 8 ký tự)</string>
+    <string name="onb_enc_passphrase_confirm">Nhập lại passphrase</string>
+    <string name="onb_enc_mismatch">Passphrase nhập lại không khớp</string>
+    <string name="onb_enc_ack">Tôi hiểu và đã ghi nhớ passphrase</string>
+    <string name="onb_enc_enable">Bật mã hoá</string>
+    <string name="onb_enc_skip">Để sau</string>
+    <string name="set_security">Bảo mật</string>
+    <string name="set_encryption">Mã hoá đầu-cuối</string>
+    <string name="set_encryption_sub">Chỉ mã hoá tệp upload sau khi bật; tệp cũ giữ nguyên</string>
+    <string name="set_encryption_disable_title">Tắt mã hoá?</string>
+    <string name="set_encryption_disable_body">Chỉ các tệp upload sau đó không mã hoá. Tệp đã mã hoá vẫn mở được bình thường.</string>
+    <string name="set_encryption_wrong_pass">Passphrase không đúng</string>
+    <string name="action_confirm">Xác nhận</string>
+    </resources>
