@@ -107,7 +107,8 @@ class PreviewViewModel
 
         // ---------------- Nguồn bytes ----------------
 
-        /** Ghép toàn bộ chunks thành plaintext (chỉ dùng cho ảnh/PDF — caller giới hạn kích thước). */
+        /** Ghép toàn bộ chunks thành plaintext (chỉ dùng
+         * cho ảnh/PDF — caller giới hạn kích thước). */
         private suspend fun allPlainBytes(node: Node): ByteArray? {
             val chunks = chunkDao.forNode(node.id).sortedBy { it.idx }
             if (chunks.isEmpty()) return null
