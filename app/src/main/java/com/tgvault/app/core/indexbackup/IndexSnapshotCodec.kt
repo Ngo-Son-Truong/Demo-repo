@@ -4,6 +4,7 @@ import com.tgvault.app.core.crypto.CryptoScheme
 import com.tgvault.app.core.crypto.NodeCipher
 import com.tgvault.app.data.local.entity.ChunkEntity
 import com.tgvault.app.data.local.entity.NodeEntity
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.ByteArrayInputStream
@@ -98,8 +99,8 @@ object IndexSnapshotCodec {
 
     @Serializable
     data class ManifestPart(
-        val file_id: String,
-        val message_id: Long,
+        @SerialName("file_id") val fileId: String,
+        @SerialName("message_id") val messageId: Long,
         val size: Long,
     )
 

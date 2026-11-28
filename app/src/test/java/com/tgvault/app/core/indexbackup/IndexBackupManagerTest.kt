@@ -138,9 +138,8 @@ class IndexBackupManagerTest {
     private var localRevision = 5L
     private var lastBackupAt: Long? = null
 
-    private fun driveConfig() =
-        DriveConfig(
-            botUsername = "bot",
+    private fun driveConfig() = DriveConfig(
+        botUsername = "bot",
             chatId = -100,
             chunkSizeBytes = 19 * 1024 * 1024,
             wifiOnly = false,
@@ -278,13 +277,13 @@ class IndexBackupManagerTest {
 
             // parts + manifest của r5 đã bị xoá khỏi "channel"
             for (p in parts1) {
-                val mid = gateway.fileIdToMessage[p.file_id]
+                val mid = gateway.fileIdToMessage[p.fileId]
                 assertTrue("part r5 phải bị xoá", mid == null || !gateway.docs.containsKey(mid))
             }
             assertTrue("manifest r5 phải bị xoá", !gateway.docs.containsKey(manifest1Id))
             // parts r6 còn nguyên (giữ 2 phiên bản)
             for (p in parts2) {
-                val mid = gateway.fileIdToMessage[p.file_id]
+                val mid = gateway.fileIdToMessage[p.fileId]
                 assertTrue(gateway.docs.containsKey(mid))
             }
             // manifest hiện tại là r7

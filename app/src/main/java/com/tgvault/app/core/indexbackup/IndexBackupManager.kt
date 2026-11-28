@@ -158,7 +158,7 @@ class IndexBackupManager
                                 fileName = "tgvault_index_r${revision}_p${i + 1}.tgsnap",
                                 caption = "#tgvault-index r$revision ${i + 1}/${parts.size}",
                             )
-                        ManifestPart(file_id = sent.fileId, message_id = sent.messageId, size = part.size.toLong())
+                        ManifestPart(fileId = sent.fileId, messageId = sent.messageId, size = part.size.toLong())
                     }
 
                 // Manifest mới → ghim
@@ -182,7 +182,7 @@ class IndexBackupManager
                     prevRaw?.let { IndexSnapshotCodec.parseManifest(it)?.prev }
                         ?.let { IndexSnapshotCodec.parseManifest(it) }
                 if (prevPrev != null) {
-                    prevPrev.parts.forEach { runCatching { gateway.deleteMessage(chatId, it.message_id) } }
+                    prevPrev.parts.forEach { runCatching { gateway.deleteMessage(chatId, it.messageId) } }
                     val prevPrevManifestId =
                         IndexSnapshotCodec.parseManifest(prevRaw!!)?.prevManifestMessageId
                     if (prevPrevManifestId != null) {

@@ -159,7 +159,7 @@ class SettingsViewModel
             if (_backupBusy.value) return
             viewModelScope.launch {
                 _backupBusy.value = true
-                when (val r = indexBackupManager.restoreFromPinned(passphrase)) {
+                when (indexBackupManager.restoreFromPinned(passphrase)) {
                     is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.Success -> {
                         _restoreNeedsPassphrase.value = false
                         _backupMessage.value = BackupMessage.RESTORE_OK
