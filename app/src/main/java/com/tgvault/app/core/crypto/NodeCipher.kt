@@ -3,15 +3,10 @@ package com.tgvault.app.core.crypto
 import com.google.crypto.tink.InsecureSecretKeyAccess
 import com.google.crypto.tink.KeysetHandle
 import com.google.crypto.tink.StreamingAead
-import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey
-import com.google.crypto.tink.proto.HashType
-import com.google.crypto.tink.proto.KeyData
-import com.google.crypto.tink.proto.KeyStatusType
-import com.google.crypto.tink.proto.Keyset
-import com.google.crypto.tink.proto.OutputPrefixType
+import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingKey
+import com.google.crypto.tink.streamingaead.AesGcmHkdfStreamingParameters
 import com.google.crypto.tink.streamingaead.StreamingAeadConfig
-import com.google.crypto.tink.subtle.TinkProtoKeysetFormat
-import com.google.protobuf.ByteString
+import com.google.crypto.tink.util.SecretBytes
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -56,48 +51,25 @@ class NodeCipher(
             }
         }
 
-        /**
-         * Dựng KeysetHandle trực tiếp từ master key (ikm) — proto keyset serialize
-         * qua TinkProtoKeysetFormat (API công khai, không cần registry writer).
-         */
+        /** Dựng KeysetHandle trực tiếp từ master key (ikm) qua API object của Tink (không qua file keyset). */
         fun buildHandle(masterKey: ByteArray): KeysetHandle {
             val params =
-                com.google.crypto.tink.proto.AesGcmHkdfStreamingParams
-                    .newBuilder()
-                    .setCiphertextSegmentSize(CryptoScheme.STREAM_SEGMENT_SIZE)
-                    .setDerivedKeySize(32)
-                    .setHkdfHashType(HashType.SHA256)
+                AesGcmHkdfStreamingParameters
+                    .builder()
+                    .setKeySizeBytes(CryptoScheme.MASTER_KEY_SIZE)
+                    .setDerivedKeySizeBytes(32)
+                    .setHkdfHashType(AesGcmHkdfStreamingParameters.HashType.SHA256)
+                    .setCiphertextSegmentSizeBytes(CryptoScheme.STREAM_SEGMENT_SIZE)
                     .build()
-            val keyData =
-                KeyData
-                    .newBuilder()
-                    .setTypeUrl("type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey")
-                    .setValue(
-                        AesGcmHkdfStreamingKey
-                            .newBuilder()
-                            .setVersion(0)
-                            .setKeyValue(ByteString.copyFrom(masterKey))
-                            .setParams(params)
-                            .build()
-                            .toByteString(),
-                    ).setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
-                    .build()
-            val keyset =
-                Keyset
-                    .newBuilder()
-                    .setPrimaryKeyId(1)
-                    .addKey(
-                        Keyset.Key
-                            .newBuilder()
-                            .setKeyId(1)
-                            .setStatus(KeyStatusType.ENABLED)
-                            .setOutputPrefixType(OutputPrefixType.RAW)
-                            .setKeyData(keyData),
-                    ).build()
-            return TinkProtoKeysetFormat.parseKeyset(
-                keyset.toByteArray(),
-                InsecureSecretKeyAccess.getInstance(),
-            )
+            val key =
+                AesGcmHkdfStreamingKey.create(
+                    params,
+                    SecretBytes.copyFrom(masterKey, InsecureSecretKeyAccess.getInstance()),
+                )
+            return KeysetHandle
+                .newBuilder()
+                .addEntry(KeysetHandle.importKey(key).withFixedId(1).makePrimary())
+                .build()
         }
     }
 }
