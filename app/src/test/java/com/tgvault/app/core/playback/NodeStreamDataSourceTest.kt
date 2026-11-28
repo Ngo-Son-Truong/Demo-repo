@@ -2,7 +2,8 @@ package com.tgvault.app.core.playback
 
 import android.net.Uri
 import androidx.media3.datasource.DataSpec
-import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertTrue
 import com.tgvault.app.data.remote.BotInfo
 import com.tgvault.app.data.remote.BotRights
 import com.tgvault.app.data.remote.ChannelCandidate
@@ -105,8 +106,6 @@ class NodeStreamDataSourceTest {
 
         override suspend fun resolveFilePath(fileId: String): String = fileId
 
-        override suspend fun token(): String = error("unused")
-
         override suspend fun getMe(): BotInfo = error("unused")
 
         override fun watchForChannel(): Flow<ChannelCandidate> = emptyFlow()
@@ -176,7 +175,7 @@ class NodeStreamDataSourceTest {
     fun `đọc toàn bộ stream khớp nội dung gốc`() {
         val ds = newSource(FakeGateway())
         ds.open(DataSpec(Uri.parse("tgvault://stream/n1")))
-        assertThat(readAll(ds)).isEqualTo(content)
+        assertArrayEquals(content, readAll(ds))
         ds.close()
     }
 
@@ -184,7 +183,7 @@ class NodeStreamDataSourceTest {
     fun `seek vào giữa chunk trả đúng đuôi dữ liệu`() {
         val ds = newSource(FakeGateway())
         ds.open(DataSpec(Uri.parse("tgvault://stream/n1"), 11, androidx.media3.common.C.LENGTH_UNSET.toLong()))
-        assertThat(readAll(ds)).isEqualTo(content.copyOfRange(11, content.size))
+        assertArrayEquals(content.copyOfRange(11, content.size), readAll(ds))
         ds.close()
     }
 
@@ -197,7 +196,7 @@ class NodeStreamDataSourceTest {
         readAll(ds)
         ds.close()
         val cached = dir.listFiles { f -> f.name.startsWith("chunk_") }!!.toList()
-        assertThat(cached.size).isAtMost(NodeStreamDataSource.MAX_CACHED_CHUNKS)
+        assertTrue(cached.size <= NodeStreamDataSource.MAX_CACHED_CHUNKS)
     }
 
     @Test
@@ -215,6 +214,6 @@ class NodeStreamDataSourceTest {
         ds2.open(DataSpec(Uri.parse("tgvault://stream/n1")))
         readAll(ds2)
         ds2.close()
-        assertThat(gateway.downloadCalls).isAtMost(callsBefore + chunkCount)
+        assertTrue(gateway.downloadCalls <= callsBefore + chunkCount)
     }
 }
