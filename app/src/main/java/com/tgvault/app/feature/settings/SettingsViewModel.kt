@@ -133,7 +133,14 @@ class SettingsViewModel
         private val _restoreNeedsPassphrase = MutableStateFlow(false)
         val restoreNeedsPassphrase: StateFlow<Boolean> = _restoreNeedsPassphrase.asStateFlow()
 
-        enum class BackupMessage { BACKUP_OK, BACKUP_FAIL, RESTORE_OK, RESTORE_NOT_FOUND, RESTORE_WRONG_PASS, RESTORE_FAIL }
+        enum class BackupMessage {
+            BACKUP_OK,
+            BACKUP_FAIL,
+            RESTORE_OK,
+            RESTORE_NOT_FOUND,
+            RESTORE_WRONG_PASS,
+            RESTORE_FAIL,
+        }
 
         fun backupNow() {
             if (_backupBusy.value) return

@@ -124,7 +124,10 @@ object IndexSnapshotCodec {
         )
 
     fun ChunkEntity.toSnapshot() =
-        SnapshotChunk(nodeId, idx, plainSizeBytes, storedSizeBytes, tgChatId, tgMessageId, tgFileId, tgFileUniqueId, sha256)
+        SnapshotChunk(
+            nodeId, idx, plainSizeBytes, storedSizeBytes,
+            tgChatId, tgMessageId, tgFileId, tgFileUniqueId, sha256,
+        )
 
     fun SnapshotNode.toEntity() =
         NodeEntity(

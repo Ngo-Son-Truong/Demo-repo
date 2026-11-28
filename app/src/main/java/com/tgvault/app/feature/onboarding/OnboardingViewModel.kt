@@ -19,7 +19,16 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /** Các bước onboarding (SPEC §15.3 màn 2). ENCRYPTION = bước đặt passphrase (M7-4, FR-ONB-4). */
-enum class OnboardingStep { WELCOME, CREATE_BOT, ENTER_TOKEN, CONNECT_CHANNEL, VERIFY_RIGHTS, RESTORE, ENCRYPTION, DONE }
+enum class OnboardingStep {
+    WELCOME,
+    CREATE_BOT,
+    ENTER_TOKEN,
+    CONNECT_CHANNEL,
+    VERIFY_RIGHTS,
+    RESTORE,
+    ENCRYPTION,
+    DONE,
+}
 
 /** Lỗi onboarding thân thiện (M4-6) — UI map sang chuỗi + hành động gợi ý. */
 enum class OnboardingError { INVALID_TOKEN, NETWORK, CHANNEL_NOT_FOUND, UNKNOWN }
