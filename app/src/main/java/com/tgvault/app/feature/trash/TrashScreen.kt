@@ -124,12 +124,13 @@ private fun TrashRow(
         )
         Column(Modifier.weight(1f).padding(start = Spacing.x3)) {
             Text(node.name, style = MaterialTheme.typography.bodyLarge, maxLines = 1)
-            val sub = buildString {
-                if (!node.isFolder) append(FileUtils.formatBytes(node.sizeBytes)).append(" · ")
-                node.trashedAt?.let {
-                    append(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it)))
+            val sub =
+                buildString {
+                    if (!node.isFolder) append(FileUtils.formatBytes(node.sizeBytes)).append(" · ")
+                    node.trashedAt?.let {
+                        append(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it)))
+                    }
                 }
-            }
             Text(
                 sub,
                 style = MaterialTheme.typography.bodySmall,

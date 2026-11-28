@@ -5,8 +5,8 @@ import android.util.Log
 import com.tgvault.app.core.common.TokenRedactor
 import com.tgvault.app.data.remote.ConnectionManager
 import com.tgvault.app.data.transfer.TransferNotifier
-import com.tgvault.app.data.transfer.TrashCleanupScheduler
 import com.tgvault.app.data.transfer.TransferScheduler
+import com.tgvault.app.data.transfer.TrashCleanupScheduler
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
