@@ -346,16 +346,16 @@ private fun NodeRow(
                 } else {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(FileUtils.formatBytes(node.sizeBytes))
-                    if (node.status == NodeStatus.PENDING || node.status == NodeStatus.UPLOADING) {
-                        Spacer(Modifier.width(Spacing.x2))
-                        Text(
-                            stringResource(R.string.files_uploading),
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.labelSmall,
-                        )
+                        if (node.status == NodeStatus.PENDING || node.status == NodeStatus.UPLOADING) {
+                            Spacer(Modifier.width(Spacing.x2))
+                            Text(
+                                stringResource(R.string.files_uploading),
+                                color = MaterialTheme.colorScheme.primary,
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        }
                     }
                 }
-            }
             }
         },
         leadingContent = {

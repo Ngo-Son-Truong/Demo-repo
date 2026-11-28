@@ -226,6 +226,7 @@ class FilesViewModel
                     if (c.moveToFirst()) c.getString(0) else null
                 }
             }.getOrNull()
+
         private companion object {
             const val MAX_PATH_DEPTH = 20
         }
