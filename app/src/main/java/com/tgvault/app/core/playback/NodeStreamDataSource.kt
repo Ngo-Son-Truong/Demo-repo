@@ -149,6 +149,10 @@ class NodeStreamDataSource(
 
     private fun chunkFile(idx: Int) = File(nodeCacheDir, "chunk_$idx")
 
+    override fun addTransferListener(transferListener: androidx.media3.datasource.TransferListener) {
+        // Không cần báo cáo băng thông — analytics ngoài phạm vi SPEC
+    }
+
     override fun getUri(): Uri = Uri.parse("tgvault://stream/${node.id}")
 
     override fun close() {
