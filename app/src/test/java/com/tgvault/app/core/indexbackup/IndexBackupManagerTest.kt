@@ -138,8 +138,9 @@ class IndexBackupManagerTest {
     private var localRevision = 5L
     private var lastBackupAt: Long? = null
 
-    private fun driveConfig() = DriveConfig(
-        botUsername = "bot",
+    private fun driveConfig() =
+        DriveConfig(
+            botUsername = "bot",
             chatId = -100,
             chunkSizeBytes = 19 * 1024 * 1024,
             wifiOnly = false,

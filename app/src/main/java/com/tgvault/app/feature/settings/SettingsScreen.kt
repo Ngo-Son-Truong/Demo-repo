@@ -333,7 +333,10 @@ private fun BackupSection(
                         SettingsViewModel.BackupMessage.BACKUP_FAIL -> stringResource(R.string.backup_fail)
                         SettingsViewModel.BackupMessage.RESTORE_OK -> stringResource(R.string.restore_ok)
                         SettingsViewModel.BackupMessage.RESTORE_NOT_FOUND -> stringResource(R.string.restore_not_found)
-                        SettingsViewModel.BackupMessage.RESTORE_WRONG_PASS -> stringResource(R.string.restore_wrong_pass)
+                        SettingsViewModel.BackupMessage.RESTORE_WRONG_PASS ->
+                            stringResource(
+                                R.string.restore_wrong_pass,
+                            )
                         SettingsViewModel.BackupMessage.RESTORE_FAIL -> stringResource(R.string.restore_fail)
                     },
                 )
