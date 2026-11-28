@@ -66,15 +66,15 @@ class FilesViewModel
                     }
                 },
             ) { s, nodes ->
-            val paths =
-                if (s.searching) {
-                    val byId = nodes.associateBy { it.id }
-                    nodes.associate { it.id to buildPathString(it, byId) }
-                } else {
-                    emptyMap()
-                }
-            s.copy(nodes = nodes, searchPaths = paths)
-        }
+                val paths =
+                    if (s.searching) {
+                        val byId = nodes.associateBy { it.id }
+                        nodes.associate { it.id to buildPathString(it, byId) }
+                    } else {
+                        emptyMap()
+                    }
+                s.copy(nodes = nodes, searchPaths = paths)
+            }
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), FilesUiState())
 
         /** Đường dẫn "/a/b" của các tổ tiên (không gồm chính node); kết quả chỉ có trong [byId] → chỉ hiện được phần trong kết quả. */
