@@ -252,7 +252,8 @@ class DownloadEngine
                         "chunk ${chunk.idx} tải thiếu: $cipherBytes/${chunk.storedSizeBytes}",
                     )
                 }
-                val plainBytes = decryptInto(ctx.cipher, tmp, ctx.nodeId, chunk, nodeChunkCount = ctx.nodeChunkCount, raf)
+                val plainBytes =
+                    decryptInto(ctx.cipher, tmp, ctx.nodeId, chunk, nodeChunkCount = ctx.nodeChunkCount, raf)
                 if (plainBytes != chunk.plainSizeBytes) {
                     throw AppError.Transient(
                         "chunk ${chunk.idx} giải mã thiếu: $plainBytes/${chunk.plainSizeBytes}",
