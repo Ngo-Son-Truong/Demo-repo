@@ -88,6 +88,8 @@ class MainActivity : FragmentActivity() {
                     else -> {
                         NotificationPermissionEffect()
                         TgVaultNavHost()
+                        // M8-3 (FR-IDX-4): bản sao lưu cloud mới hơn → hỏi khôi phục
+                        CloudNewerDialog(rootViewModel)
                     }
                 }
             }
@@ -111,4 +113,78 @@ private fun NotificationPermissionEffect() {
                 PackageManager.PERMISSION_GRANTED
         if (!granted) launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
+}
+
+/**
+ * M8-3 (FR-IDX-4): cloud có bản sao lưu mới hơn máy → hỏi khôi phục.
+ * Snapshot mã hoá → hỏi passphrase ngay trong dialog.
+ */
+@androidx.compose.runtime.Composable
+private fun CloudNewerDialog(rootViewModel: RootViewModel) {
+    val cloudRev by rootViewModel.cloudNewerRevision.collectAsStateWithLifecycle()
+    val rev = cloudRev ?: return
+    var showPass by androidx.compose.runtime.remember {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
+    var pass by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
+    var errorMsg by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
+    val wrongPassText = androidx.compose.ui.res.stringResource(R.string.restore_wrong_pass)
+    val failText = androidx.compose.ui.res.stringResource(R.string.restore_fail)
+
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = rootViewModel::dismissCloudNewer,
+        title = { androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.conflict_title, rev)) },
+        text = {
+            androidx.compose.foundation.layout.Column {
+                androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.conflict_body))
+                if (showPass) {
+                    androidx.compose.foundation.layout.Spacer(
+                        androidx.compose.ui.Modifier.height(com.tgvault.app.core.designsystem.Spacing.x2),
+                    )
+                    androidx.compose.material3.OutlinedTextField(
+                        value = pass,
+                        onValueChange = { pass = it },
+                        visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                        singleLine = true,
+                        label = { androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.onb_enc_passphrase)) },
+                    )
+                }
+                errorMsg?.let {
+                    androidx.compose.material3.Text(
+                        it,
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.error,
+                        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            androidx.compose.material3.TextButton(
+                onClick = {
+                    coroutineScope.launch {
+                        when (
+                            rootViewModel.restoreCloud(if (showPass) pass.toCharArray() else null)
+                        ) {
+                            is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.Success -> {
+                                errorMsg = null
+                            }
+                            is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.NeedPassphrase ->
+                                showPass = true
+                            com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.WrongPassphrase ->
+                                errorMsg = wrongPassText
+                            else -> errorMsg = failText
+                        }
+                    }
+                },
+            ) {
+                androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.conflict_restore))
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = rootViewModel::dismissCloudNewer) {
+                androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.conflict_keep_local))
+            }
+        },
+    )
 }

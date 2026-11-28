@@ -143,4 +143,32 @@
     <string name="set_applock_timeout_10m">10 phút</string>
     <string name="set_applock_disable_title">Tắt khoá app?</string>
     <string name="set_applock_disable_body">PIN sẽ bị xoá và app không khoá khi vào nền nữa.</string>
+
+    <!-- Sao lưu / khôi phục index (M8) -->
+    <string name="set_backup">Sao lưu index</string>
+    <string name="set_backup_last">Lần cuối: %1$s</string>
+    <string name="set_backup_never">Chưa sao lưu lần nào</string>
+    <string name="set_backup_now">Sao lưu ngay</string>
+    <string name="set_backup_restore">Khôi phục từ Telegram</string>
+    <string name="set_backup_restore_confirm_title">Khôi phục index từ Telegram?</string>
+    <string name="set_backup_restore_confirm_body">Danh mục tệp cục bộ sẽ bị THAY THẾ bằng bản sao lưu. Tệp đã tải về máy không bị ảnh hưởng.</string>
+    <string name="set_backup_passphrase_title">Bản sao lưu có mã hoá</string>
+    <string name="set_backup_passphrase_hint">Nhập passphrase đã đặt khi bật mã hoá</string>
+    <string name="backup_ok">Đã sao lưu xong</string>
+    <string name="backup_fail">Sao lưu thất bại — kiểm tra kết nối</string>
+    <string name="restore_ok">Khôi phục xong</string>
+    <string name="restore_not_found">Không tìm thấy bản sao lưu trong tin ghim</string>
+    <string name="restore_wrong_pass">Passphrase không đúng</string>
+    <string name="restore_fail">Khôi phục thất bại — dữ liệu cục bộ giữ nguyên</string>
+
+    <!-- Xung đột + khôi phục onboarding (M8-3/M8-5) -->
+    <string name="conflict_title">Có bản sao lưu mới hơn (r%1$d)</string>
+    <string name="conflict_body">Bản sao lưu trên Telegram mới hơn dữ liệu máy này. Khôi phục bản cloud, hoặc giữ bản đang có trên máy.</string>
+    <string name="conflict_restore">Khôi phục bản cloud</string>
+    <string name="conflict_keep_local">Giữ bản máy này</string>
+    <string name="onb_restore_title">Tìm thấy bản sao lưu</string>
+    <string name="onb_restore_body">Channel này có bản sao lưu index TgVault (r%1$d). Khôi phục danh mục tệp?</string>
+    <string name="onb_restore_action">Khôi phục</string>
+    <string name="onb_restore_skip">Bắt đầu trống</string>
+    <string name="onb_restore_working">Đang khôi phục…</string>
 </resources>

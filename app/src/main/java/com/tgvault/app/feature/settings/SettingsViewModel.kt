@@ -27,6 +27,7 @@ class SettingsViewModel
         private val configRepository: ConfigRepository,
         private val cryptoManager: com.tgvault.app.core.crypto.CryptoManager,
         private val appLockManager: com.tgvault.app.core.security.AppLockManager,
+        private val indexBackupManager: com.tgvault.app.core.indexbackup.IndexBackupManager,
     ) : ViewModel() {
         val config: StateFlow<DriveConfig?> =
             configRepository.config
@@ -117,5 +118,63 @@ class SettingsViewModel
             viewModelScope.launch {
                 configRepository.setAppLock(true, timeoutSec)
             }
+        }
+
+        // --- Sao lưu / khôi phục index (M8-5, FR-IDX-*) ---
+
+        private val _backupBusy = MutableStateFlow(false)
+        val backupBusy: StateFlow<Boolean> = _backupBusy.asStateFlow()
+
+        /** Thông điệp trạng thái backup/restore hiển thị một lần (snackbar). */
+        private val _backupMessage = MutableStateFlow<BackupMessage?>(null)
+        val backupMessage: StateFlow<BackupMessage?> = _backupMessage.asStateFlow()
+
+        /** Restore cần passphrase — UI mở dialog nhập. */
+        private val _restoreNeedsPassphrase = MutableStateFlow(false)
+        val restoreNeedsPassphrase: StateFlow<Boolean> = _restoreNeedsPassphrase.asStateFlow()
+
+        enum class BackupMessage { BACKUP_OK, BACKUP_FAIL, RESTORE_OK, RESTORE_NOT_FOUND, RESTORE_WRONG_PASS, RESTORE_FAIL }
+
+        fun backupNow() {
+            if (_backupBusy.value) return
+            viewModelScope.launch {
+                _backupBusy.value = true
+                val ok =
+                    runCatching { indexBackupManager.backupNow() }
+                        .getOrDefault(false)
+                _backupMessage.value = if (ok) BackupMessage.BACKUP_OK else BackupMessage.BACKUP_FAIL
+                _backupBusy.value = false
+            }
+        }
+
+        /** Khôi phục từ tin ghim — GHI ĐÈ dữ liệu cục bộ (UI phải xác nhận trước). */
+        fun restoreNow(passphrase: CharArray? = null) {
+            if (_backupBusy.value) return
+            viewModelScope.launch {
+                _backupBusy.value = true
+                when (val r = indexBackupManager.restoreFromPinned(passphrase)) {
+                    is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.Success -> {
+                        _restoreNeedsPassphrase.value = false
+                        _backupMessage.value = BackupMessage.RESTORE_OK
+                    }
+                    is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.NeedPassphrase ->
+                        _restoreNeedsPassphrase.value = true
+                    com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.WrongPassphrase ->
+                        _backupMessage.value = BackupMessage.RESTORE_WRONG_PASS
+                    com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.NotFound ->
+                        _backupMessage.value = BackupMessage.RESTORE_NOT_FOUND
+                    is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.Failure ->
+                        _backupMessage.value = BackupMessage.RESTORE_FAIL
+                }
+                _backupBusy.value = false
+            }
+        }
+
+        fun consumeBackupMessage() {
+            _backupMessage.value = null
+        }
+
+        fun restoreCancelPassphrase() {
+            _restoreNeedsPassphrase.value = false
         }
     }

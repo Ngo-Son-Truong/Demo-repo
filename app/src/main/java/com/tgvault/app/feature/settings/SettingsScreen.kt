@@ -33,6 +33,7 @@ import com.tgvault.app.R
 import com.tgvault.app.core.crypto.CryptoScheme
 import com.tgvault.app.core.designsystem.Spacing
 import com.tgvault.app.core.designsystem.components.TgPrimaryButton
+import com.tgvault.app.core.designsystem.components.TgSecondaryButton
 
 /**
  * Cài đặt — M7-4: phần Bảo mật (mã hoá đầu-cuối, FR-SEC-1).
@@ -52,6 +53,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val config by viewModel.config.collectAsStateWithLifecycle()
     val cryptoConfigured by viewModel.cryptoConfigured.collectAsStateWithLifecycle()
     val encryptionError by viewModel.encryptionError.collectAsStateWithLifecycle()
+    val backupBusy by viewModel.backupBusy.collectAsStateWithLifecycle()
+    val backupMessage by viewModel.backupMessage.collectAsStateWithLifecycle()
+    val restoreNeedsPassphrase by viewModel.restoreNeedsPassphrase.collectAsStateWithLifecycle()
 
     var showPassphraseDialog by remember { mutableStateOf(false) }
     var showDisableDialog by remember { mutableStateOf(false) }
@@ -59,6 +63,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     var showChangePinDialog by remember { mutableStateOf(false) }
     var showTimeoutDialog by remember { mutableStateOf(false) }
     var showDisableLockDialog by remember { mutableStateOf(false) }
+    var showRestoreConfirm by remember { mutableStateOf(false) }
 
     Column(
         modifier =
@@ -148,6 +153,135 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                 Text(stringResource(R.string.set_applock_change_pin))
             }
         }
+
+        // --- Sao lưu / khôi phục index (M8-5, FR-IDX-*) ---
+        Spacer(Modifier.height(Spacing.x4))
+        HorizontalDivider()
+        Spacer(Modifier.height(Spacing.x4))
+        Text(
+            stringResource(R.string.set_backup),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.height(Spacing.x2))
+        val lastBackup = config?.lastIndexBackupAt
+        Text(
+            if (lastBackup != null) {
+                stringResource(
+                    R.string.set_backup_last,
+                    java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT, java.text.DateFormat.SHORT)
+                        .format(java.util.Date(lastBackup)),
+                )
+            } else {
+                stringResource(R.string.set_backup_never)
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(Spacing.x2))
+        Row {
+            TgPrimaryButton(
+                onClick = viewModel::backupNow,
+                enabled = !backupBusy,
+            ) {
+                Text(stringResource(R.string.set_backup_now))
+            }
+            Spacer(Modifier.size(Spacing.x3))
+            TgSecondaryButton(
+                onClick = { showRestoreConfirm = true },
+                enabled = !backupBusy,
+            ) {
+                Text(stringResource(R.string.set_backup_restore))
+            }
+        }
+        if (backupBusy) {
+            Spacer(Modifier.height(Spacing.x2))
+            androidx.compose.material3.LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
+    }
+
+    // Snackbar đơn giản qua dialog nhỏ khi có thông điệp backup/restore
+    backupMessage?.let { msg ->
+        AlertDialog(
+            onDismissRequest = viewModel::consumeBackupMessage,
+            text = {
+                Text(
+                    when (msg) {
+                        SettingsViewModel.BackupMessage.BACKUP_OK -> stringResource(R.string.backup_ok)
+                        SettingsViewModel.BackupMessage.BACKUP_FAIL -> stringResource(R.string.backup_fail)
+                        SettingsViewModel.BackupMessage.RESTORE_OK -> stringResource(R.string.restore_ok)
+                        SettingsViewModel.BackupMessage.RESTORE_NOT_FOUND -> stringResource(R.string.restore_not_found)
+                        SettingsViewModel.BackupMessage.RESTORE_WRONG_PASS -> stringResource(R.string.restore_wrong_pass)
+                        SettingsViewModel.BackupMessage.RESTORE_FAIL -> stringResource(R.string.restore_fail)
+                    },
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = viewModel::consumeBackupMessage) {
+                    Text(stringResource(R.string.action_confirm))
+                }
+            },
+        )
+    }
+
+    if (showRestoreConfirm) {
+        AlertDialog(
+            onDismissRequest = { showRestoreConfirm = false },
+            title = { Text(stringResource(R.string.set_backup_restore_confirm_title)) },
+            text = { Text(stringResource(R.string.set_backup_restore_confirm_body)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showRestoreConfirm = false
+                        viewModel.restoreNow()
+                    },
+                ) {
+                    Text(stringResource(R.string.action_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRestoreConfirm = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+        )
+    }
+
+    if (restoreNeedsPassphrase) {
+        var pass by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { viewModel.restoreCancelPassphrase() },
+            title = { Text(stringResource(R.string.set_backup_passphrase_title)) },
+            text = {
+                Column {
+                    Text(
+                        stringResource(R.string.set_backup_passphrase_hint),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Spacer(Modifier.height(Spacing.x2))
+                    OutlinedTextField(
+                        value = pass,
+                        onValueChange = { pass = it },
+                        visualTransformation = PasswordVisualTransformation(),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                TgPrimaryButton(
+                    onClick = { viewModel.restoreNow(pass.toCharArray()) },
+                    enabled = pass.length >= CryptoScheme.MIN_PASSPHRASE_CHARS,
+                ) {
+                    Text(stringResource(R.string.action_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.restoreCancelPassphrase() }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+        )
     }
 
     if (showSetPinDialog) {

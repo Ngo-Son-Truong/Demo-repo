@@ -19,7 +19,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /** Các bước onboarding (SPEC §15.3 màn 2). ENCRYPTION = bước đặt passphrase (M7-4, FR-ONB-4). */
-enum class OnboardingStep { WELCOME, CREATE_BOT, ENTER_TOKEN, CONNECT_CHANNEL, VERIFY_RIGHTS, ENCRYPTION, DONE }
+enum class OnboardingStep { WELCOME, CREATE_BOT, ENTER_TOKEN, CONNECT_CHANNEL, VERIFY_RIGHTS, RESTORE, ENCRYPTION, DONE }
 
 /** Lỗi onboarding thân thiện (M4-6) — UI map sang chuỗi + hành động gợi ý. */
 enum class OnboardingError { INVALID_TOKEN, NETWORK, CHANNEL_NOT_FOUND, UNKNOWN }
@@ -35,6 +35,11 @@ data class OnboardingUiState(
     val rights: BotRights? = null,
     val checkingRights: Boolean = false,
     val error: OnboardingError? = null,
+    /** M8-5: revision backup trên cloud (null = không có bản sao lưu) */
+    val cloudBackupRevision: Long? = null,
+    val restoreBusy: Boolean = false,
+    val restoreNeedsPassphrase: Boolean = false,
+    val restoreFailed: Boolean = false,
 ) {
     val canGoBack: Boolean get() =
         step != OnboardingStep.WELCOME &&
@@ -49,6 +54,7 @@ class OnboardingViewModel
         private val connectionManager: ConnectionManager,
         private val configRepository: ConfigRepository,
         private val cryptoManager: com.tgvault.app.core.crypto.CryptoManager,
+        private val indexBackupManager: com.tgvault.app.core.indexbackup.IndexBackupManager,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow(OnboardingUiState())
         val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
@@ -225,8 +231,50 @@ class OnboardingViewModel
                 botUsername = state.botUsername.orEmpty(),
                 chatId = chatId,
             )
-            // M7-4 (FR-ONB-4): sau khi kết nối → bước đặt passphrase mã hoá (có thể bỏ qua);
-            // setOnboardingDone chỉ gọi khi rời bước đó (enable hoặc skip).
+            // M8-5 (FR-ONB-5): nếu channel đã có bản sao lưu index → hỏi khôi phục trước;
+            // không có → M7-4: bước đặt passphrase mã hoá.
+            // setOnboardingDone chỉ gọi khi rời các bước cuối (restore/encryption).
+            val cloudRev =
+                runCatching { indexBackupManager.cloudRevision() }
+                    .onFailure { timber.log.Timber.w(it, "đọc pinned manifest thất bại") }
+                    .getOrNull()
+            if (cloudRev != null) {
+                _uiState.update {
+                    it.copy(step = OnboardingStep.RESTORE, cloudBackupRevision = cloudRev, error = null)
+                }
+            } else {
+                _uiState.update { it.copy(step = OnboardingStep.ENCRYPTION, error = null) }
+            }
+        }
+
+        /** M8-5 (FR-ONB-5): khôi phục index từ tin ghim; snapshot mã hoá → cần passphrase. */
+        fun restoreBackup(passphrase: CharArray? = null) {
+            if (_uiState.value.restoreBusy) return
+            viewModelScope.launch {
+                _uiState.update { it.copy(restoreBusy = true, restoreFailed = false) }
+                when (indexBackupManager.restoreFromPinned(passphrase)) {
+                    is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.Success -> {
+                        // Nếu bản sao lưu có mã hoá, master key đã được nhập trong restore
+                        // → bỏ qua bước đặt passphrase; ngược lại hỏi như bình thường.
+                        if (cryptoManager.isConfigured()) {
+                            configRepository.setOnboardingDone(true)
+                            _uiState.update { it.copy(step = OnboardingStep.DONE, restoreBusy = false) }
+                        } else {
+                            _uiState.update { it.copy(step = OnboardingStep.ENCRYPTION, restoreBusy = false) }
+                        }
+                    }
+                    is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.NeedPassphrase ->
+                        _uiState.update { it.copy(restoreBusy = false, restoreNeedsPassphrase = true) }
+                    com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.WrongPassphrase ->
+                        _uiState.update { it.copy(restoreBusy = false, restoreFailed = true) }
+                    else ->
+                        _uiState.update { it.copy(restoreBusy = false, restoreFailed = true) }
+                }
+            }
+        }
+
+        /** Bỏ qua khôi phục — bắt đầu trống, sang bước mã hoá. */
+        fun skipRestore() {
             _uiState.update { it.copy(step = OnboardingStep.ENCRYPTION, error = null) }
         }
 

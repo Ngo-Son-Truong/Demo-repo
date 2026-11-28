@@ -143,4 +143,32 @@
     <string name="set_applock_timeout_10m">10 minutes</string>
     <string name="set_applock_disable_title">Turn off app lock?</string>
     <string name="set_applock_disable_body">The PIN will be deleted and the app won’t lock when backgrounded.</string>
+
+    <!-- Sao lưu / khôi phục index (M8) -->
+    <string name="set_backup">Index backup</string>
+    <string name="set_backup_last">Last backup: %1$s</string>
+    <string name="set_backup_never">Never backed up</string>
+    <string name="set_backup_now">Back up now</string>
+    <string name="set_backup_restore">Restore from Telegram</string>
+    <string name="set_backup_restore_confirm_title">Restore index from Telegram?</string>
+    <string name="set_backup_restore_confirm_body">The local file list will be REPLACED by the backup. Downloaded files on this device are not affected.</string>
+    <string name="set_backup_passphrase_title">Backup is encrypted</string>
+    <string name="set_backup_passphrase_hint">Enter the passphrase you set when enabling encryption</string>
+    <string name="backup_ok">Backup uploaded</string>
+    <string name="backup_fail">Backup failed — check your connection</string>
+    <string name="restore_ok">Restore complete</string>
+    <string name="restore_not_found">No backup found in the pinned message</string>
+    <string name="restore_wrong_pass">Incorrect passphrase</string>
+    <string name="restore_fail">Restore failed — local data is unchanged</string>
+
+    <!-- Xung đột + khôi phục onboarding (M8-3/M8-5) -->
+    <string name="conflict_title">Newer backup found (r%1$d)</string>
+    <string name="conflict_body">The backup on Telegram is newer than this device’s data. Restore it, or keep this device’s version.</string>
+    <string name="conflict_restore">Restore cloud copy</string>
+    <string name="conflict_keep_local">Keep this device</string>
+    <string name="onb_restore_title">Backup found</string>
+    <string name="onb_restore_body">This channel has a TgVault index backup (r%1$d). Restore your file list?</string>
+    <string name="onb_restore_action">Restore</string>
+    <string name="onb_restore_skip">Start fresh</string>
+    <string name="onb_restore_working">Restoring…</string>
 </resources>

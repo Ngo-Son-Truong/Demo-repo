@@ -107,6 +107,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel = hiltViewModel()) {
                 OnboardingStep.ENTER_TOKEN -> EnterTokenStep(state, viewModel)
                 OnboardingStep.CONNECT_CHANNEL -> ConnectChannelStep(state, viewModel)
                 OnboardingStep.VERIFY_RIGHTS -> VerifyRightsStep(state, viewModel)
+                OnboardingStep.RESTORE -> RestoreStep(state, viewModel)
                 OnboardingStep.ENCRYPTION -> EncryptionStep(viewModel)
                 OnboardingStep.DONE -> DoneStep()
             }
@@ -389,6 +390,79 @@ private fun RightItem(
         )
         Spacer(Modifier.size(Spacing.x2))
         Text(label)
+    }
+}
+
+/**
+ * Bước khôi phục index từ Telegram (M8-5, FR-ONB-5): channel đã có backup →
+ * hỏi khôi phục hay bắt đầu trống; snapshot mã hoá → nhập passphrase.
+ */
+@Composable
+private fun RestoreStep(
+    state: OnboardingUiState,
+    viewModel: OnboardingViewModel,
+) {
+    var pass by remember { mutableStateOf("") }
+    StepScaffold(title = stringResource(R.string.onb_restore_title)) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(top = Spacing.x8),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                Icons.Rounded.CloudUpload,
+                contentDescription = null,
+                modifier = Modifier.size(96.dp),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.height(Spacing.x6))
+            Text(
+                stringResource(R.string.onb_restore_body, state.cloudBackupRevision ?: 0),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(Spacing.x4))
+            if (state.restoreNeedsPassphrase) {
+                OutlinedTextField(
+                    value = pass,
+                    onValueChange = { pass = it },
+                    label = { Text(stringResource(R.string.onb_enc_passphrase)) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(Spacing.x4))
+            }
+            if (state.restoreFailed) {
+                Text(
+                    stringResource(R.string.restore_fail),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(Modifier.height(Spacing.x2))
+            }
+            if (state.restoreBusy) {
+                CircularProgressIndicator()
+                Spacer(Modifier.height(Spacing.x2))
+                Text(stringResource(R.string.onb_restore_working))
+            } else {
+                TgPrimaryButton(
+                    onClick = {
+                        viewModel.restoreBackup(
+                            if (state.restoreNeedsPassphrase) pass.toCharArray() else null,
+                        )
+                    },
+                    enabled = !state.restoreNeedsPassphrase ||
+                        pass.length >= com.tgvault.app.core.crypto.CryptoScheme.MIN_PASSPHRASE_CHARS,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.onb_restore_action))
+                }
+                Spacer(Modifier.height(Spacing.x2))
+                TgSecondaryButton(onClick = viewModel::skipRestore, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.onb_restore_skip))
+                }
+            }
+        }
     }
 }
 
