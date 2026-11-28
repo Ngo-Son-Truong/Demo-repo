@@ -159,6 +159,8 @@ dependencies {
     implementation(libs.compose.foundation)
     implementation(libs.compose.runtime)
     implementation(libs.compose.material3.adaptive.navigation.suite)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     // AndroidX nền tảng
     implementation(libs.androidx.activity.compose)

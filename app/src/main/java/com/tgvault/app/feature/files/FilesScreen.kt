@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.AudioFile
@@ -64,13 +65,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.tgvault.app.R
+import com.tgvault.app.core.thumb.ThumbnailCache
 import com.tgvault.app.core.designsystem.Spacing
 import com.tgvault.app.core.designsystem.components.EmptyState
 import com.tgvault.app.core.designsystem.components.TgTextField
@@ -337,7 +346,7 @@ private fun NodeRow(
             }
         },
         leadingContent = {
-            Icon(iconFor(node), contentDescription = null)
+            NodeLeadingIcon(node)
         },
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -392,6 +401,28 @@ private fun NodeRow(
             ),
     )
 }
+
+@Composable
+private fun NodeLeadingIcon(node: Node) {
+    if (ThumbnailCache.isImage(node.mimeType) && node.chunkCount == 1 && node.status == NodeStatus.READY) {
+        AsyncImage(
+            model =
+                ImageRequest
+                    .Builder(LocalPlatformContext.current)
+                    .data(node)
+                    .crossfade(true)
+                    .build(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(LeadingThumbSize).clip(RoundedCornerShape(ThumbCorner)),
+        )
+    } else {
+        Icon(iconFor(node), contentDescription = null)
+    }
+}
+
+private val LeadingThumbSize = 40.dp
+private val ThumbCorner = 6.dp
 
 private fun iconFor(node: Node): ImageVector =
     if (node.isFolder) {

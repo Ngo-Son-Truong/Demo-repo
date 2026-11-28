@@ -1,7 +1,13 @@
 package com.tgvault.app.core.di
 
+import android.content.Context
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import com.tgvault.app.core.common.SystemTimeProvider
 import com.tgvault.app.core.common.TimeProvider
+import com.tgvault.app.core.thumb.NodeThumbnailFetcher
+import com.tgvault.app.core.thumb.ThumbnailCache
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,4 +30,17 @@ object AppModule {
             explicitNulls = false
             encodeDefaults = true
         }
+
+    /** Coil ImageLoader mặc định (SingletonImageLoader) — có Fetcher thumbnail cho Node (M9-1). */
+    @Provides
+    @Singleton
+    fun provideImageLoader(
+        @ApplicationContext context: Context,
+        thumbnailCache: ThumbnailCache,
+    ): ImageLoader =
+        ImageLoader
+            .Builder(context)
+            .components { add(NodeThumbnailFetcher.Factory(thumbnailCache)) }
+            .build()
+            .also { SingletonImageLoader.setSafe { it } }
 }
