@@ -281,12 +281,16 @@ private fun PinSetDialog(
         title = { Text(title) },
         text = {
             Column {
-                PinField(pin, { pin = it }, stringResource(R.string.lock_pin_hint))
+                PinField(
+                    value = pin,
+                    onChange = { pin = it },
+                    label = stringResource(R.string.lock_pin_hint),
+                )
                 Spacer(Modifier.height(Spacing.x2))
                 PinField(
-                    confirm,
-                    { confirm = it },
-                    stringResource(R.string.set_applock_pin_confirm),
+                    value = confirm,
+                    onChange = { confirm = it },
+                    label = stringResource(R.string.set_applock_pin_confirm),
                     isError = mismatch,
                 )
                 if (mismatch) {
@@ -327,7 +331,12 @@ private fun PinChangeDialog(
         title = { Text(stringResource(R.string.set_applock_change_pin)) },
         text = {
             Column {
-                PinField(oldPin, { oldPin = it }, stringResource(R.string.set_applock_old_pin), isError = wrongOld)
+                PinField(
+                    value = oldPin,
+                    onChange = { oldPin = it },
+                    label = stringResource(R.string.set_applock_old_pin),
+                    isError = wrongOld,
+                )
                 if (wrongOld) {
                     Text(
                         stringResource(R.string.set_applock_wrong_old),
@@ -336,12 +345,16 @@ private fun PinChangeDialog(
                     )
                 }
                 Spacer(Modifier.height(Spacing.x2))
-                PinField(newPin, { newPin = it }, stringResource(R.string.set_applock_pin_title))
+                PinField(
+                    value = newPin,
+                    onChange = { newPin = it },
+                    label = stringResource(R.string.set_applock_pin_title),
+                )
                 Spacer(Modifier.height(Spacing.x2))
                 PinField(
-                    confirm,
-                    { confirm = it },
-                    stringResource(R.string.set_applock_pin_confirm),
+                    value = confirm,
+                    onChange = { confirm = it },
+                    label = stringResource(R.string.set_applock_pin_confirm),
                     isError = mismatch,
                 )
                 if (mismatch) {
