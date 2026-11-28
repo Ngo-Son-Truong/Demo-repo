@@ -283,7 +283,12 @@ private fun PinSetDialog(
             Column {
                 PinField(pin, { pin = it }, stringResource(R.string.lock_pin_hint))
                 Spacer(Modifier.height(Spacing.x2))
-                PinField(confirm, { confirm = it }, stringResource(R.string.set_applock_pin_confirm), isError = mismatch)
+                PinField(
+                    confirm,
+                    { confirm = it },
+                    stringResource(R.string.set_applock_pin_confirm),
+                    isError = mismatch,
+                )
                 if (mismatch) {
                     Text(
                         stringResource(R.string.set_applock_pin_mismatch),
@@ -333,7 +338,12 @@ private fun PinChangeDialog(
                 Spacer(Modifier.height(Spacing.x2))
                 PinField(newPin, { newPin = it }, stringResource(R.string.set_applock_pin_title))
                 Spacer(Modifier.height(Spacing.x2))
-                PinField(confirm, { confirm = it }, stringResource(R.string.set_applock_pin_confirm), isError = mismatch)
+                PinField(
+                    confirm,
+                    { confirm = it },
+                    stringResource(R.string.set_applock_pin_confirm),
+                    isError = mismatch,
+                )
                 if (mismatch) {
                     Text(
                         stringResource(R.string.set_applock_pin_mismatch),
