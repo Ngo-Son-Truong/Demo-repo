@@ -222,7 +222,7 @@ fun FilesScreen(
                                     node.isFolder -> viewModel.openFolder(node)
                                     node.status == NodeStatus.READY &&
                                         FileUtils.mimeKind(node.mimeType) in
-                                            setOf(FileUtils.MimeKind.VIDEO, FileUtils.MimeKind.AUDIO) ->
+                                        setOf(FileUtils.MimeKind.VIDEO, FileUtils.MimeKind.AUDIO) ->
                                         onOpenFile(node)
                                     else -> Unit
                                 }

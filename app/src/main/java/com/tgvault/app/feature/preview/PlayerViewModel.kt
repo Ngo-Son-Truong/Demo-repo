@@ -5,9 +5,9 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import androidx.media3.common.MediaItem
 import com.tgvault.app.core.playback.NodeStreamDataSource
 import com.tgvault.app.core.util.FileUtils
 import com.tgvault.app.data.remote.GatewayHolder
@@ -57,8 +57,9 @@ class PlayerViewModel
         private fun loadAndPrepare() {
             viewModelScope.launch {
                 try {
-                    val node = nodeRepository.getNode(nodeId)
-                        ?: error("không tìm thấy node $nodeId")
+                    val node =
+                        nodeRepository.getNode(nodeId)
+                            ?: error("không tìm thấy node $nodeId")
                     val chunks = nodeRepository.getChunks(nodeId).filter { it.isUploaded }
                     require(chunks.size == node.chunkCount) {
                         "tệp chưa upload đủ chunk (${chunks.size}/${node.chunkCount})"

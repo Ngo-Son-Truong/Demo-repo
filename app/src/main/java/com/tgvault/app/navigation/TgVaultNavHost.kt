@@ -9,15 +9,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.tgvault.app.core.designsystem.MotionConfig
 import com.tgvault.app.core.designsystem.MotionSpecs
 import com.tgvault.app.core.designsystem.currentMotionConfig
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import com.tgvault.app.feature.files.FilesScreen
 import com.tgvault.app.feature.preview.PlayerScreen
 import com.tgvault.app.feature.settings.SettingsScreen
