@@ -3,7 +3,7 @@
 package com.tgvault.app.feature.preview
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -91,7 +91,7 @@ class PlayerViewModel
         ) {
             val mediaItem =
                 MediaItem.Builder()
-                    .setUri(Uri.parse("tgvault://stream/${node.id}"))
+                    .setUri("tgvault://stream/${node.id}".toUri())
                     .setMimeType(node.mimeType ?: "application/octet-stream")
                     .build()
             val mediaSource =
