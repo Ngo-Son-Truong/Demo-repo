@@ -17,9 +17,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 /** M7-6: khoá app — PIN hash, timeout nền, khoá khi mở lại (FR-SEC-2). */
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class AppLockManagerTest {
     private var now = 1_000_000L
     private val timeProvider = TimeProvider { now }
