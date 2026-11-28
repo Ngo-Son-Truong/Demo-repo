@@ -42,6 +42,7 @@ class PlayerViewModel
         savedStateHandle: SavedStateHandle,
         private val nodeRepository: NodeRepository,
         private val gatewayHolder: GatewayHolder,
+        private val cryptoManager: com.tgvault.app.core.crypto.CryptoManager,
         @ApplicationContext private val context: Context,
     ) : ViewModel() {
         private val nodeId: String = checkNotNull(savedStateHandle["nodeId"])
@@ -68,12 +69,23 @@ class PlayerViewModel
                         "tệp chưa upload đủ chunk (${chunks.size}/${node.chunkCount})"
                     }
                     val kind = FileUtils.mimeKind(node.mimeType)
+                    // M7-2: node mã hoá → mở khoá session, DataSource giải mã chunk khi tải cache
+                    val cipher =
+                        if (node.encrypted) {
+                            if (!cryptoManager.unlock()) {
+                                error("mã hoá đã bật nhưng không mở được khoá")
+                            }
+                            com.tgvault.app.core.crypto.NodeCipher(cryptoManager.requireKey())
+                        } else {
+                            null
+                        }
                     val dataSourceFactory =
                         NodeStreamDataSource.Factory(
                             node = node,
                             chunks = chunks,
                             gateway = gatewayHolder.current(),
                             streamCacheRoot = File(context.cacheDir, "stream"),
+                            cipher = cipher,
                         )
                     prepare(node, dataSourceFactory, kind)
                 } catch (e: Exception) {

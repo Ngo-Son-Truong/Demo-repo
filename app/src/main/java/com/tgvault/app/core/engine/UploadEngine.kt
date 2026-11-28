@@ -44,6 +44,7 @@ class UploadEngine
         private val gatewayHolder: GatewayHolder,
         private val timeProvider: TimeProvider,
         private val configRepository: com.tgvault.app.domain.repository.ConfigRepository,
+        private val cryptoManager: com.tgvault.app.core.crypto.CryptoManager,
     ) : TransferEngine {
         /** Chạy tới khi DONE/FAILED/CANCELLED. Trả true nếu DONE. */
         override suspend fun run(transferId: String): Boolean {
@@ -55,6 +56,18 @@ class UploadEngine
                     ?: throw AppError.NotConnected("chưa có chatId — cần onboarding (M4)")
 
             transferDao.updateState(transferId, TransferState.RUNNING.name, timeProvider.nowMillis())
+
+            // M7-2: node mã hoá → mở khoá session và dựng cipher dùng chung cho mọi chunk
+            val cipher =
+                if (node.encrypted) {
+                    if (!cryptoManager.unlock()) {
+                        throw AppError.Transient("mã hoá đã bật nhưng không mở được khoá — mở lại app")
+                    }
+                    com.tgvault.app.core.crypto.NodeCipher(cryptoManager.requireKey())
+                } else {
+                    null
+                }
+            val totalChunks = ((node.sizeBytes + node.chunkSize - 1) / node.chunkSize).toInt()
 
             val doneIdx =
                 chunkDao.forNode(node.id)
@@ -85,10 +98,33 @@ class UploadEngine
                         val source = chunker.next() ?: break
                         val chunkIdx = idx
                         val plainSize = source.length
+                        val part =
+                            if (cipher != null) {
+                                val aad =
+                                    com.tgvault.app.core.crypto.CryptoScheme.chunkAad(
+                                        node.id,
+                                        chunkIdx,
+                                        totalChunks,
+                                    )
+                                com.tgvault.app.core.crypto.EncryptingChunkSource(
+                                    cipher,
+                                    aad,
+                                    HashingChunkSource(source, sha),
+                                )
+                            } else {
+                                HashingChunkSource(source, sha)
+                            }
+                        // M7-2: tên opaque khi mã hoá — không lộ tên gốc trên Telegram
+                        val wireName =
+                            if (cipher != null) {
+                                "chunk_${chunkIdx.toString().padStart(4, '0')}.tgv"
+                            } else {
+                                "${node.name}.part${chunkIdx.toString().padStart(4, '0')}"
+                            }
                         gateway.sendDocument(
                             chatId = chatId,
-                            part = HashingChunkSource(source, sha),
-                            fileName = "${node.name}.part${chunkIdx.toString().padStart(4, '0')}",
+                            part = part,
+                            fileName = wireName,
                             caption = null,
                         ).let { sent ->
                             chunkDao.upsert(
@@ -96,7 +132,7 @@ class UploadEngine
                                     nodeId = node.id,
                                     idx = chunkIdx,
                                     plainSizeBytes = plainSize,
-                                    storedSizeBytes = plainSize,
+                                    storedSizeBytes = part.length,
                                     tgChatId = chatId,
                                     tgMessageId = sent.messageId,
                                     tgFileId = sent.fileId,

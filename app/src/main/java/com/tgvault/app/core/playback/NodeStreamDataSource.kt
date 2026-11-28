@@ -23,8 +23,10 @@ import java.util.concurrent.Executors
  *   vào cache đĩa `cacheDir/stream/<nodeId>/`, LRU giữ tối đa [MAX_CACHED_CHUNKS] chunk.
  * - Prefetch chunk kế tiếp ở nền để phát mượt; tua ngược không tải lại nếu còn cache.
  *
- * Lưu ý: chỉ áp dụng khi node CHƯA mã hoá (M7 sẽ cần lớp giải mã xen giữa).
- * Mọi lỗi được gói thành IOException để ExoPlayer đưa về trạng thái lỗi chuẩn.
+ * Node mã hoá (M7-2): ciphertext tải NGUYÊN chunk (AesGcmHkdfStreaming giải tuần tự,
+ * không Range), giải mã streaming vào file cache — cache vẫn là plaintext, xoá theo
+ * LRU + khi khoá app (SPEC §12). Mọi lỗi được gói thành IOException để ExoPlayer đưa
+ * về trạng thái lỗi chuẩn.
  */
 @UnstableApi
 class NodeStreamDataSource(
@@ -33,6 +35,7 @@ class NodeStreamDataSource(
     private val gateway: TelegramGateway,
     private val nodeCacheDir: File,
     private val prefetchExecutor: Executor,
+    private val cipher: com.tgvault.app.core.crypto.NodeCipher? = null,
 ) : DataSource {
     private var opened = false
     private var position = 0L
@@ -116,8 +119,32 @@ class NodeStreamDataSource(
                 val fileId =
                     chunk.tgFileId ?: throw IOException("chunk $chunkIdx chưa có fileId")
                 val path = gateway.resolveFilePath(fileId)
-                tmp.outputStream().use { sink ->
-                    gateway.download(path, sink, 0L until chunk.plainSizeBytes)
+                if (cipher != null) {
+                    // Tải nguyên ciphertext → giải mã streaming sang tmp (plaintext)
+                    val encTmp = File(nodeCacheDir, "chunk_$chunkIdx.enc")
+                    try {
+                        encTmp.outputStream().use { sink -> gateway.download(path, sink, null) }
+                        if (encTmp.length() != chunk.storedSizeBytes) {
+                            throw IOException(
+                                "chunk $chunkIdx tải thiếu: ${encTmp.length()}/${chunk.storedSizeBytes}",
+                            )
+                        }
+                        val aad =
+                            com.tgvault.app.core.crypto.CryptoScheme.chunkAad(
+                                node.id,
+                                chunkIdx,
+                                node.chunkCount,
+                            )
+                        cipher.newDecryptingStream(encTmp.inputStream(), aad).use { dec ->
+                            tmp.outputStream().use { out -> dec.copyTo(out) }
+                        }
+                    } finally {
+                        encTmp.delete()
+                    }
+                } else {
+                    tmp.outputStream().use { sink ->
+                        gateway.download(path, sink, 0L until chunk.plainSizeBytes)
+                    }
                 }
             }
             if (tmp.length() != chunk.plainSizeBytes) {
@@ -171,6 +198,7 @@ class NodeStreamDataSource(
         private val chunks: List<Chunk>,
         private val gateway: TelegramGateway,
         private val streamCacheRoot: File,
+        private val cipher: com.tgvault.app.core.crypto.NodeCipher? = null,
     ) : androidx.media3.datasource.DataSource.Factory {
         // Executor dùng chung cho mọi DataSource của node này; player release → DataSource đóng.
         private val executor: Executor = Executors.newSingleThreadExecutor()
@@ -182,6 +210,7 @@ class NodeStreamDataSource(
                 gateway = gateway,
                 nodeCacheDir = File(streamCacheRoot, node.id),
                 prefetchExecutor = executor,
+                cipher = cipher,
             )
     }
 
