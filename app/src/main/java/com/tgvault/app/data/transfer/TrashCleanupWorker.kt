@@ -35,8 +35,7 @@ class TrashCleanupWorker(
     }
 
     override suspend fun doWork(): Result {
-        val nodeRepository =
-            EntryPointAccessors.fromApplication(applicationContext, Deps::class.java).nodeRepository()
+        val nodeRepository = deps(applicationContext).nodeRepository()
         val purged =
             runCatching { nodeRepository.purgeExpiredTrash(TTL_MILLIS) }
                 .onFailure { Timber.w(it, "purgeExpiredTrash lỗi") }
@@ -49,6 +48,14 @@ class TrashCleanupWorker(
         const val WORK_NAME = "trash_cleanup_periodic"
         const val TTL_MILLIS = 30L * 24 * 60 * 60 * 1000
         internal const val INTERVAL_HOURS = 6L
+
+        /** Test override — mặc định lấy từ Hilt EntryPoint. */
+        @Volatile
+        internal var depsOverride: Deps? = null
+
+        private fun deps(context: Context): Deps =
+            depsOverride
+                ?: EntryPointAccessors.fromApplication(context.applicationContext, Deps::class.java)
     }
 }
 
