@@ -10,10 +10,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -123,60 +135,50 @@ private fun NotificationPermissionEffect() {
 private fun CloudNewerDialog(rootViewModel: RootViewModel) {
     val cloudRev by rootViewModel.cloudNewerRevision.collectAsStateWithLifecycle()
     val rev = cloudRev ?: return
-    var showPass by androidx.compose.runtime.remember {
-        androidx.compose.runtime.mutableStateOf(false)
-    }
-    var pass by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
-    var errorMsg by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
-    val coroutineScope = androidx.compose.runtime.rememberCoroutineScope()
+    var showPass by remember { mutableStateOf(false) }
+    var pass by remember { mutableStateOf("") }
+    var errorMsg by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
     val wrongPassText = androidx.compose.ui.res.stringResource(R.string.restore_wrong_pass)
     val failText = androidx.compose.ui.res.stringResource(R.string.restore_fail)
 
-    androidx.compose.material3.AlertDialog(
+    AlertDialog(
         onDismissRequest = rootViewModel::dismissCloudNewer,
-        title = {
-            androidx.compose.material3.Text(
-                androidx.compose.ui.res.stringResource(R.string.conflict_title, rev),
-            )
-        },
+        title = { Text(androidx.compose.ui.res.stringResource(R.string.conflict_title, rev)) },
         text = {
-            androidx.compose.foundation.layout.Column {
-                androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.conflict_body))
+            Column {
+                Text(androidx.compose.ui.res.stringResource(R.string.conflict_body))
                 if (showPass) {
-                    androidx.compose.foundation.layout.Spacer(
-                        androidx.compose.ui.Modifier.height(com.tgvault.app.core.designsystem.Spacing.x2),
-                    )
-                    androidx.compose.material3.OutlinedTextField(
+                    Spacer(Modifier.height(com.tgvault.app.core.designsystem.Spacing.x2))
+                    OutlinedTextField(
                         value = pass,
                         onValueChange = { pass = it },
-                        visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                        visualTransformation =
+                            androidx.compose.ui.text.input.PasswordVisualTransformation(),
                         singleLine = true,
                         label = {
-                            androidx.compose.material3.Text(
-                                androidx.compose.ui.res.stringResource(R.string.onb_enc_passphrase),
-                            )
+                            Text(androidx.compose.ui.res.stringResource(R.string.onb_enc_passphrase))
                         },
                     )
                 }
                 errorMsg?.let {
-                    androidx.compose.material3.Text(
+                    Text(
                         it,
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.error,
-                        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }
         },
         confirmButton = {
-            androidx.compose.material3.TextButton(
+            TextButton(
                 onClick = {
                     coroutineScope.launch {
                         when (
                             rootViewModel.restoreCloud(if (showPass) pass.toCharArray() else null)
                         ) {
-                            is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.Success -> {
+                            is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.Success ->
                                 errorMsg = null
-                            }
                             is com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.NeedPassphrase ->
                                 showPass = true
                             com.tgvault.app.core.indexbackup.IndexBackupManager.RestoreResult.WrongPassphrase ->
@@ -186,12 +188,12 @@ private fun CloudNewerDialog(rootViewModel: RootViewModel) {
                     }
                 },
             ) {
-                androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.conflict_restore))
+                Text(androidx.compose.ui.res.stringResource(R.string.conflict_restore))
             }
         },
         dismissButton = {
-            androidx.compose.material3.TextButton(onClick = rootViewModel::dismissCloudNewer) {
-                androidx.compose.material3.Text(androidx.compose.ui.res.stringResource(R.string.conflict_keep_local))
+            TextButton(onClick = rootViewModel::dismissCloudNewer) {
+                Text(androidx.compose.ui.res.stringResource(R.string.conflict_keep_local))
             }
         },
     )

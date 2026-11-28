@@ -221,7 +221,7 @@ class IndexBackupManager
                 // Tải + ghép các phần
                 val bytes = ByteArrayOutputStream()
                 manifest.parts.forEach { part ->
-                    val path = gateway.resolveFilePath(part.file_id)
+                    val path = gateway.resolveFilePath(part.fileId)
                     gateway.download(path, bytes, null)
                 }
                 val snapshot = bytes.toByteArray()
