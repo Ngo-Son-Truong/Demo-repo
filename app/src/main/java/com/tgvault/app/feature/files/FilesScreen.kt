@@ -117,24 +117,7 @@ fun FilesScreen(
 
     // Share-out: tải về Downloads trước, xong mở chooser (FR-FILE-4)
     var shareTarget by remember { mutableStateOf<Node?>(null) }
-    LaunchedEffect(shareTarget) {
-        val node = shareTarget ?: return@LaunchedEffect
-        val file = viewModel.downloadAndAwait(node) ?: return@LaunchedEffect
-        val shareUri =
-            androidx.core.content.FileProvider.getUriForFile(
-                context,
-                "${context.packageName}.fileprovider",
-                file,
-            )
-        val send =
-            Intent(Intent.ACTION_SEND).apply {
-                type = node.mimeType ?: "application/octet-stream"
-                putExtra(Intent.EXTRA_STREAM, shareUri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-        context.startActivity(Intent.createChooser(send, node.name))
-        shareTarget = null
-    }
+    ShareOutEffect(shareTarget, viewModel) { shareTarget = null }
 
     val shareNode: (Node) -> Unit = { node ->
         shareTarget = node
@@ -217,16 +200,7 @@ fun FilesScreen(
                     items(state.nodes, key = { it.id }) { node ->
                         NodeRow(
                             node = node,
-                            onClick = {
-                                when {
-                                    node.isFolder -> viewModel.openFolder(node)
-                                    node.status == NodeStatus.READY &&
-                                        FileUtils.mimeKind(node.mimeType) in
-                                        setOf(FileUtils.MimeKind.VIDEO, FileUtils.MimeKind.AUDIO) ->
-                                        onOpenFile(node)
-                                    else -> Unit
-                                }
-                            },
+                            onClick = { onNodeTap(node, viewModel, onOpenFile) },
                             onDownload = { viewModel.download(node) },
                             onShare = { shareNode(node) },
                             onRename = { renameTarget = node },
@@ -465,4 +439,48 @@ private fun NameDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
         },
     )
+}
+
+/** Tap vào file: mở player nếu video/audio READY; thư mục thì mở; còn lại để menu xử lý. */
+private fun onNodeTap(
+    node: Node,
+    viewModel: FilesViewModel,
+    onOpenFile: (Node) -> Unit,
+) {
+    if (node.isFolder) {
+        viewModel.openFolder(node)
+        return
+    }
+    val streamable =
+        FileUtils.mimeKind(node.mimeType) in
+            setOf(FileUtils.MimeKind.VIDEO, FileUtils.MimeKind.AUDIO)
+    if (node.status == NodeStatus.READY && streamable) onOpenFile(node)
+}
+
+/** Chờ download xong rồi mở share chooser qua FileProvider. */
+@Composable
+private fun ShareOutEffect(
+    shareTarget: Node?,
+    viewModel: FilesViewModel,
+    onConsumed: () -> Unit,
+) {
+    val context = LocalContext.current
+    LaunchedEffect(shareTarget) {
+        val node = shareTarget ?: return@LaunchedEffect
+        val file = viewModel.downloadAndAwait(node) ?: return@LaunchedEffect
+        val shareUri =
+            androidx.core.content.FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file,
+            )
+        val send =
+            Intent(Intent.ACTION_SEND).apply {
+                type = node.mimeType ?: "application/octet-stream"
+                putExtra(Intent.EXTRA_STREAM, shareUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        context.startActivity(Intent.createChooser(send, node.name))
+        onConsumed()
+    }
 }
