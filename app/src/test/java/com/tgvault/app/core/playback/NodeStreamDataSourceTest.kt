@@ -198,5 +198,4 @@ class NodeStreamDataSourceTest {
         val cached = dir.listFiles { f -> f.name.startsWith("chunk_") }!!.toList()
         assertTrue(cached.size <= NodeStreamDataSource.MAX_CACHED_CHUNKS)
     }
-
 }
