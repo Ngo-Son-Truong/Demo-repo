@@ -98,9 +98,9 @@ class PreviewViewModel
             val chunks = chunkDao.forNode(node.id).sortedBy { it.idx }
             if (chunks.isEmpty()) return null
             return when (kind) {
-                com.tgvault.app.core.util.FileUtils.MimeKind.IMAGE -> loadImage(node, chunks)
-                com.tgvault.app.core.util.FileUtils.MimeKind.TEXT -> loadText(node, chunks)
-                com.tgvault.app.core.util.FileUtils.MimeKind.PDF -> loadPdf(node, chunks)
+                com.tgvault.app.core.util.FileUtils.MimeKind.IMAGE -> loadImage(node)
+                com.tgvault.app.core.util.FileUtils.MimeKind.TEXT -> loadText(node)
+                com.tgvault.app.core.util.FileUtils.MimeKind.PDF -> loadPdf(node)
                 else -> null
             }
         }
@@ -111,35 +111,48 @@ class PreviewViewModel
          * cho ảnh/PDF — caller giới hạn kích thước). */
         private suspend fun allPlainBytes(node: Node): ByteArray? {
             val chunks = chunkDao.forNode(node.id).sortedBy { it.idx }
-            if (chunks.isEmpty()) return null
-            val cipher = cipherForNode(node) ?: return null
+            val cipher = cipherForNode(node)
             val out = ByteArrayOutputStream(node.sizeBytes.coerceAtMost(MAX_WHOLE_BYTES).toInt().coerceAtLeast(MIN_BUF))
-            for (chunk in chunks) {
-                val plain = fetchChunkPlain(node, chunk, cipher) ?: return null
-                out.write(plain)
-                if (out.size() > MAX_WHOLE_BYTES) return null
+            var failed = chunks.isEmpty() || cipher == null
+            var idx = 0
+            while (!failed && idx < chunks.size) {
+                val plain = fetchChunkPlain(node, chunks[idx], cipher)
+                if (plain == null) {
+                    failed = true
+                } else {
+                    out.write(plain)
+                    if (out.size() > MAX_WHOLE_BYTES) failed = true
+                }
+                idx++
             }
-            return out.toByteArray()
+            return if (failed) null else out.toByteArray()
         }
 
         /** plaintext của [limitBytes] đầu (text preview); truncated=true nếu còn dư. */
         private suspend fun headPlainBytes(node: Node): Pair<ByteArray, Boolean>? {
             val chunks = chunkDao.forNode(node.id).sortedBy { it.idx }
-            if (chunks.isEmpty()) return null
-            val cipher = cipherForNode(node) ?: return null
+            val cipher = cipherForNode(node)
+            if (chunks.isEmpty() || cipher == null) return null
             val out = ByteArrayOutputStream(TEXT_PREVIEW_BYTES + MIN_BUF)
             var truncated = false
-            for (chunk in chunks) {
-                val plain = fetchChunkPlain(node, chunk, cipher) ?: return null
-                val remaining = TEXT_PREVIEW_BYTES - out.size()
-                if (plain.size > remaining) {
-                    out.write(plain, 0, remaining.coerceAtLeast(0))
-                    truncated = true
-                    break
+            var failed = false
+            var idx = 0
+            while (!failed && !truncated && idx < chunks.size) {
+                val plain = fetchChunkPlain(node, chunks[idx], cipher)
+                if (plain == null) {
+                    failed = true
+                } else {
+                    val remaining = TEXT_PREVIEW_BYTES - out.size()
+                    if (plain.size > remaining) {
+                        out.write(plain, 0, remaining.coerceAtLeast(0))
+                        truncated = true
+                    } else {
+                        out.write(plain)
+                    }
                 }
-                out.write(plain)
+                idx++
             }
-            return out.toByteArray() to truncated
+            return if (failed) null else out.toByteArray() to truncated
         }
 
         private suspend fun fetchChunkPlain(
@@ -172,10 +185,7 @@ class PreviewViewModel
 
         // ---------------- Loại nội dung ----------------
 
-        private suspend fun loadImage(
-            node: Node,
-            chunks: List<ChunkEntity>,
-        ): PreviewContent? {
+        private suspend fun loadImage(node: Node): PreviewContent? {
             val bytes = allPlainBytes(node) ?: return null
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
@@ -192,18 +202,12 @@ class PreviewViewModel
             return PreviewContent.Image(scaleDown(decoded))
         }
 
-        private suspend fun loadText(
-            node: Node,
-            chunks: List<ChunkEntity>,
-        ): PreviewContent? {
+        private suspend fun loadText(node: Node): PreviewContent? {
             val (bytes, truncated) = headPlainBytes(node) ?: return null
             return PreviewContent.TextContent(String(bytes, Charsets.UTF_8), truncated)
         }
 
-        private suspend fun loadPdf(
-            node: Node,
-            chunks: List<ChunkEntity>,
-        ): PreviewContent? {
+        private suspend fun loadPdf(node: Node): PreviewContent? {
             val bytes = allPlainBytes(node) ?: return null
             val tmp = File(context.cacheDir, "preview_$nodeId.pdf")
             tmp.writeBytes(bytes)
