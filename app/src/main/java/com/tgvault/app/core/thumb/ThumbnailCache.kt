@@ -1,6 +1,7 @@
 package com.tgvault.app.core.thumb
 
 import android.content.Context
+import android.os.Build
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.LruCache
@@ -65,7 +66,14 @@ class ThumbnailCache
             runCatching {
                 thumbDir.mkdirs()
                 diskFile.outputStream().use { out ->
-                    bmp.compress(Bitmap.CompressFormat.WEBP_LOSSY, WEBP_QUALITY, out)
+                    @Suppress("DEPRECATION")
+                    val format =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            Bitmap.CompressFormat.WEBP_LOSSY
+                        } else {
+                            Bitmap.CompressFormat.WEBP
+                        }
+                    bmp.compress(format, WEBP_QUALITY, out)
                 }
             }
             memoryCache.put(node.id, bmp)
