@@ -19,8 +19,7 @@ class NodeThumbnailFetcher(
     private val cache: ThumbnailCache,
 ) : Fetcher {
     override suspend fun fetch(): FetchResult {
-        val bitmap: Bitmap = cache.get(node)
-        checkNotNull(bitmap) { "không có thumbnail cho node ${node.id}" }
+        val bitmap: Bitmap = checkNotNull(cache.get(node)) { "không có thumbnail cho node ${node.id}" }
         return ImageFetchResult(
             image = bitmap.asImage(),
             isSampled = true,

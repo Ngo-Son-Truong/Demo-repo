@@ -37,10 +37,13 @@ object AppModule {
     fun provideImageLoader(
         @ApplicationContext context: Context,
         thumbnailCache: ThumbnailCache,
-    ): ImageLoader =
-        ImageLoader
-            .Builder(context)
-            .components { add(NodeThumbnailFetcher.Factory(thumbnailCache)) }
-            .build()
-            .also { SingletonImageLoader.setSafe { it } }
+    ): ImageLoader {
+        val loader =
+            ImageLoader
+                .Builder(context)
+                .components { add(NodeThumbnailFetcher.Factory(thumbnailCache)) }
+                .build()
+        SingletonImageLoader.setSafe { loader }
+        return loader
+    }
 }

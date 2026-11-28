@@ -92,7 +92,7 @@ class ThumbnailCache
             fileId: String,
         ): ByteArray? {
             val gateway = runCatching { gatewayHolder.current() }.getOrNull() ?: return null
-            val cipher = cipherForNode(node) ?: return CipherResult.NONE
+            val cipher = cipherForNode(node)
             if (cipher === CipherResult.FAIL) return null
             val path = gateway.resolveFilePath(fileId)
             val raw = ByteArrayOutputStream(chunk.storedSizeBytes.toInt().coerceAtLeast(MIN_BUFFER))
