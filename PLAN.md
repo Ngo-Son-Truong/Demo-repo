@@ -264,7 +264,7 @@ Acceptance
 Tham chiếu: FR-PRV-*, FR-FILE-5,6.
 
 Tasks
-- [ ] **M9-1** Thumbnail ảnh cục bộ (tối đa 320 px, WebP), cache trong `cacheDir`; tải bằng Coil với `Fetcher` riêng cho Node (tải chunk đầu nếu ảnh ≤ 1 chunk; tệp lớn hơn: dùng icon); sinh thumbnail khi upload để khỏi tải lại.
+- [x] **M9-1** ✅ 2026-11-28 — `ThumbnailCache` (2 tầng: LruCache + `cacheDir/thumbnails/*.webp`, ≤320px WebP; chỉ ảnh ≤1 chunk; mã hoá → NodeCipher, không mở khoá → null); Coil `NodeThumbnailFetcher` + `AsyncImage` trong `FilesScreen`; 6 test Robolectric (decode PNG 800×600→320, không ảnh/nhiều chunk/no fileId/no-key → null, ảnh nhỏ giữ nguyên). Thumbnail ảnh cục bộ (tối đa 320 px, WebP), cache trong `cacheDir`; tải bằng Coil với `Fetcher` riêng cho Node (tải chunk đầu nếu ảnh ≤ 1 chunk; tệp lớn hơn: dùng icon); sinh thumbnail khi upload để khỏi tải lại.
 - [ ] **M9-2** Xem trước ảnh (zoom/pan, shared element từ thumbnail, vuốt xuống để đóng), văn bản (≤ 1 MiB đầu tệp), PDF (`PdfRenderer`); loại khác → màn hình tải về + "Mở bằng…". **Cập nhật**: video/audio đã có player streaming trong app (xem mục backlog #4 đã thực hiện); "Mở bằng…" chỉ còn áp dụng cho zip/loại không xem trước được.
 - [ ] **M9-3** Thùng rác đầy đủ: liệt kê theo `trashRootId`, khôi phục (khôi phục cả cây con), xoá vĩnh viễn (qua M2-7), dọn tự động > 30 ngày (một Worker định kỳ), banner thông tin.
 - [ ] **M9-4** Hoàn thiện tìm kiếm (toàn drive, hiển thị đường dẫn thư mục cha, bỏ dấu tiếng Việt, kết quả không gồm mục trong thùng rác).
